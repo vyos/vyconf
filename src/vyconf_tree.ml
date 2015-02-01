@@ -58,5 +58,4 @@ let rec insert_child default_data node path data =
         | None ->
             let next_child' = Node (name, default_data, []) in
             let new_node = insert_child default_data next_child' names data in
-            let (old_name, old_data, old_children) = destructure_node node in
-            Node (old_name, old_data, new_node :: old_children)
+            adopt_child node new_node
