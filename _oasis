@@ -1,0 +1,16 @@
+Name: VyConf
+Version: 0.1
+Synopsis: Appliance configuration framework
+Authors: VyOS maintainers <maintainers@vyos.net>
+License: LGPL with OCaml linking exception
+
+Description: VyConf
+Homepage: http://vyos.net
+
+OASISFormat: 0.4
+BuildTools: ocamlbuild
+Plugins: META (0.4), DevFiles (0.4)
+
+Executable "vyconfd"
+  Path: src
+  MainIs: vyconfd.ml
