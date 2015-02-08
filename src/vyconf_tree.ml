@@ -48,6 +48,14 @@ let replace_child node child =
 let find_child node name =
     find_child_in_list node.children name
 
+let rec extract_names children =
+    match children with
+    | [] -> []
+    | c :: cs -> c.name :: extract_names cs
+
+let list_children node =
+    extract_names node.children
+
 let rec insert_child default_data node path data =
     match path with
     | [] -> raise Empty_path
