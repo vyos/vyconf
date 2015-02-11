@@ -14,3 +14,17 @@ Plugins: META (0.4), DevFiles (0.4)
 Executable "vyconfd"
   Path: src
   MainIs: vyconfd.ml
+
+Executable "vyconf_tree_test"
+  Path: test
+  MainIs: vyconf_tree_test.ml
+  Build$: flag(tests)
+  CompiledObject: best
+  Install: false
+  BuildDepends:  oUnit
+
+Test "vyconf_tree_test"
+  Run$: flag(tests)
+  TestTools: vyconf_tree_test
+  Command: $vyconf_tree_test
+  WorkingDirectory: test
