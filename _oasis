@@ -11,6 +11,11 @@ OASISFormat: 0.4
 BuildTools: ocamlbuild
 Plugins: META (0.4), DevFiles (0.4)
 
+Library "vytree"
+  Path: src
+  Modules: Vytree
+#  InternalModules: InternalFoo
+
 Executable "vyconfd"
   Path: src
   MainIs: vyconfd.ml
@@ -21,7 +26,7 @@ Executable "vyconf_tree_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends:  oUnit
+  BuildDepends:  oUnit, vytree
 
 Test "vyconf_tree_test"
   Run$: flag(tests)
