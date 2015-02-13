@@ -4,11 +4,17 @@ type 'a	vyconf_tree = {
     children: 'a vyconf_tree list
 }
 
+type 'a t = 'a vyconf_tree
+
 exception Empty_path
 exception Duplicate_child
 exception Nonexistent_path
 
 let make name data = { name = name; data = data; children = [] }
+
+let name_of_node node = node.name
+let data_of_node node = node.data
+let children_of_node node = node.children
 
 let rec find_child_in_list children name =
     match children with
