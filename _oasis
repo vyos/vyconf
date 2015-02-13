@@ -14,11 +14,11 @@ Plugins: META (0.4), DevFiles (0.4)
 Library "vytree"
   Path: src
   Modules: Vytree
-#  InternalModules: InternalFoo
 
 Executable "vyconfd"
   Path: src
   MainIs: vyconfd.ml
+  CompiledObject: best
 
 Executable "vyconf_tree_test"
   Path: test
