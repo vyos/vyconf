@@ -12,6 +12,8 @@ exception Nonexistent_path
 
 let make name data = { name = name; data = data; children = [] }
 
+let make_full name data children = { name = name; data = data; children = children }
+
 let name_of_node node = node.name
 let data_of_node node = node.data
 let children_of_node node = node.children
