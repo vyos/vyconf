@@ -40,12 +40,20 @@ let test_insert_multi_level test_ctxt =
     let root = make_full "root" () [foo] in
     assert_equal root node'
 
+(* list_children correctly returns a list of children names *)
+let test_list_children test_ctxt =
+    let node = make "root" () in
+    let node' = insert_child () node ["foo"] () in
+    let node'' = insert_child () node' ["bar"] () in
+    assert_equal (list_children node'') ["foo"; "bar"]
+
 let suite =
     "VyConf tree tests" >::: [
         "test_make_node" >:: test_make_node;
         "test_insert_immediate_child" >:: test_insert_immediate_child;
         "test_insert_multiple_children" >:: test_insert_multiple_children;
         "test_insert_multi_level" >:: test_insert_multi_level;
+        "test_list_children" >:: test_list_children;
     ]
 
 let () =
