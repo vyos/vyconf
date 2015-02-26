@@ -40,6 +40,12 @@ let test_insert_multi_level test_ctxt =
     let root = make_full "root" () [foo] in
     assert_equal root node'
 
+(* Inserting duplicate child fails *)
+let test_insert_duplicate_child test_ctxt =
+    let node = make "root" () in
+    let node' = insert_child () node ["foo"] () in
+    assert_raises Duplicate_child (fun () -> insert_child () node' ["foo"] ())
+
 (* list_children correctly returns a list of children names *)
 let test_list_children test_ctxt =
     let node = make "root" () in
@@ -53,6 +59,7 @@ let suite =
         "test_insert_immediate_child" >:: test_insert_immediate_child;
         "test_insert_multiple_children" >:: test_insert_multiple_children;
         "test_insert_multi_level" >:: test_insert_multi_level;
+        "test_insert_duplicate_child" >:: test_insert_duplicate_child;
         "test_list_children" >:: test_list_children;
     ]
 
