@@ -14,4 +14,6 @@ val children_of_node : 'a t -> 'a t list
 val insert_child :
   'a -> 'a t -> string list -> 'a -> 'a t
 
+val delete_child : 'a t -> string list -> 'a t
+
 val list_children : 'a t -> string list

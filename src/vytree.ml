@@ -45,6 +45,10 @@ let insert_immediate_child node name data =
     let children' = node.children @ [new_node] in
     { node with children = children' }
 
+let delete_immediate_child node name =
+    let children' = remove_child_from_list node.children name in
+    { node with children = children' }
+
 let adopt_child node child =
     { node with children = (node.children @ [child]) }
 
@@ -79,3 +83,13 @@ let rec insert_child default_data node path data =
             let next_child' = make name default_data in
             let new_node = insert_child default_data next_child' names data in
             adopt_child node new_node
+
+let rec delete_child node path =
+    match path with
+    | [] -> raise Empty_path
+    | [name] -> delete_immediate_child node name
+    | name :: names ->
+        let next_child = find_child node name in
+        match next_child with
+        | None -> raise Nonexistent_path
+        | Some next_child' -> delete_child next_child' names
