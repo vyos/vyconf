@@ -92,4 +92,6 @@ let rec delete_child node path =
         let next_child = find_child node name in
         match next_child with
         | None -> raise Nonexistent_path
-        | Some next_child' -> delete_child next_child' names
+        | Some next_child' -> 
+            let new_node = delete_child next_child' names in
+            replace_child node new_node
