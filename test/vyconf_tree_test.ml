@@ -53,6 +53,21 @@ let test_list_children test_ctxt =
     let node'' = insert_child () node' ["bar"] () in
     assert_equal (list_children node'') ["foo"; "bar"]
 
+(* Deleting a child, well, deletes it *)
+let test_delete_immediate_child test_ctxt =
+    let node = make "root" () in
+    let node' = insert_child () node ["foo"] () in
+    let node'' = delete_child node' ["foo"] in
+    assert_equal node node''
+
+(* Deleting a child at multi-level path works *)
+let test_delete_multi_level test_ctxt =
+    let node = make "root" () in
+    let node' = insert_child () node ["foo"; "bar"] () in
+    let foo_node = insert_child () node ["foo"] () in
+    let node'' = delete_child node' ["foo"; "bar"] in
+    assert_equal node'' foo_node
+
 let suite =
     "VyConf tree tests" >::: [
         "test_make_node" >:: test_make_node;
@@ -61,6 +76,8 @@ let suite =
         "test_insert_multi_level" >:: test_insert_multi_level;
         "test_insert_duplicate_child" >:: test_insert_duplicate_child;
         "test_list_children" >:: test_list_children;
+        "test_delete_immediate_child" >:: test_delete_immediate_child;
+        "test_delete_multi_level" >:: test_delete_multi_level
     ]
 
 let () =
