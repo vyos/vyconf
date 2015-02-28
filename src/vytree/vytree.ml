@@ -78,3 +78,21 @@ let rec delete_child node path =
         | Some next_child' -> 
             let new_node = delete_child next_child' names in
             replace_child node new_node
+
+let rec get_child node path =
+    match path with
+    | [] -> raise Empty_path
+    | [name] ->
+        begin
+            let child = find_child node name in
+            match child with
+            | None -> raise Nonexistent_path
+            | Some child' -> child'
+        end
+    | name :: names ->
+        begin
+            let next_child = find_child node name in
+            match next_child with
+            | None -> raise Nonexistent_path
+            | Some child' -> get_child child' names
+        end

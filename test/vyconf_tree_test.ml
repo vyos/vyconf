@@ -73,6 +73,23 @@ let test_delete_nonexistent test_ctxt =
     let node = make "root" () in
     assert_raises Nonexistent_path (fun () -> delete_child node ["foo"; "bar"])
 
+(* get_child works with immediate children *)
+let test_get_immediate_child test_ctxt =
+    let node = make "root" () in
+    let node' = insert_child () node ["foo"] () in
+    assert_equal (name_of_node (get_child node' ["foo"])) "foo"
+
+(* get_child works with multi-level paths *)
+let test_get_child_multilevel test_ctxt =
+    let node = make "root" () in
+    let node' = insert_child () node ["foo"; "bar"] () in
+    assert_equal (name_of_node (get_child node' ["foo"; "bar"])) "bar"
+
+(* get_child raises Nonexistent_path for non-existent paths *)
+let test_get_child_nonexistent test_ctxt =
+    let node = make "root" () in
+    assert_raises Nonexistent_path (fun () -> get_child node ["foo"; "bar"])
+
 let suite =
     "VyConf tree tests" >::: [
         "test_make_node" >:: test_make_node;
@@ -84,6 +101,8 @@ let suite =
         "test_delete_immediate_child" >:: test_delete_immediate_child;
         "test_delete_multi_level" >:: test_delete_multi_level;
         "test_delete_nonexistent" >:: test_delete_nonexistent;
+        "test_get_immediate_child" >:: test_get_immediate_child;
+        "test_get_child_multilevel" >:: test_get_child_multilevel;
     ]
 
 let () =
