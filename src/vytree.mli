@@ -17,3 +17,5 @@ val insert_child :
 val delete_child : 'a t -> string list -> 'a t
 
 val list_children : 'a t -> string list
+
+val get_child : 'a t -> string list -> 'a t
