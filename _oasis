@@ -16,7 +16,7 @@ Library	"vylist"
   Modules: Vylist
 
 Library "vytree"
-  Path: src
+  Path: src/vytree
   Modules: Vytree
   BuildDepends: vylist
 
