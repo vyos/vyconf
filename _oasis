@@ -11,14 +11,9 @@ OASISFormat: 0.4
 BuildTools: ocamlbuild
 Plugins: META (0.4), DevFiles (0.4)
 
-Library	"vylist"
-  Path:	src/vylist
-  Modules: Vylist
-
 Library "vytree"
-  Path: src/vytree
+  Path: src
   Modules: Vytree
-  BuildDepends: vylist
 
 Executable "vyconfd"
   Path: src
