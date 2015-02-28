@@ -68,6 +68,11 @@ let test_delete_multi_level test_ctxt =
     let node'' = delete_child node' ["foo"; "bar"] in
     assert_equal node'' foo_node
 
+(* Attempt to delete a node at non-existent path raises an exception *)
+let test_delete_nonexistent test_ctxt =
+    let node = make "root" () in
+    assert_raises Nonexistent_path (fun () -> delete_child node ["foo"; "bar"])
+
 let suite =
     "VyConf tree tests" >::: [
         "test_make_node" >:: test_make_node;
@@ -77,7 +82,8 @@ let suite =
         "test_insert_duplicate_child" >:: test_insert_duplicate_child;
         "test_list_children" >:: test_list_children;
         "test_delete_immediate_child" >:: test_delete_immediate_child;
-        "test_delete_multi_level" >:: test_delete_multi_level
+        "test_delete_multi_level" >:: test_delete_multi_level;
+        "test_delete_nonexistent" >:: test_delete_nonexistent;
     ]
 
 let () =
