@@ -18,35 +18,13 @@ let name_of_node node = node.name
 let data_of_node node = node.data
 let children_of_node node = node.children
 
-let rec find_child_in_list children name =
-    match children with
-    | [] -> None
-    | c :: cs -> if c.name = name then (Some c)
-                 else find_child_in_list cs name
-
-let rec remove_child_from_list children name =
-    match children with
-    | [] -> []
-    | c :: cs -> if c.name = name then cs
-                 else c :: (remove_child_from_list cs name)
-
-let rec replace_child_in_list children child =
-    match children with
-    | [] -> []
-    | c :: cs -> if c.name = child.name then child :: cs
-                 else replace_child_in_list cs child
-
-let extract_child children name =
-    find_child_in_list children name,
-    remove_child_from_list children name
-
 let insert_immediate_child node name data =
     let new_node = make name data in
     let children' = node.children @ [new_node] in
     { node with children = children' }
 
 let delete_immediate_child node name =
-    let children' = remove_child_from_list node.children name in
+    let children' = Vylist.remove (fun x -> x.name = name) node.children in
     { node with children = children' }
 
 let adopt_child node child =
@@ -54,16 +32,15 @@ let adopt_child node child =
 
 let replace_child node child =
     let children = node.children in
-    let children' = replace_child_in_list children child in
+    let name = child.name in
+    let children' = Vylist.replace (fun x -> x.name = name) child children in
     { node with children = children' }
 
 let find_child node name =
-    find_child_in_list node.children name
+    Vylist.find (fun x -> x.name = name) node.children
 
 let rec extract_names children =
-    match children with
-    | [] -> []
-    | c :: cs -> c.name :: extract_names cs
+    List.map (fun x -> x.name) children
 
 let list_children node =
     extract_names node.children
