@@ -11,11 +11,10 @@ val name_of_node : 'a t -> string
 val data_of_node : 'a t -> 'a
 val children_of_node : 'a t -> 'a t list
 
-val insert_child :
-  'a -> 'a t -> string list -> 'a -> 'a t
+val insert : 'a -> 'a t -> string list -> 'a -> 'a t
 
-val delete_child : 'a t -> string list -> 'a t
+val delete : 'a t -> string list -> 'a t
 
 val list_children : 'a t -> string list
 
-val get_child : 'a t -> string list -> 'a t
+val get : 'a t -> string list -> 'a t

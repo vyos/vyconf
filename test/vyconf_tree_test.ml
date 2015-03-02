@@ -17,7 +17,7 @@ let test_make_node test_ctxt =
    children list *)
 let test_insert_immediate_child test_ctxt =
     let node = make "root" () in
-    let node' = insert_child () node ["foo"] () in
+    let node' = insert () node ["foo"] () in
     assert_equal (children_of_node node')
                  [make "foo" ()]
 
@@ -25,8 +25,8 @@ let test_insert_immediate_child test_ctxt =
    end of the children list *)
 let test_insert_multiple_children test_ctxt =
     let node = make "root" () in
-    let node' = insert_child () node ["foo"] () in
-    let node'' = insert_child () node' ["bar"] () in
+    let node' = insert () node ["foo"] () in
+    let node'' = insert () node' ["bar"] () in
     assert_equal (children_of_node node'')
                  [make "foo" (); make "bar" ()]
 
@@ -34,7 +34,7 @@ let test_insert_multiple_children test_ctxt =
    two levels deep *)
 let test_insert_multi_level test_ctxt =
     let node = make "root" () in
-    let node' = insert_child () node ["foo"; "bar"] () in
+    let node' = insert () node ["foo"; "bar"] () in
     let bar = make "bar" () in
     let foo = make_full "foo" () [bar] in
     let root = make_full "root" () [foo] in
@@ -43,52 +43,52 @@ let test_insert_multi_level test_ctxt =
 (* Inserting duplicate child fails *)
 let test_insert_duplicate_child test_ctxt =
     let node = make "root" () in
-    let node' = insert_child () node ["foo"] () in
-    assert_raises Duplicate_child (fun () -> insert_child () node' ["foo"] ())
+    let node' = insert () node ["foo"] () in
+    assert_raises Duplicate_child (fun () -> insert () node' ["foo"] ())
 
 (* list_children correctly returns a list of children names *)
 let test_list_children test_ctxt =
     let node = make "root" () in
-    let node' = insert_child () node ["foo"] () in
-    let node'' = insert_child () node' ["bar"] () in
+    let node' = insert () node ["foo"] () in
+    let node'' = insert () node' ["bar"] () in
     assert_equal (list_children node'') ["foo"; "bar"]
 
 (* Deleting a child, well, deletes it *)
 let test_delete_immediate_child test_ctxt =
     let node = make "root" () in
-    let node' = insert_child () node ["foo"] () in
-    let node'' = delete_child node' ["foo"] in
+    let node' = insert () node ["foo"] () in
+    let node'' = delete node' ["foo"] in
     assert_equal node node''
 
 (* Deleting a child at multi-level path works *)
 let test_delete_multi_level test_ctxt =
     let node = make "root" () in
-    let node' = insert_child () node ["foo"; "bar"] () in
-    let foo_node = insert_child () node ["foo"] () in
-    let node'' = delete_child node' ["foo"; "bar"] in
+    let node' = insert () node ["foo"; "bar"] () in
+    let foo_node = insert () node ["foo"] () in
+    let node'' = delete node' ["foo"; "bar"] in
     assert_equal node'' foo_node
 
 (* Attempt to delete a node at non-existent path raises an exception *)
 let test_delete_nonexistent test_ctxt =
     let node = make "root" () in
-    assert_raises Nonexistent_path (fun () -> delete_child node ["foo"; "bar"])
+    assert_raises Nonexistent_path (fun () -> delete node ["foo"; "bar"])
 
 (* get_child works with immediate children *)
 let test_get_immediate_child test_ctxt =
     let node = make "root" () in
-    let node' = insert_child () node ["foo"] () in
-    assert_equal (name_of_node (get_child node' ["foo"])) "foo"
+    let node' = insert () node ["foo"] () in
+    assert_equal (name_of_node (get node' ["foo"])) "foo"
 
 (* get_child works with multi-level paths *)
 let test_get_child_multilevel test_ctxt =
     let node = make "root" () in
-    let node' = insert_child () node ["foo"; "bar"] () in
-    assert_equal (name_of_node (get_child node' ["foo"; "bar"])) "bar"
+    let node' = insert () node ["foo"; "bar"] () in
+    assert_equal (name_of_node (get node' ["foo"; "bar"])) "bar"
 
 (* get_child raises Nonexistent_path for non-existent paths *)
 let test_get_child_nonexistent test_ctxt =
     let node = make "root" () in
-    assert_raises Nonexistent_path (fun () -> get_child node ["foo"; "bar"])
+    assert_raises Nonexistent_path (fun () -> get node ["foo"; "bar"])
 
 let suite =
     "VyConf tree tests" >::: [
