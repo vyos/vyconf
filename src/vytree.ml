@@ -45,11 +45,8 @@ let find_or_fail node name =
     | None -> raise Nonexistent_path
     | Some child' -> child'
 
-let rec extract_names children =
-    List.map (fun x -> x.name) children
-
 let list_children node =
-    extract_names node.children
+    List.map (fun x -> x.name) node.children
 
 let rec insert default_data node path data =
     match path with
