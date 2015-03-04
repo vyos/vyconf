@@ -39,6 +39,12 @@ let replace node child =
 let find node name =
     Vylist.find (fun x -> x.name = name) node.children
 
+let find_or_fail node name =
+    let child = find node name in
+    match child with
+    | None -> raise Nonexistent_path
+    | Some child' -> child'
+
 let rec extract_names children =
     List.map (fun x -> x.name) children
 
@@ -72,27 +78,12 @@ let rec delete node path =
     | [] -> raise Empty_path
     | [name] -> delete_immediate node name
     | name :: names ->
-        let next_child = find node name in
-        match next_child with
-        | None -> raise Nonexistent_path
-        | Some next_child' -> 
-            let new_node = delete next_child' names in
-            replace node new_node
+        let next_child = find_or_fail node name in
+        let new_node = delete next_child names in
+        replace node new_node
 
 let rec get node path =
     match path with
     | [] -> raise Empty_path
-    | [name] ->
-        begin
-            let child = find node name in
-            match child with
-            | None -> raise Nonexistent_path
-            | Some child' -> child'
-        end
-    | name :: names ->
-        begin
-            let next_child = find node name in
-            match next_child with
-            | None -> raise Nonexistent_path
-            | Some child' -> get child' names
-        end
+    | [name] -> find_or_fail node name
+    | name :: names -> get (find_or_fail node name) names
