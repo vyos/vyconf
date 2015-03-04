@@ -8,7 +8,7 @@ let rec remove p xs =
     match xs with
     | [] -> []
     | x :: xs' -> if (p x) then xs'
-                  else x :: (remove p xs)
+                  else x :: (remove p xs')
 
 let rec replace p x xs=
     match xs with
