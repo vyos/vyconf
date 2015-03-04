@@ -28,8 +28,22 @@ Executable "vyconf_tree_test"
   Install: false
   BuildDepends:  oUnit, vytree
 
+Executable "vylist_test"
+  Path: test
+  MainIs: vylist_test.ml
+  Build$: flag(tests)
+  CompiledObject: best
+  Install: false
+  BuildDepends:  oUnit
+
 Test "vyconf_tree_test"
   Run$: flag(tests)
   TestTools: vyconf_tree_test
   Command: $vyconf_tree_test
+  WorkingDirectory: test
+
+Test "vylist_test"
+  Run$: flag(tests)
+  TestTools: vylist_test
+  Command: $vylist_test
   WorkingDirectory: test
