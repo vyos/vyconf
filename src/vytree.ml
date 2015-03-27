@@ -6,6 +6,8 @@ type 'a	vyconf_tree = {
 
 type 'a t = 'a vyconf_tree
 
+type node_type = Tag | Leaf | Other
+
 exception Empty_path
 exception Duplicate_child
 exception Nonexistent_path
