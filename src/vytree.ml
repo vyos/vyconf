@@ -22,7 +22,7 @@ let children_of_node node = node.children
 
 let insert_immediate node name data =
     let new_node = make name data in
-    let children' = node.children @ [new_node] in
+    let children' = new_node :: node.children in
     { node with children = children' }
 
 let delete_immediate node name =
@@ -30,7 +30,7 @@ let delete_immediate node name =
     { node with children = children' }
 
 let adopt node child =
-    { node with children = (node.children @ [child]) }
+    { node with children = child :: node.children }
 
 let replace node child =
     let children = node.children in

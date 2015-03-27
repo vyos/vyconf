@@ -28,7 +28,7 @@ let test_insert_multiple_children test_ctxt =
     let node' = insert () node ["foo"] () in
     let node'' = insert () node' ["bar"] () in
     assert_equal (children_of_node node'')
-                 [make "foo" (); make "bar" ()]
+                 [make "bar" (); make "foo" ()]
 
 (* Inserting a child at a two-item path creates a tree
    two levels deep *)
@@ -51,7 +51,7 @@ let test_list_children test_ctxt =
     let node = make "root" () in
     let node' = insert () node ["foo"] () in
     let node'' = insert () node' ["bar"] () in
-    assert_equal (list_children node'') ["foo"; "bar"]
+    assert_equal (list_children node'') ["bar"; "foo"]
 
 (* Deleting a child, well, deletes it *)
 let test_delete_immediate_child test_ctxt =
