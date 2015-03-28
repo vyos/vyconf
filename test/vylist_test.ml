@@ -31,6 +31,16 @@ let test_replace_element_nonexistent test_ctxt =
     let xs = [1; 2; 3] in
     assert_raises Not_found (fun () -> replace ((=) 4) 7 xs)
 
+(* insert_before works if the element is there *)
+let test_insert_before_existent test_ctxt =
+    let xs = [1; 2; 3] in
+    assert_equal (insert_before ((=) 2) 7 xs) [1; 7; 2; 3]
+
+(* insert_before raises Not_found if there's not such element *)
+let test_insert_before_nonexistent test_ctxt =
+    let xs = [1; 2; 3] in
+     assert_raises Not_found (fun () -> insert_before ((=) 9) 7 xs)
+
 let suite =
     "VyConf list tests" >::: [
         "test_find_existent" >:: test_find_existent;
@@ -39,6 +49,8 @@ let suite =
         "test_remove_nonexistent" >:: test_remove_nonexistent;
         "test_replace_element_existent" >:: test_replace_element_existent;
         "test_replace_element_nonexistent" >:: test_replace_element_nonexistent;
+        "test_insert_before_existent" >:: test_insert_before_existent;
+        "test_insert_before_nonexistent" >:: test_insert_before_nonexistent;
     ]
 
 let () =
