@@ -12,7 +12,7 @@ let rec remove p xs =
 
 let rec replace p x xs =
     match xs with
-    | [] -> []
+    | [] -> raise Not_found
     | x' :: xs' -> if (p x') then x :: xs'
                    else x' :: (replace p x xs')
 
