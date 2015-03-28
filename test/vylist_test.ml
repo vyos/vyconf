@@ -22,7 +22,14 @@ let test_remove_nonexistent test_ctct =
     assert_equal (remove (fun x -> x = 3) xs) [1; 2; 4]
 
 (* Replacing an element works *)
+let test_replace_element_existent test_ctxt =
+    let xs = [1; 2; 3; 4] in
+    assert_equal (replace ((=) 3) 7 xs) [1; 2; 7; 4]
 
+(* Attempt to replace a nonexisten child rauses an exception *)
+let test_replace_element_nonexistent test_ctxt =
+    let xs = [1; 2; 3] in
+    assert_raises Not_found (fun () -> replace ((=) 4) 7 xs)
 
 let suite =
     "VyConf list tests" >::: [
@@ -30,6 +37,8 @@ let suite =
         "test_find_nonexistent" >:: test_find_nonexistent;
         "test_remove_existent" >:: test_remove_existent;
         "test_remove_nonexistent" >:: test_remove_nonexistent;
+        "test_replace_element_existent" >:: test_replace_element_existent;
+        "test_replace_element_nonexistent" >:: test_replace_element_nonexistent;
     ]
 
 let () =
