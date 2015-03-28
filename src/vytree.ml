@@ -8,6 +8,8 @@ type 'a t = 'a vyconf_tree
 
 type node_type = Tag | Leaf | Other
 
+type position = Before of string | After of string | Default
+
 exception Empty_path
 exception Duplicate_child
 exception Nonexistent_path
@@ -50,6 +52,15 @@ let find_or_fail node name =
 let list_children node =
     List.map (fun x -> x.name) node.children
 
+let rec do_with_child fn node path =
+    match path with
+    | [] -> raise Empty_path
+    | [name] -> fn node name
+    | name :: names ->
+        let next_child = find_or_fail node name in
+        let new_node = do_with_child fn next_child names in
+        replace node new_node
+
 let rec insert default_data node path data =
     match path with
     | [] -> raise Empty_path
@@ -72,14 +83,8 @@ let rec insert default_data node path data =
             let new_node = insert default_data next_child' names data in
             adopt node new_node
 
-let rec delete node path =
-    match path with
-    | [] -> raise Empty_path
-    | [name] -> delete_immediate node name
-    | name :: names ->
-        let next_child = find_or_fail node name in
-        let new_node = delete next_child names in
-        replace node new_node
+let delete node path =
+    do_with_child delete_immediate node path
 
 let rec get node path =
     match path with
