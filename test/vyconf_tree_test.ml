@@ -103,6 +103,7 @@ let suite =
         "test_delete_nonexistent" >:: test_delete_nonexistent;
         "test_get_immediate_child" >:: test_get_immediate_child;
         "test_get_child_multilevel" >:: test_get_child_multilevel;
+        "test_get_child_nonexistent" >:: test_get_child_nonexistent;
     ]
 
 let () =
