@@ -86,6 +86,11 @@ let rec insert default_data node path data =
 let delete node path =
     do_with_child delete_immediate node path
 
+let update node path data =
+    let update_data data' node' dummy =
+        {node' with data=data'}
+    in do_with_child (update_data data) node path
+
 let rec get node path =
     match path with
     | [] -> raise Empty_path

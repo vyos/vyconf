@@ -90,6 +90,12 @@ let test_get_child_nonexistent test_ctxt =
     let node = make "root" () in
     assert_raises Nonexistent_path (fun () -> get node ["foo"; "bar"])
 
+(* update works *)
+let test_update test_ctxt =
+    let node = make "root" 0 in
+    let node = insert 0 node ["foo"] 1 in
+    assert_equal (data_of_node (update node ["foo"] 9)) 9
+
 let suite =
     "VyConf tree tests" >::: [
         "test_make_node" >:: test_make_node;
@@ -104,6 +110,7 @@ let suite =
         "test_get_immediate_child" >:: test_get_immediate_child;
         "test_get_child_multilevel" >:: test_get_child_multilevel;
         "test_get_child_nonexistent" >:: test_get_child_nonexistent;
+        "test_update" >:: test_update;
     ]
 
 let () =
