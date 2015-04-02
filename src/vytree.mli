@@ -4,8 +4,8 @@ exception Empty_path
 exception Duplicate_child
 exception Nonexistent_path
 
-val make : string -> 'a -> 'a t
-val make_full : string -> 'a -> ('a t) list -> 'a t
+val make : 'a -> string -> 'a t
+val make_full : 'a -> string -> ('a t) list -> 'a t
 
 val name_of_node : 'a t -> string
 val data_of_node : 'a t -> 'a

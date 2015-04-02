@@ -12,16 +12,16 @@ exception Empty_path
 exception Duplicate_child
 exception Nonexistent_path
 
-let make name data = { name = name; data = data; children = [] }
+let make data name = { name = name; data = data; children = [] }
 
-let make_full name data children = { name = name; data = data; children = children }
+let make_full data name children = { name = name; data = data; children = children }
 
 let name_of_node node = node.name
 let data_of_node node = node.data
 let children_of_node node = node.children
 
 let insert_immediate node name data =
-    let new_node = make name data in
+    let new_node = make data name in
     let children' = new_node :: node.children in
     { node with children = children' }
 
@@ -77,7 +77,7 @@ let rec insert default_data node path data =
             let new_node = insert default_data next_child' names data in
             replace node new_node
         | None ->
-            let next_child' = make name default_data in
+            let next_child' = make default_data name in
             let new_node = insert default_data next_child' names data in
             adopt node new_node
 
