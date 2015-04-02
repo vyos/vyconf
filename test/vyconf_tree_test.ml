@@ -94,7 +94,7 @@ let test_get_child_nonexistent test_ctxt =
 let test_update test_ctxt =
     let node = make "root" 0 in
     let node = insert 0 node ["foo"] 1 in
-    assert_equal (data_of_node (update node ["foo"] 9)) 9
+    assert_equal (data_of_node (get (update node ["foo"] 9) ["foo"])) 9
 
 let suite =
     "VyConf tree tests" >::: [

@@ -87,8 +87,10 @@ let delete node path =
     do_with_child delete_immediate node path
 
 let update node path data =
-    let update_data data' node' dummy =
-        {node' with data=data'}
+    let update_data data' node' name =
+        let child = find_or_fail node' name in
+        let child = { child with data=data' } in
+        replace node' child
     in do_with_child (update_data data) node path
 
 let rec get node path =
