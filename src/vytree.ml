@@ -1,10 +1,8 @@
-type 'a	vyconf_tree = {
+type 'a	t = {
     name: string;
     data: 'a;
-    children: 'a vyconf_tree list
+    children: 'a t list
 }
-
-type 'a t = 'a vyconf_tree
 
 type position = Before of string | After of string | Default
 
