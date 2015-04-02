@@ -6,8 +6,6 @@ type 'a	vyconf_tree = {
 
 type 'a t = 'a vyconf_tree
 
-type node_type = Tag | Leaf | Other
-
 type position = Before of string | After of string | Default
 
 exception Empty_path
