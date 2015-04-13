@@ -1,20 +1,20 @@
 let rec find p xs =
     match xs with
     | [] -> None
-    | x :: xs' -> if (p x) then (Some x)
-                  else find p xs'
+    | y :: ys -> if (p y) then (Some y)
+                  else find p ys
 
 let rec remove p xs =
     match xs with
     | [] -> []
-    | x :: xs' -> if (p x) then xs'
-                  else x :: (remove p xs')
+    | y :: ys -> if (p y) then ys
+                  else y :: (remove p ys)
 
 let rec replace p x xs =
     match xs with
     | [] -> raise Not_found
-    | x' :: xs' -> if (p x') then x :: xs'
-                   else x' :: (replace p x xs')
+    | y :: ys -> if (p y) then x :: ys
+                   else y :: (replace p x ys)
 
 let rec insert_before p x xs =
     match xs with
