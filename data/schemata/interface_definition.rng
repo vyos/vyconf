@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <!--
+       interface_definition.rnc: VyConf reference tree XML grammar
+    
+       Copyright (C) 2014 VyOS Development Group <maintainers@vyos.net>
+    
+       This library is free software; you can redistribute it and/or
+       modify it under the terms of the GNU Lesser General Public
+       License as published by the Free Software Foundation; either
+       version 2.1 of the License, or (at your option) any later version.
+    
+       This library is distributed in the hope that it will be useful,
+       but WITHOUT ANY WARRANTY; without even the implied warranty of
+       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+       Lesser General Public License for more details.
+    
+       You should have received a copy of the GNU Lesser General Public
+       License along with this library; if not, write to the Free Software
+       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
+       USA
+  -->
+  <!--
+    The language of this file is compact form RELAX-NG
+    http://relaxng.org/compact-tutorial-20030326.htm
+    (unless converted to XML, then just RELAX-NG :)
+  -->
+  <!--
+    Interface definition starts with interfaceDefinition tag that may contain node tags
+    It also may contain "extends" tags, if nodes must be appended to certain path
+  -->
+  <start>
+    <element name="interfaceDefinition">
+      <zeroOrMore>
+        <ref name="extends"/>
+      </zeroOrMore>
+      <ref name="nodeList"/>
+    </element>
+  </start>
+  <define name="nodeList">
+    <element name="nodeList">
+      <zeroOrMore>
+        <ref name="node"/>
+      </zeroOrMore>
+    </element>
+  </define>
+  <!-- Extends tag defines path prepended to the nodes -->
+  <define name="extends">
+    <element name="extends">
+      <ref name="path"/>
+    </element>
+  </define>
+  <define name="path">
+    <attribute name="path"/>
+  </define>
+  <!--
+    node tag may contain node, leafNode, or tagNode tags
+    Those are intermediate configuration nodes that may only contain
+    other nodes and must not have values
+  -->
+  <define name="node">
+    <element name="node">
+      <optional>
+        <ref name="ownerAttr"/>
+      </optional>
+      <ref name="nodeNameAttr"/>
+      <optional>
+        <ref name="helpString"/>
+      </optional>
+      <zeroOrMore>
+        <choice>
+          <ref name="node"/>
+          <ref name="tagNode"/>
+          <ref name="leafNode"/>
+        </choice>
+      </zeroOrMore>
+    </element>
+  </define>
+  <!-- All nodes must have "name" attribute -->
+  <define name="nodeNameAttr">
+    <attribute name="name"/>
+  </define>
+  <!--
+    Ordinary nodes and tag nodes can have "owner" attribute.
+    Owner is the component that is notified when node changes.
+  -->
+  <define name="ownerAttr">
+    <attribute name="owner"/>
+  </define>
+  <!--
+    Tag nodes are containers for nodes without predefined names, like network interfaces
+    or user names (e.g. "interfaces ethernet eth0" or "user jrandomhacker")
+    Tag nodes may	contain	node and leafNode elements, and also nameConstraint tags
+    They must not contain other tag nodes
+  -->
+  <define name="tagNode">
+    <element name="tagNode">
+      <optional>
+        <ref name="ownerAttr"/>
+      </optional>
+      <ref name="nodeNameAttr"/>
+      <optional>
+        <ref name="nameConstraint"/>
+      </optional>
+      <optional>
+        <ref name="helpString"/>
+      </optional>
+      <oneOrMore>
+        <choice>
+          <ref name="node"/>
+          <ref name="leafNode"/>
+        </choice>
+      </oneOrMore>
+    </element>
+  </define>
+  <!--
+    Tag nodes may also contain nameConstraint tag with type and constraint
+    attributes. It provides information required to validate child name.
+  -->
+  <define name="nameConstraint">
+    <element name="nameConstraint">
+      <ref name="typeAttr"/>
+      <optional>
+        <ref name="constraintAttr"/>
+      </optional>
+      <optional>
+        <ref name="errorMessageAttr"/>
+      </optional>
+      <empty/>
+    </element>
+  </define>
+  <!--
+    Leaf nodes are terminal configuration nodes that can't have children,
+    but can have values.
+    Leaf node may contain one or more valueConstraint tags
+    If multiple valueConstraint tags are used, they work a logical OR
+    Leaf nodes can have "multi" attribute that indicated that it can have
+    more than one value
+  -->
+  <define name="leafNode">
+    <element name="leafNode">
+      <ref name="nodeNameAttr"/>
+      <optional>
+        <ref name="multiAttr"/>
+      </optional>
+      <optional>
+        <ref name="helpString"/>
+      </optional>
+      <zeroOrMore>
+        <choice>
+          <ref name="valueHelpString"/>
+          <ref name="valueConstraint"/>
+        </choice>
+      </zeroOrMore>
+    </element>
+  </define>
+  <!--
+    valueConstraint tag contains information required to validate node values
+    It must have two attributes, "type" and "constraint".
+  -->
+  <define name="valueConstraint">
+    <element name="valueConstraint">
+      <ref name="typeAttr"/>
+      <optional>
+        <ref name="constraintAttr"/>
+      </optional>
+      <optional>
+        <ref name="errorMessageAttr"/>
+      </optional>
+      <empty/>
+    </element>
+  </define>
+  <!--
+    helpString tag contains brief description of the purpose of the node
+    Must have description= attribute
+  -->
+  <define name="helpString">
+    <element name="helpString">
+      <ref name="descriptionAttr"/>
+      <empty/>
+    </element>
+  </define>
+  <!--
+    valueHelpString tag contain information about acceptable value format
+    It may be exact value in value= attribute, or a placeholder taken from
+    type specified in type= attribute
+  -->
+  <define name="valueHelpString">
+    <element name="valueHelpString">
+      <choice>
+        <group>
+          <ref name="typeAttr"/>
+          <optional>
+            <ref name="constraintAttr"/>
+          </optional>
+        </group>
+        <ref name="valueAttr"/>
+      </choice>
+      <ref name="descriptionAttr"/>
+      <empty/>
+    </element>
+  </define>
+  <!-- description= attribute contains help strings for nodes -->
+  <define name="descriptionAttr">
+    <attribute name="description"/>
+  </define>
+  <!-- value= attributes contains one of allowed values for leaf nodes -->
+  <define name="valueAttr">
+    <attribute name="value"/>
+  </define>
+  <!--
+    type= attribute is used in leaf nodes and contains name of a type
+    to take value placeholder from
+  -->
+  <define name="typeAttr">
+    <attribute name="type"/>
+  </define>
+  <!--
+    constraint= attribute contains additional information for type validation,
+    used in valueContrating tags
+  -->
+  <define name="constraintAttr">
+    <attribute name="constraint"/>
+  </define>
+  <!--
+    error-message= attribute is used to override default error message
+    in nameConstraint and valueConstraint attributes
+  -->
+  <define name="errorMessageAttr">
+    <attribute name="error-message"/>
+  </define>
+  <!--
+    multi=<true|false> attribute indicates that a leaf node can have
+    multiple values
+    If not present, treated as "false"
+  -->
+  <define name="multiAttr">
+    <attribute name="multi">
+      <data type="boolean"/>
+    </attribute>
+  </define>
+</grammar>
