@@ -11,6 +11,7 @@ type node_type = Leaf | Tag | Other
 exception Empty_path
 exception Duplicate_child
 exception Nonexistent_path
+exception Insert_error of string
 
 let make data name = { name = name; data = data; children = [] }
 
@@ -59,26 +60,27 @@ let rec do_with_child fn node path =
         let new_node = do_with_child fn next_child names in
         replace node new_node
 
-let rec insert default_data node path data =
-    match path with
-    | [] -> raise Empty_path
-    | [name] ->
+let rec insert node path data_list =
+    match (path, data_list) with
+    | ([], _) -> raise Empty_path
+    | (_ :: _, []) -> raise (Insert_error "No data found")
+    | ([name], [datum]) ->
         begin
             (* Check for duplicate item *)
             let last_child = find node name in
             match last_child with
-            | None -> insert_immediate node name data
+            | None -> insert_immediate node name datum
             | (Some _) -> raise Duplicate_child
         end
-    | name :: names ->
+    | (name :: names, datum :: data) ->
         let next_child = find node name in
         match next_child with
         | Some next_child' ->
-            let new_node = insert default_data next_child' names data in
+            let new_node = insert next_child' names data in
             replace node new_node
         | None ->
-            let next_child' = make default_data name in
-            let new_node = insert default_data next_child' names data in
+            let next_child' = make datum name in
+            let new_node = insert next_child' names data in
             adopt node new_node
 
 let delete node path =
