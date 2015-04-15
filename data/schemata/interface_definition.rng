@@ -88,6 +88,52 @@
     <attribute name="owner"/>
   </define>
   <!--
+    Tag and leaf nodes may have constraints on their names and values
+    (respectively).
+    When multiple constraints are listed, they work as logical OR
+  -->
+  <define name="constraint">
+    <element name="constraint">
+      <oneOrMore>
+        <choice>
+          <ref name="regex"/>
+          <ref name="validator"/>
+        </choice>
+      </oneOrMore>
+      <optional>
+        <ref name="errorMessage"/>
+      </optional>
+    </element>
+  </define>
+  <!-- A constraint may be a regex pattern -->
+  <define name="regex">
+    <element name="regex">
+      <text/>
+    </element>
+  </define>
+  <!-- A constraint may also use an external validator -->
+  <define name="validator">
+    <element name="validator">
+      <ref name="validatorNameAttr"/>
+      <ref name="validatorArgumentAttr"/>
+      <empty/>
+    </element>
+  </define>
+  <!-- Validators are named -->
+  <define name="validatorNameAttr">
+    <attribute name="name"/>
+  </define>
+  <!-- An argument can be passed to validator, in addition to the value to be validated -->
+  <define name="validatorArgumentAttr">
+    <attribute name="argument"/>
+  </define>
+  <!-- When validation fails, a message can be shown -->
+  <define name="errorMessage">
+    <element name="errorMessage">
+      <text/>
+    </element>
+  </define>
+  <!--
     Tag nodes are containers for nodes without predefined names, like network interfaces
     or user names (e.g. "interfaces ethernet eth0" or "user jrandomhacker")
     Tag nodes may	contain	node and leafNode elements, and also nameConstraint tags
@@ -100,10 +146,10 @@
       </optional>
       <ref name="nodeNameAttr"/>
       <optional>
-        <ref name="nameConstraint"/>
+        <ref name="helpString"/>
       </optional>
       <optional>
-        <ref name="helpString"/>
+        <ref name="constraint"/>
       </optional>
       <oneOrMore>
         <choice>
@@ -111,22 +157,6 @@
           <ref name="leafNode"/>
         </choice>
       </oneOrMore>
-    </element>
-  </define>
-  <!--
-    Tag nodes may also contain nameConstraint tag with type and constraint
-    attributes. It provides information required to validate child name.
-  -->
-  <define name="nameConstraint">
-    <element name="nameConstraint">
-      <ref name="typeAttr"/>
-      <optional>
-        <ref name="constraintAttr"/>
-      </optional>
-      <optional>
-        <ref name="errorMessageAttr"/>
-      </optional>
-      <empty/>
     </element>
   </define>
   <!--
@@ -146,28 +176,12 @@
       <optional>
         <ref name="helpString"/>
       </optional>
+      <optional>
+        <ref name="constraint"/>
+      </optional>
       <zeroOrMore>
-        <choice>
-          <ref name="valueHelpString"/>
-          <ref name="valueConstraint"/>
-        </choice>
+        <ref name="valueHelpString"/>
       </zeroOrMore>
-    </element>
-  </define>
-  <!--
-    valueConstraint tag contains information required to validate node values
-    It must have two attributes, "type" and "constraint".
-  -->
-  <define name="valueConstraint">
-    <element name="valueConstraint">
-      <ref name="typeAttr"/>
-      <optional>
-        <ref name="constraintAttr"/>
-      </optional>
-      <optional>
-        <ref name="errorMessageAttr"/>
-      </optional>
-      <empty/>
     </element>
   </define>
   <!--
@@ -176,58 +190,14 @@
   -->
   <define name="helpString">
     <element name="helpString">
-      <ref name="descriptionAttr"/>
-      <empty/>
+      <text/>
     </element>
   </define>
-  <!--
-    valueHelpString tag contain information about acceptable value format
-    It may be exact value in value= attribute, or a placeholder taken from
-    type specified in type= attribute
-  -->
+  <!-- valueHelpString tags contain information about acceptable value format -->
   <define name="valueHelpString">
     <element name="valueHelpString">
-      <choice>
-        <group>
-          <ref name="typeAttr"/>
-          <optional>
-            <ref name="constraintAttr"/>
-          </optional>
-        </group>
-        <ref name="valueAttr"/>
-      </choice>
-      <ref name="descriptionAttr"/>
-      <empty/>
+      <text/>
     </element>
-  </define>
-  <!-- description= attribute contains help strings for nodes -->
-  <define name="descriptionAttr">
-    <attribute name="description"/>
-  </define>
-  <!-- value= attributes contains one of allowed values for leaf nodes -->
-  <define name="valueAttr">
-    <attribute name="value"/>
-  </define>
-  <!--
-    type= attribute is used in leaf nodes and contains name of a type
-    to take value placeholder from
-  -->
-  <define name="typeAttr">
-    <attribute name="type"/>
-  </define>
-  <!--
-    constraint= attribute contains additional information for type validation,
-    used in valueContrating tags
-  -->
-  <define name="constraintAttr">
-    <attribute name="constraint"/>
-  </define>
-  <!--
-    error-message= attribute is used to override default error message
-    in nameConstraint and valueConstraint attributes
-  -->
-  <define name="errorMessageAttr">
-    <attribute name="error-message"/>
   </define>
   <!--
     multi=<true|false> attribute indicates that a leaf node can have

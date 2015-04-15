@@ -68,6 +68,47 @@ ownerAttr = attribute owner
     text
 }
 
+# Tag and leaf nodes may have constraints on their names and values
+# (respectively).
+# When multiple constraints are listed, they work as logical OR
+constraint = element constraint
+{
+    (regex | validator)+,
+    errorMessage?
+}
+
+# A constraint may be a regex pattern
+regex = element regex
+{
+    text
+}
+
+# A constraint may also use an external validator
+validator = element validator
+{
+    validatorNameAttr,
+    validatorArgumentAttr,
+    empty
+}
+
+# Validators are named
+validatorNameAttr = attribute name
+{
+    text
+}
+
+# An argument can be passed to validator, in addition to the value to be validated
+validatorArgumentAttr = attribute argument
+{
+    text
+}
+
+# When validation fails, a message can be shown
+errorMessage = element errorMessage
+{
+    text
+}
+
 # Tag nodes are containers for nodes without predefined names, like network interfaces
 # or user names (e.g. "interfaces ethernet eth0" or "user jrandomhacker")
 # Tag nodes may	contain	node and leafNode elements, and also nameConstraint tags
@@ -76,19 +117,9 @@ tagNode = element tagNode
 {
     ownerAttr?,
     nodeNameAttr,
-    nameConstraint?,
     helpString?,
+    constraint?,
     (node | leafNode)+
-}
-
-# Tag nodes may also contain nameConstraint tag with type and constraint
-# attributes. It provides information required to validate child name.
-nameConstraint = element nameConstraint
-{
-    typeAttr,
-    constraintAttr?,
-    errorMessageAttr?,
-    empty
 }
 
 # Leaf nodes are terminal configuration nodes that can't have children,
@@ -102,65 +133,19 @@ leafNode = element leafNode
     nodeNameAttr,
     multiAttr?,
     helpString?,
-    (valueHelpString | valueConstraint)*
-}
-
-# valueConstraint tag contains information required to validate node values
-# It must have two attributes, "type" and "constraint".
-valueConstraint = element valueConstraint
-{
-    typeAttr,
-    constraintAttr?,
-    errorMessageAttr?,
-    empty
+    constraint?,
+    valueHelpString*
 }
 
 # helpString tag contains brief description of the purpose of the node
 # Must have description= attribute
 helpString = element helpString
 {
-    descriptionAttr, empty
+    text
 }
 
-# valueHelpString tag contain information about acceptable value format
-# It may be exact value in value= attribute, or a placeholder taken from
-# type specified in type= attribute
+# valueHelpString tags contain information about acceptable value format
 valueHelpString = element valueHelpString
-{
-    ((typeAttr, constraintAttr?) | valueAttr),
-    descriptionAttr,
-    empty
-}
-
-# description= attribute contains help strings for nodes
-descriptionAttr = attribute description
-{
-    text
-}
-
-# value= attributes contains one of allowed values for leaf nodes
-valueAttr = attribute value
-{
-    text
-}
-
-# type= attribute is used in leaf nodes and contains name of a type
-# to take value placeholder from
-typeAttr = attribute type
-{
-    text
-}
-
-# constraint= attribute contains additional information for type validation,
-# used in valueContrating tags
-constraintAttr = attribute constraint
-{
-    text
-}
-
-# error-message= attribute is used to override default error message
-# in nameConstraint and valueConstraint attributes
-errorMessageAttr = attribute error-message
 {
     text
 }
