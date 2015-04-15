@@ -22,15 +22,16 @@
 # (unless converted to XML, then just RELAX-NG :)
 
 # Interface definition starts with interfaceDefinition tag that may contain node tags
-# It also may contain "extends" tags, if nodes must be appended to certain path
 start = element interfaceDefinition
 {
-    extends*, nodeList
+    extendsAttr?, node*
 }
 
-nodeList = element nodeList
+# Interface definitions may extend other definitions
+# In this case you specify a whitespace-separated path
+extendsAttr = attribute extends
 {
-    node*
+    text
 }
 
 # Extends tag defines path prepended to the nodes
