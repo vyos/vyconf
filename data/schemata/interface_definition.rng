@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
   <!--
        interface_definition.rnc: VyConf reference tree XML grammar
     
@@ -25,33 +25,60 @@
     http://relaxng.org/compact-tutorial-20030326.htm
     (unless converted to XML, then just RELAX-NG :)
   -->
-  <!--
-    Interface definition starts with interfaceDefinition tag that may contain node tags
-    It also may contain "extends" tags, if nodes must be appended to certain path
-  -->
+  <!-- Interface definition starts with interfaceDefinition tag that may contain node tags -->
   <start>
     <element name="interfaceDefinition">
-      <zeroOrMore>
-        <ref name="extends"/>
-      </zeroOrMore>
-      <ref name="nodeList"/>
-    </element>
-  </start>
-  <define name="nodeList">
-    <element name="nodeList">
+      <optional>
+        <ref name="extendsAttr"/>
+      </optional>
       <zeroOrMore>
         <ref name="node"/>
       </zeroOrMore>
     </element>
+  </start>
+  <!--
+    Interface definitions may extend other definitions
+    In this case you specify a whitespace-separated path
+  -->
+  <define name="extendsAttr">
+    <attribute name="extends"/>
   </define>
-  <!-- Extends tag defines path prepended to the nodes -->
-  <define name="extends">
-    <element name="extends">
-      <ref name="path"/>
+  <!-- Normal and tag nodes may have children -->
+  <define name="children">
+    <element name="children">
+      <oneOrMore>
+        <choice>
+          <ref name="node"/>
+          <ref name="tagNode"/>
+          <ref name="leafNode"/>
+        </choice>
+      </oneOrMore>
     </element>
   </define>
-  <define name="path">
-    <attribute name="path"/>
+  <!--
+    Nodes may have properties
+    For simplicity, any property is allowed in any node,
+    but whether they are used or not is implementation-defined
+  -->
+  <define name="properties">
+    <element name="properties">
+      <optional>
+        <ref name="helpString"/>
+      </optional>
+      <optional>
+        <ref name="constraint"/>
+      </optional>
+      <optional>
+        <!-- These are meaningful only for leaf nodes -->
+        <ref name="valueHelpString"/>
+      </optional>
+      <optional>
+        <choice>
+          <ref name="multi"/>
+          <ref name="valueless"/>
+        </choice>
+      </optional>
+    </element>
   </define>
   <!--
     node tag may contain node, leafNode, or tagNode tags
@@ -60,20 +87,20 @@
   -->
   <define name="node">
     <element name="node">
-      <optional>
-        <ref name="ownerAttr"/>
-      </optional>
-      <ref name="nodeNameAttr"/>
-      <optional>
-        <ref name="helpString"/>
-      </optional>
-      <zeroOrMore>
-        <choice>
-          <ref name="node"/>
-          <ref name="tagNode"/>
-          <ref name="leafNode"/>
-        </choice>
-      </zeroOrMore>
+      <interleave>
+        <optional>
+          <ref name="ownerAttr"/>
+        </optional>
+        <ref name="nodeNameAttr"/>
+      </interleave>
+      <interleave>
+        <optional>
+          <ref name="properties"/>
+        </optional>
+        <optional>
+          <ref name="children"/>
+        </optional>
+      </interleave>
     </element>
   </define>
   <!-- All nodes must have "name" attribute -->
@@ -94,15 +121,17 @@
   -->
   <define name="constraint">
     <element name="constraint">
-      <oneOrMore>
-        <choice>
-          <ref name="regex"/>
-          <ref name="validator"/>
-        </choice>
-      </oneOrMore>
-      <optional>
-        <ref name="errorMessage"/>
-      </optional>
+      <interleave>
+        <oneOrMore>
+          <choice>
+            <ref name="regex"/>
+            <ref name="validator"/>
+          </choice>
+        </oneOrMore>
+        <optional>
+          <ref name="errorMessage"/>
+        </optional>
+      </interleave>
     </element>
   </define>
   <!-- A constraint may be a regex pattern -->
@@ -114,8 +143,10 @@
   <!-- A constraint may also use an external validator -->
   <define name="validator">
     <element name="validator">
-      <ref name="validatorNameAttr"/>
-      <ref name="validatorArgumentAttr"/>
+      <interleave>
+        <ref name="validatorNameAttr"/>
+        <ref name="validatorArgumentAttr"/>
+      </interleave>
       <empty/>
     </element>
   </define>
@@ -141,22 +172,18 @@
   -->
   <define name="tagNode">
     <element name="tagNode">
-      <optional>
-        <ref name="ownerAttr"/>
-      </optional>
-      <ref name="nodeNameAttr"/>
-      <optional>
-        <ref name="helpString"/>
-      </optional>
-      <optional>
-        <ref name="constraint"/>
-      </optional>
-      <oneOrMore>
-        <choice>
-          <ref name="node"/>
-          <ref name="leafNode"/>
-        </choice>
-      </oneOrMore>
+      <interleave>
+        <optional>
+          <ref name="ownerAttr"/>
+        </optional>
+        <ref name="nodeNameAttr"/>
+      </interleave>
+      <interleave>
+        <optional>
+          <ref name="properties"/>
+        </optional>
+        <ref name="children"/>
+      </interleave>
     </element>
   </define>
   <!--
@@ -170,18 +197,19 @@
   <define name="leafNode">
     <element name="leafNode">
       <ref name="nodeNameAttr"/>
-      <optional>
-        <ref name="multiAttr"/>
-      </optional>
-      <optional>
-        <ref name="helpString"/>
-      </optional>
-      <optional>
-        <ref name="constraint"/>
-      </optional>
-      <zeroOrMore>
-        <ref name="valueHelpString"/>
-      </zeroOrMore>
+      <ref name="properties"/>
+    </element>
+  </define>
+  <!-- Some leaf nodes may have more than one value -->
+  <define name="multi">
+    <element name="multi">
+      <empty/>
+    </element>
+  </define>
+  <!-- Some leaf nodes may not have values (e.g. enable/disable flags) -->
+  <define name="valueless">
+    <element name="valueless">
+      <empty/>
     </element>
   </define>
   <!--
@@ -198,15 +226,5 @@
     <element name="valueHelpString">
       <text/>
     </element>
-  </define>
-  <!--
-    multi=<true|false> attribute indicates that a leaf node can have
-    multiple values
-    If not present, treated as "false"
-  -->
-  <define name="multiAttr">
-    <attribute name="multi">
-      <data type="boolean"/>
-    </attribute>
   </define>
 </grammar>

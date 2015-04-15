@@ -34,15 +34,23 @@ extendsAttr = attribute extends
     text
 }
 
-# Extends tag defines path prepended to the nodes
-extends = element extends
+# Normal and tag nodes may have children
+children = element children
 {
-    path
+    (node | tagNode | leafNode)+
 }
 
-path = attribute path
+# Nodes may have properties
+# For simplicity, any property is allowed in any node,
+# but whether they are used or not is implementation-defined
+properties = element properties
 {
-    text
+    helpString?,
+    constraint?,
+
+    # These are meaningful only for leaf nodes
+    valueHelpString?,
+    (multi | valueless)?
 }
 
 # node tag may contain node, leafNode, or tagNode tags
@@ -50,10 +58,8 @@ path = attribute path
 # other nodes and must not have values
 node = element node
 {
-    ownerAttr?,
-    nodeNameAttr,
-    helpString?,
-    (node | tagNode | leafNode)*
+    (ownerAttr? & nodeNameAttr),
+    (properties? & children? )
 }
 
 # All nodes must have "name" attribute
@@ -74,7 +80,7 @@ ownerAttr = attribute owner
 # When multiple constraints are listed, they work as logical OR
 constraint = element constraint
 {
-    (regex | validator)+,
+    (regex | validator)+ &
     errorMessage?
 }
 
@@ -87,8 +93,7 @@ regex = element regex
 # A constraint may also use an external validator
 validator = element validator
 {
-    validatorNameAttr,
-    validatorArgumentAttr,
+    (validatorNameAttr & validatorArgumentAttr),
     empty
 }
 
@@ -116,11 +121,8 @@ errorMessage = element errorMessage
 # They must not contain other tag nodes
 tagNode = element tagNode
 {
-    ownerAttr?,
-    nodeNameAttr,
-    helpString?,
-    constraint?,
-    (node | leafNode)+
+    (ownerAttr? & nodeNameAttr),
+    (properties? & children )
 }
 
 # Leaf nodes are terminal configuration nodes that can't have children,
@@ -132,10 +134,19 @@ tagNode = element tagNode
 leafNode = element leafNode
 {
     nodeNameAttr,
-    multiAttr?,
-    helpString?,
-    constraint?,
-    valueHelpString*
+    properties
+}
+
+# Some leaf nodes may have more than one value
+multi = element multi
+{
+    empty
+}
+
+# Some leaf nodes may not have values (e.g. enable/disable flags)
+valueless = element valueless
+{
+    empty
 }
 
 # helpString tag contains brief description of the purpose of the node
@@ -149,12 +160,4 @@ helpString = element helpString
 valueHelpString = element valueHelpString
 {
     text
-}
-
-# multi=<true|false> attribute indicates that a leaf node can have
-# multiple values
-# If not present, treated as "false"
-multiAttr = attribute multi
-{
-    xsd:boolean
 }
