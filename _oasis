@@ -11,9 +11,21 @@ OASISFormat: 0.4
 BuildTools: ocamlbuild
 Plugins: META (0.4), DevFiles (0.4)
 
+Library "vyconf"
+  Path: src
+  Modules: Vytree, Vylist, Value_checker
+  Install: false
+
 Library "vytree"
   Path: src
   Modules: Vytree
+  FindlibParent: vyconf
+
+Library "value_checker"
+  Path: src
+  Modules: Value_checker
+  FindlibParent: vyconf
+  BuildDepends: pcre
 
 Executable "vyconfd"
   Path: src
@@ -26,7 +38,7 @@ Executable "vyconf_tree_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends:  oUnit, vytree
+  BuildDepends:  oUnit, vyconf
 
 Executable "vylist_test"
   Path: test
@@ -34,7 +46,7 @@ Executable "vylist_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends:  oUnit
+  BuildDepends:  oUnit, vyconf
 
 Test "vyconf_tree_test"
   Run$: flag(tests)
