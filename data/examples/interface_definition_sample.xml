@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<interfaceDefinition extends="system">
+  <node name="login">
+    <tagNode name="user">
+      <helpString>User name</helpString>
+      <constraint>
+        <regex>[a-z][a-zA-Z0-9]+</regex>
+        <errorMessage>User name must start with a letter and consist of letters and digits</errorMessage>
+      </constraint>
+      <leafNode name="full-name">
+        <helpString>User full name</helpString>
+      </leafNode>
+    </tagNode>
+  </node>
+</interfaceDefinition>
