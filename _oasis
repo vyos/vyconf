@@ -48,6 +48,14 @@ Executable "vylist_test"
   Install: false
   BuildDepends:  oUnit, vyconf
 
+Executable "value_checker_test"
+  Path: test
+  MainIs: value_checker_test.ml
+  Build$: flag(tests)
+  CompiledObject: best
+  Install: false
+  BuildDepends:  oUnit, pcre, vyconf
+
 Test "vyconf_tree_test"
   Run$: flag(tests)
   TestTools: vyconf_tree_test
@@ -58,4 +66,10 @@ Test "vylist_test"
   Run$: flag(tests)
   TestTools: vylist_test
   Command: $vylist_test
+  WorkingDirectory: test
+
+Test "value_checker_test"
+  Run$: flag(tests)
+  TestTools: value_checker_test
+  Command: $value_checker_test
   WorkingDirectory: test
