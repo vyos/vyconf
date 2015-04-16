@@ -4,7 +4,7 @@
     <children>
       <tagNode name="user">
         <properties>
-          <helpString>User name</helpString>
+          <help>User name</help>
           <constraint>
             <regex>[a-z][a-zA-Z0-9]+</regex>
             <errorMessage>User name must start with a letter and consist of letters and digits</errorMessage>
@@ -13,15 +13,18 @@
         <children>
           <leafNode name="full-name">
             <properties>
-              <helpString>User full name</helpString>
+              <help>User full name</help>
             </properties>
           </leafNode>
         </children>
       </tagNode>
       <leafNode name="hostname">
         <properties>
-          <helpString>System hostname</helpString>
-          <valueHelpString>text</valueHelpString>
+          <help>System hostname</help>
+          <valueHelp>
+            <format>text</format>
+            <description>System hostname (alphanumeric, must start with a letter)</description>
+          </valueHelp>
         </properties>
       </leafNode>
     </children>

@@ -45,11 +45,11 @@ children = element children
 # but whether they are used or not is implementation-defined
 properties = element properties
 {
-    helpString?,
+    help?,
     constraint?,
 
     # These are meaningful only for leaf nodes
-    valueHelpString?,
+    valueHelp?,
     (multi | valueless)?
 }
 
@@ -149,15 +149,15 @@ valueless = element valueless
     empty
 }
 
-# helpString tag contains brief description of the purpose of the node
-# Must have description= attribute
-helpString = element helpString
+# help tags contains brief description of the purpose of the node
+help = element help
 {
     text
 }
 
-# valueHelpString tags contain information about acceptable value format
-valueHelpString = element valueHelpString
+# valueHelp tags contain information about acceptable value format
+valueHelp = element valueHelp
 {
-    text
+    element format { text } &
+    element description { text }
 }

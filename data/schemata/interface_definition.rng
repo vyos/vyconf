@@ -63,14 +63,14 @@
   <define name="properties">
     <element name="properties">
       <optional>
-        <ref name="helpString"/>
+        <ref name="help"/>
       </optional>
       <optional>
         <ref name="constraint"/>
       </optional>
       <optional>
         <!-- These are meaningful only for leaf nodes -->
-        <ref name="valueHelpString"/>
+        <ref name="valueHelp"/>
       </optional>
       <optional>
         <choice>
@@ -212,19 +212,23 @@
       <empty/>
     </element>
   </define>
-  <!--
-    helpString tag contains brief description of the purpose of the node
-    Must have description= attribute
-  -->
-  <define name="helpString">
-    <element name="helpString">
+  <!-- help tags contains brief description of the purpose of the node -->
+  <define name="help">
+    <element name="help">
       <text/>
     </element>
   </define>
-  <!-- valueHelpString tags contain information about acceptable value format -->
-  <define name="valueHelpString">
-    <element name="valueHelpString">
-      <text/>
+  <!-- valueHelp tags contain information about acceptable value format -->
+  <define name="valueHelp">
+    <element name="valueHelp">
+      <interleave>
+        <element name="format">
+          <text/>
+        </element>
+        <element name="description">
+          <text/>
+        </element>
+      </interleave>
     </element>
   </define>
 </grammar>
