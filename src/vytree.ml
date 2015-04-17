@@ -6,7 +6,7 @@ type 'a	t = {
 
 type position = Before of string | After of string | Default
 
-type node_type = Leaf | Tag | Other
+type node_type = Leaf_single | Leaf_multi | Tag | Other
 
 exception Empty_path
 exception Duplicate_child
