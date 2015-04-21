@@ -7,7 +7,7 @@ exception Insert_error of string
 
 type position = Before of string | After of string | Default
 
-type node_type = Leaf_single | Leaf_multi | Tag | Other
+type node_type = Leaf | Tag | Other
 
 val make : 'a -> string -> 'a t
 val make_full : 'a -> string -> ('a t) list -> 'a t
