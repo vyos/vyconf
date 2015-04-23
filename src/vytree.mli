@@ -25,3 +25,5 @@ val update : 'a t -> string list -> 'a -> 'a t
 val list_children : 'a t -> string list
 
 val get : 'a t -> string list -> 'a t
+
+val get_existent_path : 'a t -> string list -> string list

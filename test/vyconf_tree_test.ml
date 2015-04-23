@@ -99,6 +99,13 @@ let test_update test_ctxt =
     let node = insert node ["foo"] 1 in
     assert_equal (data_of_node (get (update node ["foo"] 9) ["foo"])) 9
 
+(* get_existent_path works *)
+let test_get_existent_path test_ctxt =
+    let node = make () "root" in
+    let node = insert node ["foo"] () in
+    let node = insert node ["foo"; "bar"] () in
+    assert_equal (get_existent_path node ["foo"; "bar"; "baz"]) ["foo"; "bar"]
+
 let suite =
     "VyConf tree tests" >::: [
         "test_make_node" >:: test_make_node;
@@ -114,6 +121,7 @@ let suite =
         "test_get_child_multilevel" >:: test_get_child_multilevel;
         "test_get_child_nonexistent" >:: test_get_child_nonexistent;
         "test_update" >:: test_update;
+        "test_get_existent_path" >:: test_get_existent_path;
     ]
 
 let () =

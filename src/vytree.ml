@@ -92,3 +92,14 @@ let rec get node path =
     | [] -> raise Empty_path
     | [name] -> find_or_fail node name
     | name :: names -> get (find_or_fail node name) names
+
+let get_existent_path node path =
+    let rec aux node path acc =
+        match path with
+        | [] -> acc
+        | name :: names ->
+            let child = find node name in
+            match child with
+            | None -> acc
+            | Some c -> aux c names (name :: acc)
+    in List.rev (aux node path [])
