@@ -41,6 +41,20 @@ let test_insert_before_nonexistent test_ctxt =
     let xs = [1; 2; 3] in
      assert_raises Not_found (fun () -> insert_before ((=) 9) 7 xs)
 
+(* complement returns correct result when one list contains another, in any order *)
+let test_complement_first_is_longer test_ctxt =
+    let xs = [1;2;3;4;5] and ys = [1;2;3] in
+    assert_equal (complement xs ys) (Some [4;5])
+
+let test_complement_second_is_longer test_ctxt =
+    let	xs = [1;2] and ys = [1;2;3;4;5] in
+    assert_equal (complement xs	ys) (Some [3;4;5])
+
+(* complement returns None if one list doesn't contain another *)
+let test_complement_doesnt_contain test_ctxt =
+    let xs = [1;2;3] and ys = [1;4;5;6] in
+    assert_equal (complement xs ys) None
+
 let suite =
     "VyConf list tests" >::: [
         "test_find_existent" >:: test_find_existent;
@@ -51,6 +65,9 @@ let suite =
         "test_replace_element_nonexistent" >:: test_replace_element_nonexistent;
         "test_insert_before_existent" >:: test_insert_before_existent;
         "test_insert_before_nonexistent" >:: test_insert_before_nonexistent;
+        "test_complement_first_is_longer" >:: test_complement_first_is_longer;
+        "test_complement_second_is_longer" >:: test_complement_second_is_longer;
+        "test_complement_doesnt_contain" >:: test_complement_doesnt_contain;
     ]
 
 let () =
