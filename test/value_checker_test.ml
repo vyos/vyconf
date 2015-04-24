@@ -30,6 +30,13 @@ let test_check_external_bad_validator test_ctxt =
     let v = "fgsfds" in
     assert_raises (Bad_validator "invalid") (fun () -> validate_value validators c v)
 
+let test_validate_any_valid test_ctxt =
+    let cs = [Regex "\\d+"; Regex "[a-z]+"; External ("anything", "")] in
+    assert_equal (validate_any validators cs "AAAA") true
+
+let test_validate_any_invalid test_ctxt =
+    let cs = [Regex "\\d+"; Regex "[a-z]+"] in
+    assert_equal (validate_any validators cs "AAAA") false
 
 let suite =
     "VyConf value checker tests" >::: [
@@ -38,6 +45,8 @@ let suite =
         "test_check_external_valid" >:: test_check_external_valid;
         "test_check_external_invalid" >:: test_check_external_invalid;
         "test_check_external_bad_validator" >:: test_check_external_bad_validator;
+        "test_validate_any_valid" >:: test_validate_any_valid;
+        "test_validate_any_invalid" >:: test_validate_any_invalid;
     ]
 
 let () =

@@ -16,3 +16,9 @@ let validate_value validators value_constraint value =
             | Unix.WEXITED 0 -> true
             | _ -> false
         with Not_found -> raise (Bad_validator t)
+
+let rec validate_any validators constraints value =
+    match constraints with
+    | [] -> false
+    | c :: cs -> if validate_value validators c value then true
+                 else validate_any validators cs value
