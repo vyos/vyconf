@@ -7,8 +7,8 @@ let find_xml_child name xml =
         | _ -> false
     in
     match xml with
-    | Xml.Element (_, _, children) -> List.find find_aux children
-    | Xml.PCData _ -> raise Not_found
+    | Xml.Element (_, _, children) -> Vylist.find find_aux children
+    | Xml.PCData _ -> None
 
 (* Dirty pretty printer *)
 let string_of_path path =
