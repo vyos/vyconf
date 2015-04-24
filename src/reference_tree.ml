@@ -44,10 +44,9 @@ let load_constraint_from_xml d c =
             let cs = (Value_checker.External (n, a)) :: d.constraints in
             {d with constraints=cs}
         | _ -> raise (Bad_interface_definition "Malformed constraint")
-    in print_endline "Load constraint" ; Xml.fold aux d c
+    in Xml.fold aux d c
 
 let data_from_xml d x =
-    print_endline "data_from_xml";
     let aux d x =
         match x with
         | Xml.Element ("help", _, [Xml.PCData s]) -> {d with help=s}
@@ -68,7 +67,6 @@ let data_from_xml d x =
 let rec insert_from_xml basepath reftree xml =
     match xml with
     | Xml.Element (tag, _,  _) ->
-        print_endline ("In node " ^ tag);
         let props = Util.find_xml_child "properties" xml in
         let data =
             (match props with
@@ -99,10 +97,10 @@ let load_from_xml reftree file =
             let basepath =
                 try Pcre.split (Xml.attrib xml "extends")
                 with _ -> []
-            in print_endline "fold children"; List.fold_left (insert_from_xml basepath) reftree children
+            in List.fold_left (insert_from_xml basepath) reftree children
             
             
         | _ -> raise (Bad_interface_definition "Should start with <interfaceDefinition>")
     in
-    let xml = Xml.parse_file file in print_endline "xml_to_reftree";
+    let xml = Xml.parse_file file in
     xml_to_reftree xml reftree
