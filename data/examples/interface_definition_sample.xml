@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
-<interfaceDefinition extends="system">
-  <node name="login">
+<interfaceDefinition>
+  <node name="login" owner="login">
     <children>
       <tagNode name="user">
         <properties>
           <help>User name</help>
           <constraint>
             <regex>[a-z][a-zA-Z0-9]+</regex>
-            <errorMessage>User name must start with a letter and consist of letters and digits</errorMessage>
           </constraint>
+          <constraintErrorMessage>User name must start with a letter and consist of letters and digits</constraintErrorMessage>
         </properties>
         <children>
           <leafNode name="full-name">
@@ -18,15 +18,6 @@
           </leafNode>
         </children>
       </tagNode>
-      <leafNode name="hostname">
-        <properties>
-          <help>System hostname</help>
-          <valueHelp>
-            <format>text</format>
-            <description>System hostname (alphanumeric, must start with a letter)</description>
-          </valueHelp>
-        </properties>
-      </leafNode>
     </children>
   </node>
 </interfaceDefinition>

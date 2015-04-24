@@ -45,11 +45,12 @@ children = element children
 # but whether they are used or not is implementation-defined
 properties = element properties
 {
-    help?,
-    constraint?,
+    help? &
+    constraint? &
+    (element constraintErrorMessage { text })? &
 
     # These are meaningful only for leaf nodes
-    valueHelp?,
+    valueHelp? &
     (multi | valueless)?
 }
 
@@ -80,8 +81,7 @@ ownerAttr = attribute owner
 # When multiple constraints are listed, they work as logical OR
 constraint = element constraint
 {
-    (regex | validator)+ &
-    errorMessage?
+    (regex | validator)+
 }
 
 # A constraint may be a regex pattern
@@ -105,12 +105,6 @@ validatorNameAttr = attribute name
 
 # An argument can be passed to validator, in addition to the value to be validated
 validatorArgumentAttr = attribute argument
-{
-    text
-}
-
-# When validation fails, a message can be shown
-errorMessage = element errorMessage
 {
     text
 }
