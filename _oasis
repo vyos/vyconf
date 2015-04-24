@@ -27,6 +27,12 @@ Library "value_checker"
   FindlibParent: vyconf
   BuildDepends: pcre
 
+Library "util"
+  Path: src
+  Modules: Util
+  FindlibParent: vyconf
+  BuildDepends: xml-light
+
 Executable "vyconfd"
   Path: src
   MainIs: vyconfd.ml
@@ -56,6 +62,14 @@ Executable "value_checker_test"
   Install: false
   BuildDepends:  oUnit, pcre, vyconf
 
+Executable "util_test"
+  Path: test
+  MainIs: util_test.ml
+  Build$: flag(tests)
+  CompiledObject: best
+  Install: false
+  BuildDepends: oUnit, xml-light
+
 Test "vyconf_tree_test"
   Run$: flag(tests)
   TestTools: vyconf_tree_test
@@ -72,4 +86,10 @@ Test "value_checker_test"
   Run$: flag(tests)
   TestTools: value_checker_test
   Command: $value_checker_test
+  WorkingDirectory: test
+
+Test "util_test"
+  Run$: flag(tests)
+  TestTools: util_test
+  Command: $util_test
   WorkingDirectory: test
