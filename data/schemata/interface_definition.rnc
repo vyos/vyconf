@@ -34,6 +34,37 @@ extendsAttr = attribute extends
     text
 }
 
+# node tag may contain node, leafNode, or tagNode tags
+# Those are intermediate configuration nodes that may only contain
+# other nodes and must not have values
+node = element node
+{
+    (ownerAttr? & nodeNameAttr),
+    (properties? & children? )
+}
+
+# Tag nodes are containers for nodes without predefined names, like network interfaces
+# or user names (e.g. "interfaces ethernet eth0" or "user jrandomhacker")
+# Tag nodes may contain node and leafNode elements, and also nameConstraint tags
+# They must not contain other tag nodes
+tagNode = element tagNode
+{
+    (ownerAttr? & nodeNameAttr),
+    (properties? & children )
+}
+
+# Leaf nodes are terminal configuration nodes that can't have children,
+# but can have values.
+# Leaf node may contain one or more valueConstraint tags
+# If multiple valueConstraint tags are used, they work a logical OR
+# Leaf nodes can have "multi" attribute that indicated that it can have
+# more than one value
+leafNode = element leafNode
+{
+    nodeNameAttr,
+    properties
+}
+
 # Normal and tag nodes may have children
 children = element children
 {
@@ -43,6 +74,12 @@ children = element children
 # Nodes may have properties
 # For simplicity, any property is allowed in any node,
 # but whether they are used or not is implementation-defined
+#
+# Leaf nodes may differ in number of values that can be
+# associated with them.
+# By default, a leaf node can have only one value.
+# "multi" tag means a node can have one or more values,
+# "valueless" means it can have no values at all.
 properties = element properties
 {
     help? &
@@ -50,17 +87,9 @@ properties = element properties
     (element constraintErrorMessage { text })? &
 
     # These are meaningful only for leaf nodes
-    valueHelp? &
-    (multi | valueless)?
-}
-
-# node tag may contain node, leafNode, or tagNode tags
-# Those are intermediate configuration nodes that may only contain
-# other nodes and must not have values
-node = element node
-{
-    (ownerAttr? & nodeNameAttr),
-    (properties? & children? )
+    (element valueless { empty })? &
+    (element multi { empty })? &
+    valueHelp*
 }
 
 # All nodes must have "name" attribute
@@ -81,65 +110,15 @@ ownerAttr = attribute owner
 # When multiple constraints are listed, they work as logical OR
 constraint = element constraint
 {
-    (regex | validator)+
+    ( (element regex { text }) |
+      validator )+
 }
 
-# A constraint may be a regex pattern
-regex = element regex
-{
-    text
-}
-
-# A constraint may also use an external validator
+# A constraint may also use an external validator rather than regex
 validator = element validator
 {
-    (validatorNameAttr & validatorArgumentAttr),
-    empty
-}
-
-# Validators are named
-validatorNameAttr = attribute name
-{
-    text
-}
-
-# An argument can be passed to validator, in addition to the value to be validated
-validatorArgumentAttr = attribute argument
-{
-    text
-}
-
-# Tag nodes are containers for nodes without predefined names, like network interfaces
-# or user names (e.g. "interfaces ethernet eth0" or "user jrandomhacker")
-# Tag nodes may	contain	node and leafNode elements, and also nameConstraint tags
-# They must not contain other tag nodes
-tagNode = element tagNode
-{
-    (ownerAttr? & nodeNameAttr),
-    (properties? & children )
-}
-
-# Leaf nodes are terminal configuration nodes that can't have children,
-# but can have values.
-# Leaf node may contain one or more valueConstraint tags
-# If multiple valueConstraint tags are used, they work a logical OR
-# Leaf nodes can have "multi" attribute that indicated that it can have
-# more than one value
-leafNode = element leafNode
-{
-    nodeNameAttr,
-    properties
-}
-
-# Some leaf nodes may have more than one value
-multi = element multi
-{
-    empty
-}
-
-# Some leaf nodes may not have values (e.g. enable/disable flags)
-valueless = element valueless
-{
+    ( (attribute argument { text }) &
+      (attribute name { text }) ),
     empty
 }
 
