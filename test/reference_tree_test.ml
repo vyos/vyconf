@@ -2,7 +2,9 @@ open OUnit2
 open Reference_tree
 
 let test_load_valid_definition test_ctxt =
-    assert_equal 0 0
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (Vytree.list_children r) ["login"]
 
 let suite =
     "Util tests" >::: [
