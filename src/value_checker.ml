@@ -17,8 +17,16 @@ let validate_value validators value_constraint value =
             | _ -> false
         with Not_found -> raise (Bad_validator t)
 
-let rec validate_any validators constraints value =
+(* If no constraints given, consider it valid.
+   Otherwise consider it valid if it satisfies at least
+   one constraint *)
+let validate_any validators constraints value =
+    let rec aux validators constraints value  =
+        match constraints with
+        | [] -> false
+        | c :: cs -> if validate_value validators c value then true
+                     else aux validators cs value
+    in
     match constraints with
-    | [] -> false
-    | c :: cs -> if validate_value validators c value then true
-                 else validate_any validators cs value
+    | [] -> true
+    | _ -> aux validators constraints value

@@ -38,6 +38,10 @@ let test_validate_any_invalid test_ctxt =
     let cs = [Regex "\\d+"; Regex "[a-z]+"] in
     assert_equal (validate_any validators cs "AAAA") false
 
+let test_validate_any_no_constraints test_ctxt =
+    let cs = [] in
+    assert_equal (validate_any validators cs "foo") true
+
 let suite =
     "VyConf value checker tests" >::: [
         "test_check_regex_valid" >:: test_check_regex_valid;
@@ -47,6 +51,7 @@ let suite =
         "test_check_external_bad_validator" >:: test_check_external_bad_validator;
         "test_validate_any_valid" >:: test_validate_any_valid;
         "test_validate_any_invalid" >:: test_validate_any_invalid;
+        "test_validate_any_no_constraints" >:: test_validate_any_no_constraints;
     ]
 
 let () =
