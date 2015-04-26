@@ -93,6 +93,10 @@ let rec get node path =
     | [name] -> find_or_fail node name
     | name :: names -> get (find_or_fail node name) names
 
+let exists node path =
+    try ignore (get node path); true
+    with Nonexistent_path -> false
+
 let get_existent_path node path =
     let rec aux node path acc =
         match path with

@@ -106,6 +106,19 @@ let test_get_existent_path test_ctxt =
     let node = insert node ["foo"; "bar"] () in
     assert_equal (get_existent_path node ["foo"; "bar"; "baz"]) ["foo"; "bar"]
 
+let test_exists_existent test_ctxt =
+    let node = make () "root" in
+    let node = insert node ["foo"] () in
+    let node = insert node ["foo"; "bar"] () in
+    assert_equal (exists node ["foo"; "bar"]) true
+
+let test_exists_nonexistent test_ctxt =
+    let node = make () "root" in
+    let node = insert node ["foo"] () in
+    let node = insert node ["foo"; "bar"] () in
+    assert_equal (exists node ["foo"; "bar"; "baz"]) false
+
+
 let suite =
     "VyConf tree tests" >::: [
         "test_make_node" >:: test_make_node;
@@ -122,6 +135,8 @@ let suite =
         "test_get_child_nonexistent" >:: test_get_child_nonexistent;
         "test_update" >:: test_update;
         "test_get_existent_path" >:: test_get_existent_path;
+        "test_exists_existent" >:: test_exists_existent;
+        "test_exists_nonexistent" >:: test_exists_nonexistent;
     ]
 
 let () =
