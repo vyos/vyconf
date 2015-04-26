@@ -4,6 +4,7 @@ type config_node_data = {
   values : string list;
   comment : string;
   node_type : Vytree.node_type;
+  keep_order : bool;
 }
 
 type t = config_node_data Vytree.t

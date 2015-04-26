@@ -7,6 +7,7 @@ type ref_node_data = {
     multi: bool;
     valueless: bool;
     owner: string option;
+    keep_order: bool;
 }
 
 exception Validation_error of string

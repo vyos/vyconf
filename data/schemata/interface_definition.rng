@@ -84,6 +84,11 @@
         <optional>
           <ref name="properties"/>
         </optional>
+        <optional>
+          <element name="keepChildOrder">
+            <empty/>
+          </element>
+        </optional>
         <ref name="children"/>
       </interleave>
     </element>

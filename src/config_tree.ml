@@ -4,6 +4,7 @@ type config_node_data = {
     values: string list;
     comment: string;
     node_type: Vytree.node_type;
+    keep_order: bool;
 }
 
 type t = config_node_data Vytree.t
@@ -12,6 +13,7 @@ let default_data = {
     values = [];
     comment = "";
     node_type = Vytree.Other;
+    keep_order = false;
 }
 
 let make = Vytree.make default_data

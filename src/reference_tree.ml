@@ -7,6 +7,7 @@ type ref_node_data = {
     multi: bool;
     valueless: bool;
     owner: string option;
+    keep_order: bool;
 }
 
 type t = ref_node_data Vytree.t
@@ -24,6 +25,7 @@ let default_data = {
     multi = false;
     valueless = false;
     owner = None;
+    keep_order = false;
 }
 
 (* Loading from XML *)
@@ -66,6 +68,14 @@ let data_from_xml d x =
         | _ -> raise (Bad_interface_definition "Malformed property tag")
     in Xml.fold aux d x
 
+let get_keep_child_order xml =
+    match xml with
+    | Xml.Element ("tagNode", _, _) ->
+        (match (Util.find_xml_child "keepChildOrder" xml) with
+         | Some _ -> true
+         | None -> false)
+    | _ -> false
+
 let rec insert_from_xml basepath reftree xml =
     match xml with
     | Xml.Element (tag, _,  _) ->
@@ -79,7 +89,8 @@ let rec insert_from_xml basepath reftree xml =
         let node_owner = try let o = Xml.attrib xml "owner" in Some o
                          with _ -> None
         in
-        let data = {data with node_type = node_type; owner = node_owner} in
+        let keep_order = get_keep_child_order xml in
+        let data = {data with node_type = node_type; owner = node_owner; keep_order = keep_order} in
         let name = Xml.attrib xml "name" in
         let path = basepath @ [name] in
         let new_tree = Vytree.insert reftree path data in
