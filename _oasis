@@ -27,6 +27,11 @@ Library "reference_tree"
   FindlibParent: vyconf
   BuildDepends: xml-light, pcre
 
+Library "config_tree"
+  Path: src
+  Modules: Config_tree
+  FindlibParent: vyconf
+
 Library "value_checker"
   Path: src
   Modules: Value_checker
@@ -59,6 +64,14 @@ Executable "reference_tree_test"
   CompiledObject: best
   Install: false
   BuildDepends: oUnit, xml-light, pcre, vyconf
+
+Executable "config_tree_test"
+  Path: test
+  MainIs: config_tree_test.ml
+  Build$: flag(tests)
+  CompiledObject: best
+  Install: false
+  BuildDepends: oUnit, vyconf
 
 Executable "vylist_test"
   Path: test
@@ -94,6 +107,12 @@ Test "reference_tree_test"
   Run$: flag(tests)
   TestTools: reference_tree_test
   Command: $reference_tree_test
+  WorkingDirectory: test
+
+Test "config_tree_test"
+  Run$: flag(tests)
+  TestTools: config_tree_test
+  Command: $config_tree_test
   WorkingDirectory: test
 
 Test "vylist_test"
