@@ -1,23 +1,34 @@
 <?xml version="1.0"?>
 <interfaceDefinition>
-  <node name="login" owner="login">
+  <node name="system">
     <children>
-      <tagNode name="user">
-        <properties>
-          <help>User name</help>
-          <constraint>
-            <regex>[a-z][a-zA-Z0-9]+</regex>
-          </constraint>
-          <constraintErrorMessage>User name must start with a letter and consist of letters and digits</constraintErrorMessage>
-        </properties>
+      <node name="login" owner="login">
         <children>
-          <leafNode name="full-name">
+          <tagNode name="user">
             <properties>
-              <help>User full name</help>
+              <help>User name</help>
+              <constraint>
+                <regex>[a-zA-Z][a-zA-Z0-9\-]+</regex>
+              </constraint>
+              <constraintErrorMessage>User name must start with a letter and consist of letters and digits</constraintErrorMessage>
             </properties>
-          </leafNode>
+            <children>
+              <leafNode name="full-name">
+                <properties>
+                  <help>User full name</help>
+                </properties>
+              </leafNode>
+            </children>
+          </tagNode>
         </children>
-      </tagNode>
+      </node>
+      <leafNode name="host-name">
+        <properties>
+          <constraint>
+            <regex>[a-zA-Z][a-zA-Z0-9\-]</regex>
+          </constraint>
+        </properties>
+      </leafNode>
     </children>
   </node>
 </interfaceDefinition>

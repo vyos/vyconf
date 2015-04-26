@@ -13,6 +13,8 @@ type t = ref_node_data Vytree.t
 
 exception Bad_interface_definition of string
 
+exception Validation_error of string
+
 let default_data = {
     node_type = Vytree.Other;
     constraints = [];
@@ -104,3 +106,53 @@ let load_from_xml reftree file =
     in
     let xml = Xml.parse_file file in
     xml_to_reftree xml reftree
+
+(* Validation function *)
+
+(* A path can be created in the config tree unless:
+     1. It's a tag node without a child
+     2. It's a non-valueless leaf node without a value
+     3. It's a valueless node with a value
+     4. It's a non-valueless leaf node with garbage after the value
+     5. It's a non-leaf, non-tag node with a name that doesn't exist
+        in the reference tree
+ *)
+let rec validate_path validators node path =
+    let show_path p = Util.string_of_path (List.rev p) in
+    let rec aux node path acc =
+        let data = Vytree.data_of_node node in
+        match data.node_type with
+        | Vytree.Leaf ->
+            (match path with
+             | [] ->
+                 if data.valueless then (List.rev acc, None)
+                 else raise (Validation_error
+                   (Printf.sprintf "Node \"%s\" requires a value" (show_path acc) ))
+             | [p] ->
+                 if not data.valueless then
+                     (if (Value_checker.validate_any validators data.constraints p) then (List.rev acc, Some p)
+                     else raise (Validation_error data.constraint_error_message))
+                 else raise (Validation_error
+                   (Printf.sprintf "Node %s cannot have a value" (show_path acc)))
+             | p :: ps -> raise (Validation_error (Printf.sprintf "Path %s is too long" (show_path acc))))
+        | Vytree.Tag ->
+            (match path with
+             | p :: p' :: ps ->
+                 if (Value_checker.validate_any validators data.constraints p) then
+                     let child = Vytree.find node p' in
+                     (match child with
+                      | Some c -> aux c ps (p' :: p :: acc)
+                      | None -> raise (Validation_error (Printf.sprintf "Node %s has no child %s" (show_path acc) p')))
+                 else raise (Validation_error (Printf.sprintf "%s is not a valid child name for node %s" p (show_path acc)))
+             | [p] -> if (Value_checker.validate_any validators data.constraints p) then (List.rev acc, None)
+                          else raise (Validation_error (Printf.sprintf "Node %s has no child %s" (show_path acc) p))
+             | _ -> raise (Validation_error (Printf.sprintf "Path %s is incomplete" (show_path acc))))
+        | Vytree.Other ->
+            (match path with
+             | [] -> (List.rev acc, None)
+             | p :: ps ->
+                 let child = Vytree.find node p in
+                 (match child with
+                  | Some c -> aux c ps (p :: acc)
+                  | None -> raise (Validation_error ((Printf.sprintf "Path %s is incomplete" (show_path acc))))))
+    in aux node path []

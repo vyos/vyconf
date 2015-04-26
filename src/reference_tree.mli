@@ -9,8 +9,12 @@ type ref_node_data = {
     owner: string option;
 }
 
+exception Validation_error of string
+
 type t = ref_node_data Vytree.t
 
 val default_data : ref_node_data
 
 val load_from_xml : t -> string -> t
+
+val validate_path : (string, string) Hashtbl.t -> t -> string list -> string list * string option
