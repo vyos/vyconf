@@ -49,13 +49,13 @@ Executable "vyconfd"
   MainIs: vyconfd.ml
   CompiledObject: best
 
-Executable "vyconf_tree_test"
+Executable "vytree_test"
   Path: test
-  MainIs: vyconf_tree_test.ml
+  MainIs: vytree_test.ml
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends:  oUnit, vyconf
+  BuildDepends: oUnit, vyconf
 
 Executable "reference_tree_test"
   Path: test
@@ -95,12 +95,12 @@ Executable "util_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends: oUnit, xml-light
+  BuildDepends: oUnit, vyconf, xml-light
 
-Test "vyconf_tree_test"
+Test "vytree_test"
   Run$: flag(tests)
-  TestTools: vyconf_tree_test
-  Command: $vyconf_tree_test
+  TestTools: vytree_test
+  Command: $vytree_test
   WorkingDirectory: test
 
 Test "reference_tree_test"
