@@ -38,3 +38,9 @@ let complement xs ys =
     in
     if List.length xs < List.length ys then aux xs ys
     else aux ys xs
+
+let in_list xs x =
+    let x' = find ((=) x) xs in
+    match x' with
+    | None -> false
+    | Some _ -> true

@@ -55,6 +55,12 @@ let test_complement_doesnt_contain test_ctxt =
     let xs = [1;2;3] and ys = [1;4;5;6] in
     assert_equal (complement xs ys) None
 
+(* in_list works *)
+let test_in_list test_ctxt =
+    let xs = [1;2;3;4] in
+    assert_equal (in_list xs 3) true;
+    assert_equal (in_list xs 9) false
+
 let suite =
     "VyConf list tests" >::: [
         "test_find_existent" >:: test_find_existent;
