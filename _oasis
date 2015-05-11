@@ -97,6 +97,14 @@ Executable "util_test"
   Install: false
   BuildDepends: oUnit, vyconf, xml-light
 
+Executable "vytree_load_test"
+  Path: test
+  MainIs: vytree_load_test.ml
+  Build$: flag(tests)
+  CompiledObject: best
+  Install: false
+  BuildDepends: vyconf
+
 Test "vytree_test"
   Run$: flag(tests)
   TestTools: vytree_test
