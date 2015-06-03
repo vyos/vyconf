@@ -31,4 +31,6 @@ val get : 'a t -> string list -> 'a t
 
 val get_existent_path : 'a t -> string list -> string list
 
+val get_data : 'a t -> string list -> 'a
+
 val exists : 'a t -> string list -> bool

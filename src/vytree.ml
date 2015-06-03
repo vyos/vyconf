@@ -97,6 +97,8 @@ let rec get node path =
     | [name] -> find_or_fail node name
     | name :: names -> get (find_or_fail node name) names
 
+let get_data node path = data_of_node @@ get node path
+
 let exists node path =
     try ignore (get node path); true
     with Nonexistent_path -> false
