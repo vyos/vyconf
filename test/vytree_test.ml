@@ -21,8 +21,8 @@ let test_insert_immediate_child test_ctxt =
     assert_equal (children_of_node node')
                  [make () "foo"]
 
-(* Inserting one child after another adds it to the
-   end of the children list *)
+(* Inserting one child after another works.
+   The default behaviour is to insert new items at the beginning.  *)
 let test_insert_multiple_children test_ctxt =
     let node = make () "root" in
     let node' = insert node ["foo"] () in
@@ -46,6 +46,14 @@ let test_insert_duplicate_child test_ctxt =
     let node = make () "root" in
     let node = insert node ["foo"] () in
     assert_raises Duplicate_child (fun () -> insert node ["foo"] ())
+
+(* Inserting a child at the end works *)
+let test_insert_multiple_children_end test_ctxt =
+    let node = make () "root" in
+    let node = insert node ["foo"] () in
+    let node = insert ~position:End node ["bar"] () in
+    assert_equal (children_of_node node)
+                 [make () "foo"; make () "bar"]
 
 (* list_children correctly returns a list of children names *)
 let test_list_children test_ctxt =
@@ -126,6 +134,7 @@ let suite =
         "test_insert_multiple_children" >:: test_insert_multiple_children;
         "test_insert_multi_level" >:: test_insert_multi_level;
         "test_insert_duplicate_child" >:: test_insert_duplicate_child;
+        "test_insert_multiple_children_end" >:: test_insert_multiple_children_end;
         "test_list_children" >:: test_list_children;
         "test_delete_immediate_child" >:: test_delete_immediate_child;
         "test_delete_multi_level" >:: test_delete_multi_level;

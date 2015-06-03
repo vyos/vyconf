@@ -5,7 +5,7 @@ exception Duplicate_child
 exception Nonexistent_path
 exception Insert_error of string
 
-type position = Before of string | After of string | Default
+type position = Before of string | After of string | End | Default
 
 type node_type = Leaf | Tag | Other
 
@@ -19,7 +19,7 @@ val children_of_node : 'a t -> 'a t list
 val find : 'a t -> string -> 'a t option
 val find_or_fail : 'a t -> string -> 'a t
 
-val insert : 'a t -> string list -> 'a -> 'a t
+val insert : ?position:position -> 'a t -> string list -> 'a -> 'a t
 
 val delete : 'a t -> string list -> 'a t
 

@@ -4,7 +4,7 @@ type 'a	t = {
     children: 'a t list
 }
 
-type position = Before of string | After of string | Default
+type position = Before of string | After of string | End | Default
 
 type node_type = Leaf | Tag | Other
 
@@ -21,10 +21,14 @@ let name_of_node node = node.name
 let data_of_node node = node.data
 let children_of_node node = node.children
 
-let insert_immediate node name data =
+let insert_immediate ?(position=Default) node name data =
     let new_node = make data name in
-    let children' = new_node :: node.children in
-    { node with children = children' }
+    let children' =
+        match position with
+        | Default -> new_node :: node.children
+        | End -> node.children @ [new_node]
+        | _ -> assert false
+    in { node with children = children' }
 
 let delete_immediate node name =
     let children' = Vylist.remove (fun x -> x.name = name) node.children in
@@ -60,13 +64,13 @@ let rec do_with_child fn node path =
         let new_node = do_with_child fn next_child names in
         replace node new_node
 
-let rec insert node path data =
+let rec insert ?(position=Default) node path data =
     match path with
     | [] -> raise Empty_path
     | [name] ->
        (let last_child = find node name in
         match last_child with
-        | None -> insert_immediate node name data
+        | None -> insert_immediate ~position:position node name data
         | (Some _) -> raise Duplicate_child)
     | name :: names ->
         let next_child = find node name in
