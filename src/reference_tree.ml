@@ -167,3 +167,7 @@ let rec validate_path validators node path =
                   | Some c -> aux c ps (p :: acc)
                   | None -> raise (Validation_error ((Printf.sprintf "Path %s is incomplete" (show_path acc))))))
     in aux node path []
+
+let is_multi reftree path =
+    let data = Vytree.get_data reftree path in
+    data.multi

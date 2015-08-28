@@ -19,3 +19,5 @@ val default_data : ref_node_data
 val load_from_xml : t -> string -> t
 
 val validate_path : (string, string) Hashtbl.t -> t -> string list -> string list * string option
+
+val is_multi : t -> string list -> bool
