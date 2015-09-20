@@ -21,6 +21,8 @@ val find_or_fail : 'a t -> string -> 'a t
 
 val insert : ?position:position -> 'a t -> string list -> 'a -> 'a t
 
+val insert_multi_level : 'a -> 'a t -> string list -> 'a -> 'a t
+
 val delete : 'a t -> string list -> 'a t
 
 val update : 'a t -> string list -> 'a -> 'a t
