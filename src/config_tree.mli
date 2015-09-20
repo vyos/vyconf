@@ -1,26 +1,21 @@
+type value_behaviour = AddValue | ReplaceValue
+
 exception Duplicate_value
+exception Node_has_no_value
 
 type config_node_data = {
   values : string list;
   comment : string;
-  node_type : Vytree.node_type;
-  keep_order : bool;
 }
 
 type t = config_node_data Vytree.t
 
 val default_data : config_node_data
 
-val make : string -> config_node_data Vytree.t
+val make : string -> t
 
-val set_value :
-  config_node_data Vytree.t ->
-  string list -> string -> config_node_data Vytree.t
+val set : t -> string list -> string -> Vytree.position -> value_behaviour -> t
 
-val add_value :
-  config_node_data Vytree.t ->
-  string list -> string -> config_node_data Vytree.t
+val get_values : t -> string list -> string list
 
-val get_values :
-  config_node_data Vytree.t ->
-  string list -> string list
+val get_value : t -> string list -> string

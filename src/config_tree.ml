@@ -1,10 +1,11 @@
+type value_behaviour = AddValue | ReplaceValue
+
 exception Duplicate_value
+exception Node_has_no_value
 
 type config_node_data = {
     values: string list;
     comment: string;
-    node_type: Vytree.node_type;
-    keep_order: bool;
 }
 
 type t = config_node_data Vytree.t
@@ -12,14 +13,12 @@ type t = config_node_data Vytree.t
 let default_data = {
     values = [];
     comment = "";
-    node_type = Vytree.Other;
-    keep_order = false;
 }
 
-let make = Vytree.make default_data
+let make name = Vytree.make default_data name
 
-let set_value node path value =
-    let data = { default_data with values=[value] } in
+let replace_value node path value =
+    let data = {default_data with values=[value]} in
     Vytree.update node path data
 
 let add_value node path value =
@@ -32,7 +31,22 @@ let add_value node path value =
         let values = values @ [value] in
         Vytree.update node path ({data with values=values})
 
+let set_value node path value behaviour =
+    match behaviour with
+    | AddValue -> add_value node path value
+    | ReplaceValue -> replace_value node path value
+
+let set node path value position behaviour =
+    if Vytree.exists node path then set_value node path value behaviour
+    else Vytree.insert ~position:position node path {default_data with values=[value]}
+
 let get_values node path =
     let node' = Vytree.get node path in
     let data = Vytree.data_of_node node' in
     data.values
+
+let get_value node path =
+    let values = get_values node path in
+    match values with
+    | [] -> raise Node_has_no_value
+    | x :: _ -> x
