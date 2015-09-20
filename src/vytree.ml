@@ -77,10 +77,17 @@ let rec insert ?(position=Default) node path data =
         let next_child = find node name in
         match next_child with
         | Some next_child' ->
-            let new_node = insert next_child' names data in
+            let new_node = insert ~position:position next_child' names data in
             replace node new_node
         | None ->
             raise (Insert_error "Path does not exist")
+
+let rec insert_multi_level default_data node path data =
+    match path with
+    | [] | [_] -> insert node path data
+    | name :: names ->
+        let node = insert node [name] default_data in
+        insert_multi_level default_data node names data
 
 let delete node path =
     do_with_child delete_immediate node path
