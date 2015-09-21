@@ -13,6 +13,7 @@ exception Duplicate_child
 exception Nonexistent_path
 exception Insert_error of string
 
+
 let make data name = { name = name; data = data; children = [] }
 
 let make_full data name children = { name = name; data = data; children = children }
@@ -82,12 +83,15 @@ let rec insert ?(position=Default) node path data =
         | None ->
             raise (Insert_error "Path does not exist")
 
-let rec insert_multi_level default_data node path data =
-    match path with
-    | [] | [_] -> insert node path data
+(* When inserting at a path that, entirely or partially,
+   does not exist yet, create missing nodes on the way with default data *)
+let rec insert_multi_level default_data node path_done path_remaining data =
+    match path_remaining with
+    | [] | [_] -> insert node (path_done @ path_remaining) data
     | name :: names ->
-        let node = insert node [name] default_data in
-        insert_multi_level default_data node names data
+        let path_done = path_done @ [name] in
+        let node = insert node path_done default_data in
+        insert_multi_level default_data node path_done names data
 
 let delete node path =
     do_with_child delete_immediate node path
