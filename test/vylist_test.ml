@@ -44,16 +44,16 @@ let test_insert_before_nonexistent test_ctxt =
 (* complement returns correct result when one list contains another, in any order *)
 let test_complement_first_is_longer test_ctxt =
     let xs = [1;2;3;4;5] and ys = [1;2;3] in
-    assert_equal (complement xs ys) (Some [4;5])
+    assert_equal (complement xs ys) [4;5]
 
 let test_complement_second_is_longer test_ctxt =
     let	xs = [1;2] and ys = [1;2;3;4;5] in
-    assert_equal (complement xs	ys) (Some [3;4;5])
+    assert_equal (complement xs	ys) [3;4;5]
 
 (* complement returns None if one list doesn't contain another *)
 let test_complement_doesnt_contain test_ctxt =
     let xs = [1;2;3] and ys = [1;4;5;6] in
-    assert_equal (complement xs ys) None
+    assert_equal (complement xs ys) []
 
 (* in_list works *)
 let test_in_list test_ctxt =

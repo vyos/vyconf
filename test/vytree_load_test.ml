@@ -9,11 +9,6 @@ let max_children = 1000
 (* Number of paths *)
 let max_paths = 1000
 
-let val_of x =
-    match x with
-    | Some x -> x
-    | None -> failwith "No value here"
-
 let insert_full tree path data =
     let rec aux tree path basepath data =
         match path with
@@ -24,7 +19,7 @@ let insert_full tree path data =
             aux tree ps basepath data
     in
     let existent_path = Vytree.get_existent_path tree path in
-    let rest = val_of @@ Vylist.complement path existent_path in
+    let rest = Vylist.complement path existent_path in
     aux tree rest existent_path ()
 
 let rec add_many_children t n basepath data =
