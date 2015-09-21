@@ -36,9 +36,11 @@ let set_value node path value behaviour =
     | AddValue -> add_value node path value
     | ReplaceValue -> replace_value node path value
 
-let set node path value position behaviour =
-    if Vytree.exists node path then set_value node path value behaviour
-    else Vytree.insert ~position:position node path {default_data with values=[value]}
+let set node path value behaviour =
+    if Vytree.exists node path then set_value node path value behaviour else
+    let path_existing = Vytree.get_existent_path node path in
+    let path_remaining = Vylist.complement path path_existing in
+    Vytree.insert_multi_level default_data node path_existing path_remaining {default_data with values=[value]}
 
 let get_values node path =
     let node' = Vytree.get node path in

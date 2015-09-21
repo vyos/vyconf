@@ -14,7 +14,7 @@ val default_data : config_node_data
 
 val make : string -> t
 
-val set : t -> string list -> string -> Vytree.position -> value_behaviour -> t
+val set : t -> string list -> string -> value_behaviour -> t
 
 val get_values : t -> string list -> string list
 
