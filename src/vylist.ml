@@ -31,10 +31,10 @@ let rec insert_after p x xs =
 let complement xs ys =
     let rec aux xs ys =
         match xs, ys with
-        | [], _ -> Some ys
+        | [], _ -> ys
         | _, [] -> assert false (* Can't happen *)
         | p :: ps, q :: qs -> if p = q then aux ps qs
-                              else None
+                              else []
     in
     if List.length xs < List.length ys then aux xs ys
     else aux ys xs
