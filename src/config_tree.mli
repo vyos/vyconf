@@ -14,7 +14,7 @@ val default_data : config_node_data
 
 val make : string -> t
 
-val set : t -> string list -> string -> value_behaviour -> t
+val set : t -> string list -> string option -> value_behaviour -> t
 
 val delete : t -> string list -> string option -> t
 

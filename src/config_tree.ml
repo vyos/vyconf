@@ -3,6 +3,7 @@ type value_behaviour = AddValue | ReplaceValue
 exception Duplicate_value
 exception Node_has_no_value
 exception No_such_value
+exception Useless_set
 
 type config_node_data = {
     values: string list;
@@ -43,10 +44,15 @@ let set_value node path value behaviour =
     | ReplaceValue -> replace_value node path value
 
 let set node path value behaviour =
-    if Vytree.exists node path then set_value node path value behaviour else
-    let path_existing = Vytree.get_existent_path node path in
-    let path_remaining = Vylist.complement path path_existing in
-    Vytree.insert_multi_level default_data node path_existing path_remaining {default_data with values=[value]}
+    if (Vytree.exists node path) then
+        (match value with
+         | None -> raise Useless_set
+         | Some v -> set_value node path v behaviour)
+    else
+        let path_existing = Vytree.get_existent_path node path in
+        let path_remaining = Vylist.complement path path_existing in
+        let values = match value with None -> [] | Some v -> [v] in
+        Vytree.insert_multi_level default_data node path_existing path_remaining {default_data with values=values}
 
 let get_values node path =
     let node' = Vytree.get node path in
