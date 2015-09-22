@@ -2,6 +2,7 @@ type value_behaviour = AddValue | ReplaceValue
 
 exception Duplicate_value
 exception Node_has_no_value
+exception No_such_value
 
 type config_node_data = {
     values: string list;
@@ -31,6 +32,11 @@ let add_value node path value =
         let values = values @ [value] in
         Vytree.update node path ({data with values=values})
 
+let delete_value node path value =
+    let data = Vytree.data_of_node @@ Vytree.get node path in
+    let values = Vylist.remove (fun x -> x = value) data.values in
+    Vytree.update node path {data with values=values}
+
 let set_value node path value behaviour =
     match behaviour with
     | AddValue -> add_value node path value
@@ -52,3 +58,16 @@ let get_value node path =
     match values with
     | [] -> raise Node_has_no_value
     | x :: _ -> x
+
+let delete node path value =
+    match value with
+    | Some v ->
+        (let values = get_values node path in
+        if Vylist.in_list values v then
+        (match values with
+        | [_] -> Vytree.delete node path
+        | _ -> delete_value node path v)
+        else raise No_such_value)
+    | None ->
+	Vytree.delete node path
+

@@ -16,6 +16,8 @@ val make : string -> t
 
 val set : t -> string list -> string -> value_behaviour -> t
 
+val delete : t -> string list -> string option -> t
+
 val get_values : t -> string list -> string list
 
 val get_value : t -> string list -> string
