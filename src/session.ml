@@ -1,25 +1,24 @@
 module CT = Config_tree
+module RT = Reference_tree
 
 type cfg_op =
     | CfgSet of string list * string option * CT.value_behaviour
     | CfgDelete of string list * string	option
 
-type session_data = {
-    id: string;
-    running_config: Config_tree.t ref;
-    proposed_config : Config_tree.t ref;
-    reference_tree: Reference_tree.t ref;
+type world = {
+    mutable running_config: CT.t;
+    reference_tree: RT.t;
     validators: (string, string) Hashtbl.t;
+}
+
+type session_data = {
+    proposed_config : Config_tree.t;
     modified: bool;
     changeset: cfg_op list
 }
 
-let make i c r v = {
-    id = i;
-    running_config = c;
-    proposed_config = c;
-    reference_tree = r;
-    validators = v;
+let make world = {
+    proposed_config = world.running_config;
     modified = false;
     changeset = []
 }
@@ -39,4 +38,3 @@ let rec apply_changes changeset config =
     match changeset with
     | [] -> config
     | c :: cs -> apply_changes cs (apply_cfg_op c config)
-

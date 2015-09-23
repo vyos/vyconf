@@ -2,15 +2,17 @@ type cfg_op =
     | CfgSet of string list * string option * Config_tree.value_behaviour
     | CfgDelete of string list * string option
 
-type session_data = {
-    id: string;
-    running_config: Config_tree.t ref;
-    proposed_config: Config_tree.t ref;
-    reference_tree: Reference_tree.t ref;
+type world = {
+    mutable running_config: Config_tree.t;
+    reference_tree: Reference_tree.t;
     validators: (string, string) Hashtbl.t;
+}
+
+type session_data = {
+    proposed_config : Config_tree.t;
     modified: bool;
     changeset: cfg_op list
 }
 
-val make : string -> Config_tree.t ref -> Reference_tree.t ref -> (string, string) Hashtbl.t -> session_data
+val make : world -> session_data
 
