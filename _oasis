@@ -44,6 +44,11 @@ Library "util"
   FindlibParent: vyconf
   BuildDepends: xml-light
 
+Library "session"
+  Path: src
+  Modules: Session
+  FindlibParent: vyconf
+
 Executable "vyconfd"
   Path: src
   MainIs: vyconfd.ml
