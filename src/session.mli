@@ -16,3 +16,6 @@ type session_data = {
 
 val make : world -> session_data
 
+val set : world -> session_data -> string list -> session_data
+
+val delete : world -> session_data -> string list -> session_data
