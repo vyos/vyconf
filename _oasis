@@ -49,10 +49,17 @@ Library "session"
   Modules: Session
   FindlibParent: vyconf
 
+Library "vyconf_config"
+  Path: src
+  Modules: Vyconf_config
+  FindlibParent: vyconf
+  BuildDepends: ppx_deriving_yojson
+
 Executable "vyconfd"
   Path: src
   MainIs: vyconfd.ml
   CompiledObject: best
+  BuildDepends: ppx_deriving_yojson.runtime
 
 Executable "vytree_test"
   Path: test
