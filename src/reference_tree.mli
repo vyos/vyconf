@@ -1,5 +1,7 @@
+type node_type = Leaf | Tag | Other
+
 type ref_node_data = {
-    node_type: Vytree.node_type;
+    node_type: node_type;
     constraints: (Value_checker.value_constraint list);
     help: string;
     value_help: (string * string) list;

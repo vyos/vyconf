@@ -1,5 +1,7 @@
+type node_type = Leaf | Tag | Other
+
 type ref_node_data = {
-    node_type: Vytree.node_type;
+    node_type: node_type;
     constraints: (Value_checker.value_constraint list);
     help: string;
     value_help: (string * string) list;
@@ -17,7 +19,7 @@ exception Bad_interface_definition of string
 exception Validation_error of string
 
 let default_data = {
-    node_type = Vytree.Other;
+    node_type = Other;
     constraints = [];
     help = "No help available";
     value_help = [];
@@ -32,9 +34,9 @@ let default_data = {
 
 let node_type_of_string s =
     match s with
-    | "node" -> Vytree.Other
-    | "tagNode" -> Vytree.Tag
-    | "leafNode" -> Vytree.Leaf
+    | "node" -> Other
+    | "tagNode" -> Tag
+    | "leafNode" -> Leaf
     | _ -> raise (Bad_interface_definition
                   (Printf.sprintf "node, tagNode, or leafNode expected, %s found" s))
 
@@ -95,7 +97,7 @@ let rec insert_from_xml basepath reftree xml =
         let path = basepath @ [name] in
         let new_tree = Vytree.insert reftree path data in
         (match node_type with
-        | Vytree.Leaf -> new_tree
+        | Leaf -> new_tree
         | _ ->
             let children = Util.find_xml_child "children" xml in
             (match children with
@@ -133,7 +135,7 @@ let rec validate_path validators node path =
     let rec aux node path acc =
         let data = Vytree.data_of_node node in
         match data.node_type with
-        | Vytree.Leaf ->
+        | Leaf ->
             (match path with
              | [] ->
                  if data.valueless then (List.rev acc, None)
@@ -146,7 +148,7 @@ let rec validate_path validators node path =
                  else raise (Validation_error
                    (Printf.sprintf "Node %s cannot have a value" (show_path acc)))
              | p :: ps -> raise (Validation_error (Printf.sprintf "Path %s is too long" (show_path acc))))
-        | Vytree.Tag ->
+        | Tag ->
             (match path with
              | p :: p' :: ps ->
                  if (Value_checker.validate_any validators data.constraints p) then
@@ -158,7 +160,7 @@ let rec validate_path validators node path =
              | [p] -> if (Value_checker.validate_any validators data.constraints p) then (List.rev acc, None)
                           else raise (Validation_error (Printf.sprintf "Node %s has no child %s" (show_path acc) p))
              | _ -> raise (Validation_error (Printf.sprintf "Path %s is incomplete" (show_path acc))))
-        | Vytree.Other ->
+        | Other ->
             (match path with
              | [] -> (List.rev acc, None)
              | p :: ps ->
