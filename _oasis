@@ -55,6 +55,12 @@ Library "vyconf_config"
   FindlibParent: vyconf
   BuildDepends: ppx_deriving_yojson
 
+Library "message"
+  Path: src
+  Modules: Message
+  FindlibParent: vyconf
+  BuildDepends: ppx_deriving_yojson
+
 Executable "vyconfd"
   Path: src
   MainIs: vyconfd.ml
