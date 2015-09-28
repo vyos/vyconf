@@ -1,7 +1,6 @@
 type operation = {
     method_name: string;
     path: string list option;
-    value: string option;
     options: (string * string) list option
 }
 
