@@ -5,6 +5,7 @@ type operation =
     | Set of string list
     | Delete of string list
     | Show of (string list option) * ((string * string) list option)
+    | GetValues of string list
 
 type message = {
     session_id: string;

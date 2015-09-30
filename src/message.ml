@@ -5,6 +5,7 @@ type operation =
     | Set of string list
     | Delete of string list
     | Show of (string list option) * ((string * string) list option)
+    | GetValues of string list
 
 type message = {
     session_id: string;
@@ -34,6 +35,10 @@ let decode_operation op =
     | "set" -> Set (value_of_path op.path)
     | "delete" -> Delete (value_of_path op.path)
     | "show" -> Show (op.path, op.options)
+    | "get_values" ->
+        (match op.path with
+         | Some path -> GetValues path
+         | None -> raise (Invalid_operation "Operation requires a path"))
     | _ -> raise (Invalid_operation "Invalid operation name")
 
 let decode_message msg =
