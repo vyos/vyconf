@@ -65,7 +65,7 @@ Executable "vyconfd"
   Path: src
   MainIs: vyconfd.ml
   CompiledObject: best
-  BuildDepends: ppx_deriving_yojson.runtime
+  BuildDepends: ppx_deriving_yojson.runtime, lwt, lwt.unix
 
 Executable "vytree_test"
   Path: test
