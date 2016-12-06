@@ -6,11 +6,18 @@ type operation =
     | Delete of string list
     | Show of (string list option) * ((string * string) list option)
     | GetValues of string list
+    | Commit
 
-type message = {
+type request = {
     session_id: string;
-    ops: operation list
+    operations: operation list;
 }
+
+type response = {
+    errors: string list;
+    warnings: string list;
+    data: string list;
+} [@@deriving yojson]
 
 type raw_operation = {
     method_name: string;
@@ -18,9 +25,9 @@ type raw_operation = {
     options: (string * string) list option
 } [@@deriving yojson]
 
-type raw_message = {
+type raw_request = {
     raw_session_id: string;
-    raw_ops: raw_operation list;
+    raw_operations: raw_operation list;
 } [@@deriving yojson]
 
 
@@ -39,16 +46,31 @@ let decode_operation op =
         (match op.path with
          | Some path -> GetValues path
          | None -> raise (Invalid_operation "Operation requires a path"))
+    | "commit" -> Commit
     | _ -> raise (Invalid_operation "Invalid operation name")
 
-let decode_message msg =
-    let id = msg.raw_session_id in
-    let ops = List.map decode_operation msg.raw_ops in
-    {session_id = id; ops = ops}
+let encode_raw_operation op =
+    match op with
+    | Set path -> {method_name = "set"; path = Some path; options = None}
+    | Delete path -> {method_name = "delete"; path = Some path; options = None}
+    | Show (path, options) -> {method_name = "show"; path = path; options = options}
+    | Commit -> {method_name = "commit"; path = None; options = None}
+    | _ -> raise (Invalid_operation "Unimplemented")
 
-let decode j =
-    let msg = raw_message_of_yojson j in
-    match msg with
-    | `Ok msg -> decode_message msg
+let decode_request j =
+    let req = raw_request_of_yojson j in
+    match req with
+    | `Ok req -> {session_id=req.raw_session_id; operations=(List.map decode_operation req.raw_operations)}
     | `Error str -> raise (Invalid_message str)
-    
+
+let encode_request req = 
+    let raw_req = {raw_session_id=req.session_id; raw_operations=(List.map encode_raw_operation req.operations)} in
+    raw_request_to_yojson raw_req
+
+let encode_response = response_to_yojson
+
+let decode_response j = 
+    let result = response_of_yojson j in
+    match result with
+    | `Ok response -> response
+    | `Error str -> raise (Invalid_message str)
