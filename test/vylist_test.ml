@@ -1,22 +1,22 @@
 open OUnit2
 open Vylist
 
-(* Searching for an element that is there gives Some that_element *)
+(* Searching for an element that is in the list gives Some that_element *)
 let test_find_existent test_ctxt =
     let xs = [1; 2; 3; 4] in
     assert_equal (find (fun x -> x = 3) xs) (Some 3)
 
-(* Searching for an element that is not there gives None *)
+(* Searching for an element that is not in the list gives None *)
 let test_find_nonexistent test_ctxt =
     let xs = [1; 2; 4] in
     assert_equal (find (fun x -> x = 3) xs) None
 
-(* Removing a list that is there makes a list without that element *)
+(* Removing an element that exists in the list makes a list without that element *)
 let test_remove_existent test_ctct =
     let xs = [1; 2; 3; 4] in
     assert_equal (remove (fun x -> x = 3) xs) [1; 2; 4]
 
-(* Removing an element that is already not there returns the same list *)
+(* Trying to remove an element that is not in the list doesn't change the list *)
 let test_remove_nonexistent test_ctct =
     let xs = [1; 2; 4] in
     assert_equal (remove (fun x -> x = 3) xs) [1; 2; 4]
@@ -26,7 +26,7 @@ let test_replace_element_existent test_ctxt =
     let xs = [1; 2; 3; 4] in
     assert_equal (replace ((=) 3) 7 xs) [1; 2; 7; 4]
 
-(* Attempt to replace a nonexisten child rauses an exception *)
+(* Attempt to replace a nonexistent element causes an exception *)
 let test_replace_element_nonexistent test_ctxt =
     let xs = [1; 2; 3] in
     assert_raises Not_found (fun () -> replace ((=) 4) 7 xs)
@@ -43,21 +43,21 @@ let test_insert_before_nonexistent test_ctxt =
 
 (* complement returns correct result when one list contains another, in any order *)
 let test_complement_first_is_longer test_ctxt =
-    let xs = [1;2;3;4;5] and ys = [1;2;3] in
-    assert_equal (complement xs ys) [4;5]
+    let xs = [1; 2; 3; 4; 5] and ys = [1; 2; 3] in
+    assert_equal (complement xs ys) [4; 5]
 
 let test_complement_second_is_longer test_ctxt =
-    let	xs = [1;2] and ys = [1;2;3;4;5] in
-    assert_equal (complement xs	ys) [3;4;5]
+    let	xs = [1; 2] and ys = [1; 2; 3; 4; 5] in
+    assert_equal (complement xs	ys) [3; 4; 5]
 
-(* complement returns None if one list doesn't contain another *)
+(* complement returns an empty list if one list doesn't contain another *)
 let test_complement_doesnt_contain test_ctxt =
-    let xs = [1;2;3] and ys = [1;4;5;6] in
+    let xs = [1; 2; 3] and ys = [1; 4; 5; 6] in
     assert_equal (complement xs ys) []
 
 (* in_list works *)
 let test_in_list test_ctxt =
-    let xs = [1;2;3;4] in
+    let xs = [1; 2; 3; 4] in
     assert_equal (in_list xs 3) true;
     assert_equal (in_list xs 9) false
 
@@ -74,6 +74,7 @@ let suite =
         "test_complement_first_is_longer" >:: test_complement_first_is_longer;
         "test_complement_second_is_longer" >:: test_complement_second_is_longer;
         "test_complement_doesnt_contain" >:: test_complement_doesnt_contain;
+        "test_in_list" >:: test_in_list;
     ]
 
 let () =
