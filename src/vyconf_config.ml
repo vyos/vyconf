@@ -10,5 +10,5 @@ type vyconf_config = {
 
 let load filename =
     try Yojson.Safe.from_file filename |> vyconf_config_of_yojson
-    with Sys_error msg -> `Error msg
+    with Sys_error msg -> Result.Error msg
 

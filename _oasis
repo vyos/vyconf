@@ -13,7 +13,7 @@ Plugins: META (0.4), DevFiles (0.4)
 
 Library "vyconf"
   Path: src
-  Modules: Vytree, Vylist, Value_checker
+  Modules: Vytree, Vylist, Value_checker, Vyconf_config
   Install: false
 
 Library "vytree"
@@ -65,7 +65,7 @@ Executable "vyconfd"
   Path: src
   MainIs: vyconfd.ml
   CompiledObject: best
-  BuildDepends: ppx_deriving_yojson.runtime, lwt, lwt.unix
+  BuildDepends: ppx_deriving.runtime, ppx_deriving_yojson.runtime, lwt, lwt.unix, lwt.ppx, vyconf
 
 Executable "vytree_test"
   Path: test

@@ -7,4 +7,4 @@ type vyconf_config = {
     socket: string;
 }
 
-val load : string -> [ `Error of bytes | `Ok of vyconf_config ]
+val load : string -> (vyconf_config, string) Result.result

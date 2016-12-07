@@ -60,8 +60,8 @@ let encode_raw_operation op =
 let decode_request j =
     let req = raw_request_of_yojson j in
     match req with
-    | `Ok req -> {session_id=req.raw_session_id; operations=(List.map decode_operation req.raw_operations)}
-    | `Error str -> raise (Invalid_message str)
+    | Result.Ok req -> {session_id=req.raw_session_id; operations=(List.map decode_operation req.raw_operations)}
+    | Result.Error str -> raise (Invalid_message str)
 
 let encode_request req = 
     let raw_req = {raw_session_id=req.session_id; raw_operations=(List.map encode_raw_operation req.operations)} in
@@ -72,5 +72,5 @@ let encode_response = response_to_yojson
 let decode_response j = 
     let result = response_of_yojson j in
     match result with
-    | `Ok response -> response
-    | `Error str -> raise (Invalid_message str)
+    | Result.Ok response -> response
+    | Result.Error str -> raise (Invalid_message str)
