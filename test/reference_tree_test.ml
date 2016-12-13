@@ -23,12 +23,12 @@ let test_validate_path_leaf_valid test_ctxt =
 let test_validate_path_leaf_invalid test_ctxt =
     let r = Vytree.make default_data "root" in
     let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
-    assert_equal (raises_validation_error (fun () -> validate_path validators r ["system"; "host-name"; "1234"])) true
+    assert_equal (raises_validation_error (fun () -> ignore @@ validate_path validators r ["system"; "host-name"; "1234"])) true
 
 let test_validate_path_leaf_incomplete test_ctxt =
     let r = Vytree.make default_data "root" in
     let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
-    assert_equal (raises_validation_error (fun () -> validate_path validators r ["system"; "host-name"])) true
+    assert_equal (raises_validation_error (fun () -> ignore @@ validate_path validators r ["system"; "host-name"])) true
 
 let test_validate_path_tag_node_complete_valid test_ctxt =
     let r = Vytree.make default_data "root" in
@@ -39,13 +39,13 @@ let test_validate_path_tag_node_complete_valid test_ctxt =
 let test_validate_path_tag_node_invalid_name test_ctxt =
     let r = Vytree.make default_data "root" in
     let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
-    assert_equal (raises_validation_error (fun () -> validate_path validators r ["system"; "login"; "user"; "999"; "full-name"; "test user"]))
+    assert_equal (raises_validation_error (fun () -> ignore @@ validate_path validators r ["system"; "login"; "user"; "999"; "full-name"; "test user"]))
                  true
 
 let test_validate_path_tag_node_incomplete test_ctxt =
     let r = Vytree.make default_data "root" in
     let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
-    assert_equal (raises_validation_error (fun () -> validate_path validators r ["system"; "login"; "user"])) true
+    assert_equal (raises_validation_error (fun () -> ignore @@ validate_path validators r ["system"; "login"; "user"])) true
 
 
 let suite =

@@ -29,7 +29,8 @@ let load_config path =
     match result with
     | Result.Ok cfg -> cfg
     | Result.Error err ->
-        Lwt_log.fatal (Printf.sprintf "Could not load the configuration file %s" err); exit 1
+        Lwt_log.fatal (Printf.sprintf "Could not load the configuration file %s" err) |> Lwt.ignore_result;
+        exit 1
 
 let setup_logger daemonize log_file template =
     (* 
