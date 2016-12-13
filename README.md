@@ -1,97 +1,67 @@
 vyconf
 =======
 
+**Note:** VyConf is an early stage of development and need your contributions!
+
 VyConf is a software appliance configuration framework.
 
 The maintainer pronounces it as "vyeconf", but it's up to you how to pronounce it.
 
-# What do you mean by "software appliance configuration framework"?
+We define software appliance as a set of an operating system, one or more applications,
+and a high level interface for configuring and managing the system and applications.
 
-We define a software appliance as a package that contains an operating system and
-one or more applications designed to work together and perform a single task.
+Typical examples of software appliances in this sense are (VyOS)[http://vyos.io],
+(OPNSense)[https://opnsense.org/], (Zentyal)[http://www.zentyal.org/] and others.
 
-For instance, one can make a database appliance that consists of an operating system,
-a database server, a database management frontend, and a monitoring application.
-Those all serve a single purpose, to operate a database.
+Typically they are seen as a way to improve ease of use, by providing a management interface
+more convenient than editing the config files, and integrating different applications together.
+However, largely missed and unexplored opportunity is using appliance approach to improve
+reliability and robustness. And, making appliances the right way is hard since you have to
+implement a lot of things from scratch.
 
-# The problem
+VyConf tries to simplify this daunting task and allow appliance developers to focus on the
+GUI frontend and the logic for generating application configs. It's being written primarily
+for VyOS, but it's not locked into it, and not limited to routers or firewalls.
 
-Some applications combine the configuration interface and the user interface
-(this is often the case with web applications). Some do not need much configuration.
-The problem is that managing a software appliance still involves appliance-wide tasks
-that either have to be performed manually or need a custom configuration interface.
+## The big ideas of VyConf
 
-Firewall management is a common example. With the example above, you likely can
-manage database access rules from a database management application, but
-firewall is usually an operating system component that has to be managed outside
-of that application.
+System-wide config in a human readable plaintext file, thus easy backup and versioning.
 
-Besides, systems tend to grow big and include a large number of machines that need
-to be managed. One can accomplish this by connecting appliances to a configuration
-management system and work directly with its components, but the primary advantage
-of an appliance is being self-contained, and this approach violates it.
+Stateful approach: every user gets their own copy of the configuration, and can make changes,
+view diffs, run consistency checks, and so on, without any effect on the system. The user is then
+free to commit or discard the changes.
 
-# The (proposed) solution
+Safety first: system-wide config consistency checks must pass before it gets to generating
+application configs and restarting services. If anything goes wrong, the system can rollback
+to previous revision.
 
-To be a true appliance (in the same sense to hardware appliances), an appliance
-should offer a single configuration API that allows to manage all relevant components.
+## VyConf operation
 
-This is what VyConf aims to provide. You may think of it as evolution of YaST, Alterator,
-or webmin: a glue between applications and the world, a way to join multiple applications
-under a single interface.
+VyConf runs as a daemon (vyconfd) that listens on a UNIX domain socket and communicates with
+its clients. Clients provided with VyConf are a non-interactive CLI client, an interactive shell,
+and an HTTP bridge.
 
-The other problem, apart from unification, that we are aiming to solve is robustness
-and reliability. Many applications simply take any configuration and fail to start
-if it's incorrect, correctness verification is left up to the users. For an appliance
-it's preferrable when in case of user error the incorrect configuration is not applied
-at all.
+## Details
 
-The other problem is that configuration of individual applications may be correct,
-but the overall appliance configuration may not, e.g. if the user set an application
-to listen on specific address, but did not configure the network interface accordingly.
+For details of the VyConf architecture, see the architecture.md document.
 
-A possible solution to this is to make configuration stateful and atomic. First a 
-proposed configuration is built, then it's commited, and if any stage fails, it's
-rolled back to its previous state. This also simplifies accounting and allows to keep
-configuration revision history and rollback to previous revisions.
+## Hacking
 
-# What exactly VyConf is
+VyConf development is discussed in the (VyOS phabricator)[https://phabricator.vyos.net/project/profile/1/]
+and the #vyos IRC channel on Freenode.
 
-VyConf is a daemon that keeps the current configuration, provides API for changing it,
-and calls procedures that generate actual applications (or operatinf system) configuration
-and apply it.
+Don't forget to add unit tests for things you add or change!
 
-## Concepts
+If you are new to OCaml, you need to install (opam)[http://opam.ocaml.org/] first, then you need to install
+the compiler (e.g. "opam switch 4.03.0"), then install the build tools and build dependencies:
 
-**Running config** is the config currently used by the system. It is represented as a tree
-made of named nodes and values associated with them. It can be loaded from a configuration
-file or modified via the API.
+```
+opam install oasis
+opam install xml-light lwt ppx_deriving_yojson pcre ounit
+```
 
+I also recommend that you setup utop (a great interactive REPL) and setup your editor with merlin to
+see the inferred types. For GNU Emacs, consider installing tuareg-mode.
 
-**Interface definition** defines allowed node names and hierarchies. It is loaded from
-interface definition files provided by application handlers.
-
-**Config tree** is the internal representation of the config (running or proposed).
-
-**Reference tree** is the internal representation of the interface definition.
-
-## Configuration lifecycle
-
-At boot time, system-wide configuration is initialized by loading the configuration file.
-
-After that, it may be changed through the API calls from *config sessions*. Primary operations
-are "set" (creates a node or changes its value) and "delete" (deletes a node). Every config
-session has its own *proposed configuration* tree. When the user is ready to apply it, they
-initiate commit.
-
-Commit includes three stages: *verify*, *generate*, *apply*. Every *application handler*
-has programs (or procedures within one program) to perform those stages.
-
-First, all *verify* procedures are called. They read the system-wide config and check if it's
-correct. If this stage fails, the commit is aborted.
-
-After that, all *generate* procedures are executed. They generate actual config files for applications
-included in the appliance. Previous application configs are saved for the case rollback is needed.
-
-When configs are generated, *apply* procedures are called. If any of those fails, application configs
-are restored and commit is aborted.
+Don't hesitate to ask if you have any setup or build issues, and specifically for OCaml issues,
+there's #ocaml channel on Freenode too.
