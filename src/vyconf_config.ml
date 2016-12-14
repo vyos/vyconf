@@ -66,7 +66,7 @@ let load filename =
             let conf = {conf with log_file = get_field conf_toml "vyconf" "log_file"} in
             Result.Ok conf
     with
-    | Sys_error msg -> Result.Error msg
-    | Toml.Parser.Error (msg, _) -> Result.Error msg
+    | Sys_error msg -> Error msg
+    | Toml.Parser.Error (msg, _) -> Error msg
 
 let dump  = show_vyconf_config

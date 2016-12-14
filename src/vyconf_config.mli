@@ -10,6 +10,6 @@ type vyconf_config = {
     log_file: string option;
 }
 
-val load : string -> (vyconf_config, string) Result.result
+val load : string -> (vyconf_config, string) result
 
 val dump : vyconf_config -> string

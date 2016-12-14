@@ -27,8 +27,8 @@ let usage = "Usage: " ^ Sys.argv.(0) ^ " [options]"
 let load_config path =
     let result = Vyconf_config.load path in
     match result with
-    | Result.Ok cfg -> cfg
-    | Result.Error err ->
+    | Ok cfg -> cfg
+    | Error err ->
         Lwt_log.fatal (Printf.sprintf "Could not load the configuration file %s" err) |> Lwt.ignore_result;
         exit 1
 
