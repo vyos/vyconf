@@ -1,0 +1,13 @@
+[appliance]
+
+name = "Test Appliance"
+
+primary_config = "config.boot"
+fallback_config = "config.failsafe"
+
+[vyconf]
+
+socket = "/var/run/vyconfd.sock"
+pid_file = "/var/run/vyconfd.pid"
+log_file = "/var/log/vyconfd.log"
+

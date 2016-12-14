@@ -115,6 +115,14 @@ Executable "util_test"
   Install: false
   BuildDepends: oUnit, vyconf, xml-light
 
+Executable "vyconf_config_test"
+  Path: test
+  MainIs: vyconf_config_test.ml
+  Build$: flag(tests)
+  CompiledObject: best
+  Install: false
+  BuildDepends:  oUnit, toml, ppx_deriving.runtime, vyconf
+
 Executable "vytree_load_test"
   Path: test
   MainIs: vytree_load_test.ml
@@ -151,6 +159,12 @@ Test "value_checker_test"
   Run$: flag(tests)
   TestTools: value_checker_test
   Command: $value_checker_test
+  WorkingDirectory: test
+
+Test "vyconf_config_test"
+  Run$: flag(tests)
+  TestTools: vyconf_config_test
+  Command: $vyconf_config_test
   WorkingDirectory: test
 
 Test "util_test"

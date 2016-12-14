@@ -1,0 +1,7 @@
+# A config with syntax errors
+
+[appliance
+
+name = "Bad Appliance
+
+

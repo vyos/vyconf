@@ -1,0 +1,11 @@
+[appliance]
+
+name = "Test Appliance"
+
+data_dir = "/usr/share/testappliance"
+program_dir = "/usr/libexec/testappliance"
+config_dir = "/etc/testappliance"
+
+# paths relative to config_dir
+primary_config = "config.boot"
+fallback_config = "config.failsafe"
