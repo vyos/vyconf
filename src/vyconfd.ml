@@ -20,7 +20,7 @@ let args = [
          (Printf.sprintf "<string>    Configuration file, default is %s" defaults.config_file));
         ("--log-file", Arg.String (fun s -> log_file := Some s),
         "<string>    Log file");
-        ("--version", Arg.Unit (fun () -> Printf.printf "VyConf version: %s\n" defaults.version; exit 0), "Print version and exit")
+        ("--version", Arg.Unit (fun () -> print_endline @@ Version.version_info (); exit 0), "Print version and exit")
     ]
 let usage = "Usage: " ^ Sys.argv.(0) ^ " [options]"
 
