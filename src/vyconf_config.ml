@@ -68,5 +68,6 @@ let load filename =
     with
     | Sys_error msg -> Error msg
     | Toml.Parser.Error (msg, _) -> Error msg
+    | Missing_field msg -> Error msg
 
 let dump  = show_vyconf_config
