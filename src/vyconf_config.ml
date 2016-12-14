@@ -1,14 +1,72 @@
+exception Missing_field of string
+
 type vyconf_config = {
     app_name: string;
-    app_dir: string;
+    data_dir: string;
+    program_dir: string;
     config_dir: string;
     primary_config: string;
     fallback_config: string;
     socket: string;
-} [@@deriving yojson]
+    pid_file: string;
+    log_file: string option;
+} [@@deriving show]
 
+(* XXX: there should be a better way than to fully initialize it
+        with garbage just to update it later *)
+let empty_config = {
+    app_name = "";
+    data_dir = "";
+    program_dir = "";
+    config_dir = "";
+    primary_config = "";
+    fallback_config = "";
+    socket = "";
+    pid_file = "";
+    log_file = None;
+}
+
+
+(* XXX: We assume that nesting in TOML config files never goes beyond two levels  *)
+
+let get_field conf tbl_name field_name =
+    (* NB: TomlLenses module uses "table" and "field" names for function names,
+            hence tbl_name and field_name
+     *)
+    TomlLenses.(get conf (key tbl_name |-- table |-- key field_name |-- string))
+
+let mandatory_field conf table field =
+    let value = get_field conf table field in
+    match value with
+    | Some value -> value
+    | None -> raise @@ Missing_field (Printf.sprintf "Invalid config: Missing mandatory field \"%s\" in section [%s]" field table)
+
+let optional_field default conf table field =
+    let value = get_field conf table field in
+    match value with
+    | Some value -> value
+    | None -> default
 
 let load filename =
-    try Yojson.Safe.from_file filename |> vyconf_config_of_yojson
-    with Sys_error msg -> Result.Error msg
+    try
+        let open Defaults in
+        let conf_toml = Toml.Parser.from_filename filename |> Toml.Parser.unsafe in
+        let conf = empty_config in
+            (* Mandatory fields *)
+            let conf = {conf with app_name = mandatory_field conf_toml "appliance" "name"} in
+            let conf = {conf with data_dir = mandatory_field conf_toml "appliance" "data_dir"} in
+            let conf = {conf with config_dir = mandatory_field conf_toml "appliance" "config_dir"} in
+            let conf = {conf with program_dir = mandatory_field conf_toml "appliance" "program_dir"} in
+            let conf = {conf with primary_config = mandatory_field conf_toml "appliance" "primary_config"} in
+            let conf = {conf with fallback_config = mandatory_field conf_toml "appliance" "fallback_config"} in
+            (* Optional fields *)
+            let conf = {conf with pid_file = optional_field defaults.pid_file conf_toml "vyconf" "pid_file"} in
+            let conf = {conf with socket = optional_field defaults.socket conf_toml "vyconf" "socket"} in
+            (* log_file is already string option, so we don't need to unwrap *)
+            let conf = {conf with log_file = get_field conf_toml "vyconf" "log_file"} in
+            Result.Ok conf
+    with
+    | Sys_error msg -> Result.Error msg
+    | Toml.Parser.Error (msg, _) -> Result.Error msg
 
+let dump  = show_vyconf_config

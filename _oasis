@@ -53,7 +53,7 @@ Library "vyconf_config"
   Path: src
   Modules: Vyconf_config
   FindlibParent: vyconf
-  BuildDepends: ppx_deriving_yojson
+  BuildDepends: toml, ppx_deriving.show
 
 Library "message"
   Path: src
@@ -65,7 +65,7 @@ Executable "vyconfd"
   Path: src
   MainIs: vyconfd.ml
   CompiledObject: best
-  BuildDepends: ppx_deriving.runtime, ppx_deriving_yojson.runtime, lwt, lwt.unix, lwt.ppx, vyconf
+  BuildDepends: ppx_deriving.runtime, ppx_deriving_yojson.runtime, lwt, lwt.unix, lwt.ppx, toml, vyconf
 
 Executable "vytree_test"
   Path: test
