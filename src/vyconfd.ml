@@ -24,13 +24,22 @@ let args = [
     ]
 let usage = "Usage: " ^ Sys.argv.(0) ^ " [options]"
 
+let panic msg =
+    Lwt_log.fatal msg |> Lwt.ignore_result;
+    exit 1
+
 let load_config path =
     let result = Vyconf_config.load path in
     match result with
     | Ok cfg -> cfg
     | Error err ->
-        Lwt_log.fatal (Printf.sprintf "Could not load the configuration file %s" err) |> Lwt.ignore_result;
-        exit 1
+        panic (Printf.sprintf "Could not load the configuration file %s" err)
+
+let check_dirs dirs =
+    let res = Directories.test dirs in
+    match res with
+    | Ok _ -> ()
+    | Error err -> panic err
 
 let setup_logger daemonize log_file template =
     (* 
@@ -56,11 +65,13 @@ let setup_logger daemonize log_file template =
 
 let main_loop config () =
     let%lwt () = setup_logger !daemonize !log_file !log_template in
-    let%lwt () = Lwt_log.notice @@ Printf.sprintf "Loading %s" config.app_name in
+    let%lwt () = Lwt_log.notice @@ Printf.sprintf "Starting VyConf for %s" config.app_name in
     Lwt.return_unit
 
 let () = 
   let () = Arg.parse args (fun f -> ()) usage in
   let config = load_config !config_file in
+  let dirs = Directories.make config in
+  check_dirs dirs;
   Lwt_main.run @@ main_loop config ()
   

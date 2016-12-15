@@ -130,7 +130,7 @@ let load_from_xml reftree file =
      5. It's a non-leaf, non-tag node with a name that doesn't exist
         in the reference tree
  *)
-let rec validate_path validators node path =
+let rec validate_path validators_dir node path =
     let show_path p = Util.string_of_path (List.rev p) in
     let rec aux node path acc =
         let data = Vytree.data_of_node node in
@@ -143,7 +143,7 @@ let rec validate_path validators node path =
                    (Printf.sprintf "Node \"%s\" requires a value" (show_path acc) ))
              | [p] ->
                  if not data.valueless then
-                     (if (Value_checker.validate_any validators data.constraints p) then (List.rev acc, Some p)
+                     (if (Value_checker.validate_any validators_dir data.constraints p) then (List.rev acc, Some p)
                      else raise (Validation_error data.constraint_error_message))
                  else raise (Validation_error
                    (Printf.sprintf "Node %s cannot have a value" (show_path acc)))
@@ -151,13 +151,13 @@ let rec validate_path validators node path =
         | Tag ->
             (match path with
              | p :: p' :: ps ->
-                 if (Value_checker.validate_any validators data.constraints p) then
+                 if (Value_checker.validate_any validators_dir data.constraints p) then
                      let child = Vytree.find node p' in
                      (match child with
                       | Some c -> aux c ps (p' :: p :: acc)
                       | None -> raise (Validation_error (Printf.sprintf "Node %s has no child %s" (show_path acc) p')))
                  else raise (Validation_error (Printf.sprintf "%s is not a valid child name for node %s" p (show_path acc)))
-             | [p] -> if (Value_checker.validate_any validators data.constraints p) then (List.rev acc, None)
+             | [p] -> if (Value_checker.validate_any validators_dir data.constraints p) then (List.rev acc, None)
                           else raise (Validation_error (Printf.sprintf "Node %s has no child %s" (show_path acc) p))
              | _ -> raise (Validation_error (Printf.sprintf "Path %s is incomplete" (show_path acc))))
         | Other ->

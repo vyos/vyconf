@@ -1,46 +1,49 @@
 open OUnit2
 open Value_checker
 
-let validators = Hashtbl.create 256
-let () = Hashtbl.add validators "anything" "true";
-         Hashtbl.add validators "nothing" "false"
+let get_dir test_ctxt = in_testdata_dir test_ctxt ["validators"]
+
+let raises_bad_validator f =
+    try ignore @@ f (); false
+    with Bad_validator _ -> true
 
 let test_check_regex_valid test_ctxt =
     let c = Regex "[a-z]+" in
     let v = "fgsfds" in
-    assert_equal (validate_value validators c v) true
+    assert_equal (validate_value (get_dir test_ctxt) c v) true
 
 let test_check_regex_invalid test_ctxt =
     let c = Regex "[a-z]+" in
     let v = "FGSFDS" in
-    assert_equal (validate_value validators c v) false
+    assert_equal (validate_value (get_dir test_ctxt) c v) false
 
 let test_check_external_valid test_ctxt =
     let c = External ("anything", "") in
     let v = "fgsfds" in
-    assert_equal (validate_value validators c v) true
+    assert_equal (validate_value (get_dir test_ctxt) c v) true
 
 let test_check_external_invalid test_ctxt =
     let	c = External ("nothing", "") in
     let	v = "fgsfds" in
-    assert_equal (validate_value validators c v) false
+    assert_equal (validate_value (get_dir test_ctxt) c v) false
 
 let test_check_external_bad_validator test_ctxt =
     let c = External ("invalid", "") in
     let v = "fgsfds" in
-    assert_raises (Bad_validator "invalid") (fun () -> validate_value validators c v)
+    assert_bool "Invalid validator was executed successfully"
+      (raises_bad_validator (fun () -> validate_value (get_dir test_ctxt) c v))
 
 let test_validate_any_valid test_ctxt =
     let cs = [Regex "\\d+"; Regex "[a-z]+"; External ("anything", "")] in
-    assert_equal (validate_any validators cs "AAAA") true
+    assert_equal (validate_any (get_dir test_ctxt) cs "AAAA") true
 
 let test_validate_any_invalid test_ctxt =
     let cs = [Regex "\\d+"; Regex "[a-z]+"] in
-    assert_equal (validate_any validators cs "AAAA") false
+    assert_equal (validate_any (get_dir test_ctxt) cs "AAAA") false
 
 let test_validate_any_no_constraints test_ctxt =
     let cs = [] in
-    assert_equal (validate_any validators cs "foo") true
+    assert_equal (validate_any (get_dir test_ctxt) cs "foo") true
 
 let suite =
     "VyConf value checker tests" >::: [

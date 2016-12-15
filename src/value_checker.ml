@@ -1,21 +1,26 @@
+module F = Filename
+
 type value_constraint = Regex of string | External of string * string
 
 exception Bad_validator of string
 
-let validate_value validators value_constraint value =
+let validate_value dir value_constraint value =
     match value_constraint with
-    | Regex s ->      
-        (try 
+    | Regex s ->
+        (try
            let _ = Pcre.exec ~pat:s value in true
        with Not_found -> false)
-    | External (t, c) ->
-        try
-            let validator = Hashtbl.find validators t in
-            let result = Unix.system (Printf.sprintf "%s %s %s" validator c value) in
-            match result with
-            | Unix.WEXITED 0 -> true
-            | _ -> false
-        with Not_found -> raise (Bad_validator t)
+    | External (v, c) ->
+        (* XXX: Using Unix.system is a bad idea on multiple levels,
+                especially when the input comes directly from the user...
+                We should do something about it.
+         *)
+        let validator = F.concat dir v in
+        let result = Unix.system (Printf.sprintf "%s %s %s" validator c value) in
+        match result with
+        | Unix.WEXITED 0 -> true
+        | Unix.WEXITED 127 -> raise (Bad_validator (Printf.sprintf "Could not execute validator %s" validator))
+        | _ -> false
 
 (* If no constraints given, consider it valid.
    Otherwise consider it valid if it satisfies at least

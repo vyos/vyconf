@@ -5,7 +5,8 @@ type cfg_op =
 type world = {
     mutable running_config: Config_tree.t;
     reference_tree: Reference_tree.t;
-    validators: (string, string) Hashtbl.t;
+    vyconf_config: Vyconf_config.t;
+    dirs: Directories.t
 }
 
 type session_data = {

@@ -1,5 +1,6 @@
 module CT = Config_tree
 module RT = Reference_tree
+module D = Directories
 
 type cfg_op =
     | CfgSet of string list * string option * CT.value_behaviour
@@ -8,7 +9,8 @@ type cfg_op =
 type world = {
     mutable running_config: CT.t;
     reference_tree: RT.t;
-    validators: (string, string) Hashtbl.t;
+    vyconf_config: Vyconf_config.t;
+    dirs: Directories.t
 }
 
 type session_data = {
@@ -40,14 +42,14 @@ let rec apply_changes changeset config =
     | c :: cs -> apply_changes cs (apply_cfg_op c config)
 
 let set w s path =
-    let path, value = RT.validate_path w.validators w.reference_tree path in
+    let path, value = RT.validate_path D.(w.dirs.validators) w.reference_tree path in
     let value_behaviour = if RT.is_multi w.reference_tree path then CT.AddValue else CT.ReplaceValue in
     let op = CfgSet (path, value, value_behaviour) in
     let config = apply_cfg_op op s.proposed_config in
     {s with proposed_config=config; changeset=(op :: s.changeset)}
 
 let delete w s path =
-    let path, value = RT.validate_path w.validators w.reference_tree path in
+    let path, value = RT.validate_path D.(w.dirs.validators) w.reference_tree path in
     let op = CfgDelete (path, value) in
     let config = apply_cfg_op op s.proposed_config in
     {s with proposed_config=config; changeset=(op :: s.changeset)}
