@@ -1,4 +1,4 @@
-type vyconf_config = {
+type t = {
     app_name: string;
     data_dir: string;
     program_dir: string;
@@ -10,6 +10,6 @@ type vyconf_config = {
     log_file: string option;
 }
 
-val load : string -> (vyconf_config, string) result
+val load : string -> (t, string) result
 
-val dump : vyconf_config -> string
+val dump : t -> string

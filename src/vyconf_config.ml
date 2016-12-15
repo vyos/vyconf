@@ -1,6 +1,6 @@
 exception Missing_field of string
 
-type vyconf_config = {
+type t = {
     app_name: string;
     data_dir: string;
     program_dir: string;
@@ -70,4 +70,4 @@ let load filename =
     | Toml.Parser.Error (msg, _) -> Error msg
     | Missing_field msg -> Error msg
 
-let dump  = show_vyconf_config
+let dump  = show
