@@ -29,6 +29,16 @@
           </constraint>
         </properties>
       </leafNode>
+      <node name="options">
+        <children>
+          <leafNode name="reboot-on-panic">
+            <properties>
+              <help>Reboot automatically if kernel panic occurs</help>
+              <valueless/>
+            </properties>
+          </leafNode>
+        </children>
+      </node>
     </children>
   </node>
 </interfaceDefinition>

@@ -45,6 +45,21 @@ let test_validate_path_tag_node_incomplete test_ctxt =
     let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
     assert_equal (raises_validation_error (fun () -> ignore @@ validate_path (get_dir test_ctxt) r ["system"; "login"; "user"])) true
 
+let test_validate_path_garbage_after_value test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (raises_validation_error (fun () -> ignore @@ validate_path (get_dir test_ctxt) r ["system"; "host-name"; "foo"; "bar"])) true
+
+let test_validate_path_valueless_node_with_value test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (raises_validation_error (fun () -> ignore @@ validate_path (get_dir test_ctxt) r ["system"; "options"; "reboot-on-panic"; "fgsfds"])) true
+
+let test_validate_path_valueless_node_valid test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (validate_path (get_dir test_ctxt) r ["system"; "options"; "reboot-on-panic"])
+                 (["system"; "options"; "reboot-on-panic"], None)
 
 let suite =
     "Util tests" >::: [
@@ -55,6 +70,9 @@ let suite =
         "test_validate_path_tag_node_complete_valid" >:: test_validate_path_tag_node_complete_valid;
         "test_validate_path_tag_node_invalid_name" >:: test_validate_path_tag_node_invalid_name;
         "test_validate_path_tag_node_incomplete" >:: test_validate_path_tag_node_incomplete;
+        "test_validate_path_garbage_after_value" >:: test_validate_path_garbage_after_value;
+        "test_validate_path_valueless_node_with_value" >:: test_validate_path_valueless_node_with_value;
+        "test_validate_path_valueless_node_valid" >:: test_validate_path_valueless_node_valid;
     ]
 
 let () =
