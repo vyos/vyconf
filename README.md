@@ -57,7 +57,7 @@ the compiler (e.g. "opam switch 4.03.0"), then install the build tools and build
 
 ```
 opam install oasis
-opam install xml-light lwt ppx_deriving_yojson pcre ounit
+opam install xml-light lwt ppx_deriving_yojson pcre ounit fileutils toml
 ```
 
 I also recommend that you setup utop (a great interactive REPL) and setup your editor with merlin to
