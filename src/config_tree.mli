@@ -5,7 +5,7 @@ exception Node_has_no_value
 
 type config_node_data = {
   values : string list;
-  comment : string;
+  comment : string option;
 }
 
 type t = config_node_data Vytree.t
@@ -21,3 +21,7 @@ val delete : t -> string list -> string option -> t
 val get_values : t -> string list -> string list
 
 val get_value : t -> string list -> string
+
+val set_comment : t -> string list -> string option -> t
+
+val get_comment : t -> string list -> string option

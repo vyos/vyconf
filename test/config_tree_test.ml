@@ -61,6 +61,14 @@ let test_delete_subtree test_ctxt =
     let node = CT.delete node ["foo"] None in
     assert_equal (VT.list_children node) []
 
+(* Setting a node comment for an existent node should work *)
+let test_set_comment test_ctxt =
+    let path = ["foo"; "bar"] in
+    let node = CT.make "root" in
+    let node = CT.set node path None CT.AddValue in
+    let node = CT.set_comment node path (Some "comment") in
+    assert_equal (CT.get_comment node path) (Some "comment")
+
 
 let suite =
     "VyConf config tree tests" >::: [
@@ -71,6 +79,7 @@ let suite =
         "test_delete_just_value" >:: test_delete_just_value;
         "test_delete_last_value" >:: test_delete_last_value;
         "test_delete_subtree" >:: test_delete_subtree;
+        "test_set_comment" >:: test_set_comment;
     ]
 
 let () =

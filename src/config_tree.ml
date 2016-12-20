@@ -7,14 +7,14 @@ exception Useless_set
 
 type config_node_data = {
     values: string list;
-    comment: string;
+    comment: string option;
 }
 
 type t = config_node_data Vytree.t
 
 let default_data = {
     values = [];
-    comment = "";
+    comment = None;
 }
 
 let make name = Vytree.make default_data name
@@ -77,3 +77,10 @@ let delete node path value =
     | None ->
 	Vytree.delete node path
 
+let set_comment node path comment =
+    let data = Vytree.get_data node path in
+    Vytree.update node path {data with comment=comment}
+
+let get_comment node path =
+    let data = Vytree.get_data node path in
+    data.comment
