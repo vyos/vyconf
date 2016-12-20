@@ -29,6 +29,12 @@
           </constraint>
         </properties>
       </leafNode>
+      <leafNode name="ntp-server">
+        <properties>
+          <help>NTP server address</help>
+          <multi/>
+        </properties>
+      </leafNode>
       <node name="options">
         <children>
           <leafNode name="reboot-on-panic">

@@ -61,6 +61,17 @@ let test_validate_path_valueless_node_valid test_ctxt =
     assert_equal (validate_path (get_dir test_ctxt) r ["system"; "options"; "reboot-on-panic"])
                  (["system"; "options"; "reboot-on-panic"], None)
 
+let test_is_multi_valid test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (is_multi r ["system"; "ntp-server"]) true
+
+let test_is_multi_invalid test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (is_multi r ["system"; "host-name"]) false
+
+
 let suite =
     "Util tests" >::: [
         "test_load_valid_definition" >:: test_load_valid_definition;
@@ -73,6 +84,8 @@ let suite =
         "test_validate_path_garbage_after_value" >:: test_validate_path_garbage_after_value;
         "test_validate_path_valueless_node_with_value" >:: test_validate_path_valueless_node_with_value;
         "test_validate_path_valueless_node_valid" >:: test_validate_path_valueless_node_valid;
+        "test_is_multi_valid" >:: test_is_multi_valid;
+        "test_is_multi_invalid" >:: test_is_multi_invalid;
     ]
 
 let () =
