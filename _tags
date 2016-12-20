@@ -17,3 +17,4 @@
 # OASIS_STOP
 
 true: strict_sequence
+true: bin_annot
