@@ -69,6 +69,28 @@ let test_set_comment test_ctxt =
     let node = CT.set_comment node path (Some "comment") in
     assert_equal (CT.get_comment node path) (Some "comment")
 
+(* Creating a node without a value should default inactive and ephemeral to false *)
+let test_valueless_node_inactive_ephemeral test_ctxt =
+    let path = ["foo"; "bar"] in
+    let node = CT.make "root" in
+    let node = CT.set node path None CT.AddValue in
+    assert_equal ((not (CT.is_inactive node path)) && (not (CT.is_ephemeral node path))) true
+
+(* Setting a node inactive should work *)
+let test_set_inactive test_ctxt = 
+    let path = ["foo"; "bar"] in
+    let node = CT.make "root" in
+    let node = CT.set node path None CT.AddValue in
+    let node = CT.set_inactive node path (true) in
+    assert_equal (CT.is_inactive node path) true
+
+(* Setting a node ephemeral should work *)
+let test_set_ephemeral test_ctxt = 
+    let path = ["foo"; "bar"] in
+    let node = CT.make "root" in
+    let node = CT.set node path None CT.AddValue in
+    let node = CT.set_ephemeral node path (true) in
+    assert_equal (CT.is_ephemeral node path) true
 
 let suite =
     "VyConf config tree tests" >::: [
@@ -80,6 +102,9 @@ let suite =
         "test_delete_last_value" >:: test_delete_last_value;
         "test_delete_subtree" >:: test_delete_subtree;
         "test_set_comment" >:: test_set_comment;
+        "test_valueless_node_inactive_ephemeral" >:: test_valueless_node_inactive_ephemeral;
+        "test_set_inactive" >:: test_set_inactive;
+        "test_set_ephemeral" >:: test_set_ephemeral;
     ]
 
 let () =

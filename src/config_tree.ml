@@ -8,6 +8,8 @@ exception Useless_set
 type config_node_data = {
     values: string list;
     comment: string option;
+    inactive: bool;
+    ephemeral: bool;
 }
 
 type t = config_node_data Vytree.t
@@ -15,6 +17,8 @@ type t = config_node_data Vytree.t
 let default_data = {
     values = [];
     comment = None;
+    inactive = false;
+    ephemeral = false;
 }
 
 let make name = Vytree.make default_data name
@@ -84,3 +88,21 @@ let set_comment node path comment =
 let get_comment node path =
     let data = Vytree.get_data node path in
     data.comment
+
+let set_inactive node path inactive =
+    let data = Vytree.get_data node path in
+    Vytree.update node path {data with inactive=inactive}
+
+let is_inactive node path =
+    let data = Vytree.get_data node path in
+    data.inactive
+
+let set_ephemeral node path ephemeral =
+    let data = Vytree.get_data node path in
+    Vytree.update node path {data with ephemeral=ephemeral}
+
+let is_ephemeral node path =
+    let data = Vytree.get_data node path in
+    data.ephemeral
+
+
