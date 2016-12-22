@@ -24,54 +24,15 @@ let args = [
     ]
 let usage = "Usage: " ^ Sys.argv.(0) ^ " [options]"
 
-let panic msg =
-    Lwt_log.fatal msg |> Lwt.ignore_result;
-    exit 1
-
-let load_config path =
-    let result = Vyconf_config.load path in
-    match result with
-    | Ok cfg -> cfg
-    | Error err ->
-        panic (Printf.sprintf "Could not load the configuration file %s" err)
-
-let check_dirs dirs =
-    let res = Directories.test dirs in
-    match res with
-    | Ok _ -> ()
-    | Error err -> panic err
-
-let setup_logger daemonize log_file template =
-    (* 
-       If log file is specified, log to the file whether we are a daemon or not
-       If we are a daemon and log file is not specified, log to syslog
-       If we are not a daemon and log file is not specified, log to stderr
-     *)
-    match log_file with
-    | None ->
-        if daemonize then
-            begin
-                Lwt_log.default := Lwt_log.syslog ~template:template ~facility:`Daemon ();
-                Lwt.return_unit
-            end
-        else 
-            begin
-                Lwt_log.default := Lwt_log.channel ~template:template ~close_mode:`Keep ~channel:Lwt_io.stderr ();
-                Lwt.return_unit
-            end
-    | Some file ->
-        let%lwt l = Lwt_log.file ~template:template ~mode:`Append ~file_name:file () in
-        Lwt_log.default := l; Lwt.return_unit
-
 let main_loop config () =
-    let%lwt () = setup_logger !daemonize !log_file !log_template in
+    let%lwt () = Startup.setup_logger !daemonize !log_file !log_template in
     let%lwt () = Lwt_log.notice @@ Printf.sprintf "Starting VyConf for %s" config.app_name in
     Lwt.return_unit
 
 let () = 
   let () = Arg.parse args (fun f -> ()) usage in
-  let config = load_config !config_file in
+  let config = Startup.load_config !config_file in
   let dirs = Directories.make config in
-  check_dirs dirs;
+  Startup.check_dirs dirs;
   Lwt_main.run @@ main_loop config ()
   

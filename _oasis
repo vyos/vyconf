@@ -67,6 +67,12 @@ Library "message"
   FindlibParent: vyconf
   BuildDepends: ppx_deriving_yojson
 
+Library "startup"
+  Path: src
+  Modules: Startup
+  FindlibParent: vyconf
+  BuildDepends: fileutils, lwt, lwt.log
+
 Executable "vyconfd"
   Path: src
   MainIs: vyconfd.ml
