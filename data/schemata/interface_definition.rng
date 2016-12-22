@@ -129,6 +129,8 @@
     By default, a leaf node can have only one value.
     "multi" tag means a node can have one or more values,
     "valueless" means it can have no values at all.
+    "hidden" means node visibility can be toggled, eg 'dangerous' commands,
+    "secret" allows a node to hide its value from unprivileged users.
   -->
   <define name="properties">
     <element name="properties">
@@ -154,6 +156,16 @@
         </optional>
         <optional>
           <element name="multi">
+            <empty/>
+          </element>
+        </optional>
+        <optional>
+          <element name="hidden">
+            <empty/>
+          </element>
+        </optional>
+        <optional>
+          <element name="secret">
             <empty/>
           </element>
         </optional>
