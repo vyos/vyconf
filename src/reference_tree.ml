@@ -119,12 +119,14 @@ let load_from_xml reftree file =
                 try Pcre.split (Xml.attrib xml "extends")
                 with _ -> []
             in List.fold_left (insert_from_xml basepath) reftree children
-            
-            
         | _ -> raise (Bad_interface_definition "Should start with <interfaceDefinition>")
     in
-    let xml = Xml.parse_file file in
-    xml_to_reftree xml reftree
+    try
+        let xml = Xml.parse_file file in
+        xml_to_reftree xml reftree
+    with
+    | Xml.File_not_found msg -> raise (Bad_interface_definition msg)
+    | Xml.Error e -> raise (Bad_interface_definition (Xml.error e))
 
 (* Validation function *)
 
