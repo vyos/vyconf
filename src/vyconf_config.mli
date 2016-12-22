@@ -8,6 +8,8 @@ type t = {
     socket: string;
     pid_file: string;
     log_file: string option;
+    log_template: string;
+    log_level: string;
 }
 
 val load : string -> (t, string) result

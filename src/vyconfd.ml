@@ -8,7 +8,6 @@ let () = Lwt_log.add_rule "*" Lwt_log.Info
 let daemonize = ref true
 let config_file = ref defaults.config_file
 let log_file = ref None
-let log_template = ref "$(date): $(message)"
 
 (* Global data *)
 
@@ -25,13 +24,14 @@ let args = [
 let usage = "Usage: " ^ Sys.argv.(0) ^ " [options]"
 
 let main_loop config () =
-    let%lwt () = Startup.setup_logger !daemonize !log_file !log_template in
+    let%lwt () = Startup.setup_logger !daemonize !log_file config.log_template in
     let%lwt () = Lwt_log.notice @@ Printf.sprintf "Starting VyConf for %s" config.app_name in
     Lwt.return_unit
 
 let () = 
   let () = Arg.parse args (fun f -> ()) usage in
   let config = Startup.load_config !config_file in
+  let () = Lwt_log.load_rules ("* -> " ^ config.log_level) in
   let dirs = Directories.make config in
   Startup.check_dirs dirs;
   Lwt_main.run @@ main_loop config ()

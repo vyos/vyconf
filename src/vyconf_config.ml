@@ -10,6 +10,8 @@ type t = {
     socket: string;
     pid_file: string;
     log_file: string option;
+    log_template: string;
+    log_level: string;
 } [@@deriving show]
 
 (* XXX: there should be a better way than to fully initialize it
@@ -24,6 +26,8 @@ let empty_config = {
     socket = "";
     pid_file = "";
     log_file = None;
+    log_template = "";
+    log_level = "";
 }
 
 
@@ -62,6 +66,8 @@ let load filename =
             (* Optional fields *)
             let conf = {conf with pid_file = optional_field defaults.pid_file conf_toml "vyconf" "pid_file"} in
             let conf = {conf with socket = optional_field defaults.socket conf_toml "vyconf" "socket"} in
+            let conf = {conf with log_template = optional_field defaults.log_template conf_toml "vyconf" "log_template"} in
+            let conf = {conf with log_level = optional_field defaults.log_level conf_toml "vyconf" "log_level"} in
             (* log_file is already string option, so we don't need to unwrap *)
             let conf = {conf with log_file = get_field conf_toml "vyconf" "log_file"} in
             Result.Ok conf
