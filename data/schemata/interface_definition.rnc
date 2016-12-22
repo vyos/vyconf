@@ -80,6 +80,8 @@ children = element children
 # By default, a leaf node can have only one value.
 # "multi" tag means a node can have one or more values,
 # "valueless" means it can have no values at all.
+# "hidden" means node visibility can be toggled, eg 'dangerous' commands,
+# "secret" allows a node to hide its value from unprivileged users.
 properties = element properties
 {
     help? &
@@ -89,7 +91,9 @@ properties = element properties
     # These are meaningful only for leaf nodes
     (element valueless { empty })? &
     (element multi { empty })? &
-    valueHelp*
+    (element hidden { empty })? &
+    (element secret { empty })? &
+    valueHelp* 
 }
 
 # All nodes must have "name" attribute

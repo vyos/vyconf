@@ -10,6 +10,8 @@ type ref_node_data = {
     valueless: bool;
     owner: string option;
     keep_order: bool;
+    hidden: bool;
+    secret: bool;
 }
 
 exception Validation_error of string
@@ -23,3 +25,7 @@ val load_from_xml : t -> string -> t
 val validate_path : string -> t -> string list -> string list * string option
 
 val is_multi : t -> string list -> bool
+
+val is_hidden : t -> string list -> bool
+
+val is_secret : t -> string list -> bool

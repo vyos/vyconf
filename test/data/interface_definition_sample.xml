@@ -20,6 +20,12 @@
               </leafNode>
             </children>
           </tagNode>
+          <leafNode name="password">
+            <properties>
+              <help>A password</help>
+              <secret/>
+            </properties>
+          </leafNode>
         </children>
       </node>
       <leafNode name="host-name">
@@ -41,6 +47,12 @@
             <properties>
               <help>Reboot automatically if kernel panic occurs</help>
               <valueless/>
+            </properties>
+          </leafNode>
+          <leafNode name="enable-dangerous-features">
+            <properties>
+              <help>Enable dangerous features</help>
+              <hidden/>
             </properties>
           </leafNode>
         </children>

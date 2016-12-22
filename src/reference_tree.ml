@@ -10,6 +10,8 @@ type ref_node_data = {
     valueless: bool;
     owner: string option;
     keep_order: bool;
+    hidden: bool;
+    secret: bool;
 }
 
 type t = ref_node_data Vytree.t
@@ -28,6 +30,8 @@ let default_data = {
     valueless = false;
     owner = None;
     keep_order = false;
+    hidden = false;
+    secret = false;
 }
 
 (* Loading from XML *)
@@ -67,6 +71,8 @@ let data_from_xml d x =
         | Xml.Element ("constraintErrorMessage", _, [Xml.PCData s]) ->
             {d with constraint_error_message=s}
         | Xml.Element ("constraint", _, _) -> load_constraint_from_xml d x
+        | Xml.Element ("hidden", _, _) -> {d with hidden=true}
+        | Xml.Element ("secret", _, _) -> {d with secret=true}
         | _ -> raise (Bad_interface_definition "Malformed property tag")
     in Xml.fold aux d x
 
@@ -173,3 +179,11 @@ let rec validate_path validators_dir node path =
 let is_multi reftree path =
     let data = Vytree.get_data reftree path in
     data.multi
+
+let is_hidden reftree path =
+    let data = Vytree.get_data reftree path in
+    data.hidden
+
+let is_secret reftree path =
+    let data = Vytree.get_data reftree path in
+    data.secret

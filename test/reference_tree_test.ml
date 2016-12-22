@@ -71,6 +71,25 @@ let test_is_multi_invalid test_ctxt =
     let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
     assert_equal (is_multi r ["system"; "host-name"]) false
 
+let test_is_secret_valid test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (is_secret r ["system"; "login"; "password"]) true
+
+let test_is_secret_invalid test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (is_secret r ["system"; "login"; "user"; "full-name"]) false
+
+let test_is_hidden_valid test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (is_hidden r ["system"; "options"; "enable-dangerous-features"]) true
+
+let test_is_hidden_invalid test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (is_hidden r ["system"; "login"; "user"; "full-name"]) false
 
 let suite =
     "Util tests" >::: [
@@ -86,6 +105,10 @@ let suite =
         "test_validate_path_valueless_node_valid" >:: test_validate_path_valueless_node_valid;
         "test_is_multi_valid" >:: test_is_multi_valid;
         "test_is_multi_invalid" >:: test_is_multi_invalid;
+        "test_is_secret_valid" >:: test_is_secret_valid; 
+        "test_is_secret_invalid" >:: test_is_secret_invalid;
+        "test_is_hidden_valid" >:: test_is_hidden_valid; 
+        "test_is_hidden_invalid" >:: test_is_hidden_invalid;
     ]
 
 let () =
