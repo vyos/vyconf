@@ -172,9 +172,9 @@ let suite =
         "test_is_tag_valid" >:: test_is_tag_valid;
         "test_is_tag_invalid" >:: test_is_tag_invalid;
         "test_is_leaf_valid" >:: test_is_leaf_valid;
-        "test_is_leaf_invalid" >:: test_is_leaf_valid;
+        "test_is_leaf_invalid" >:: test_is_leaf_invalid;
         "test_is_valueless_valid" >:: test_is_valueless_valid;
-        "test_is_valueless_invalid" >:: test_is_valueless_valid;
+        "test_is_valueless_invalid" >:: test_is_valueless_invalid;
         "test_get_keep_order_valid" >:: test_get_keep_order_valid; 
         "test_get_keep_order_invalid" >:: test_get_keep_order_invalid;
         "test_get_owner_valid" >:: test_get_owner_valid;
