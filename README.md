@@ -15,9 +15,12 @@ Typical examples of software appliances in this sense are (VyOS)[http://vyos.io]
 
 Typically they are seen as a way to improve ease of use, by providing a management interface
 more convenient than editing the config files, and integrating different applications together.
-However, largely missed and unexplored opportunity is using appliance approach to improve
+However, a largely missed and unexplored opportunity is using appliance approach to improve
 reliability and robustness. And, making appliances the right way is hard since you have to
-implement a lot of things from scratch.
+implement a lot of things from scratch. Done right, an appliance can be more than a sum of its
+parts, and can offer something to people who know enough to have configured the applications
+included in it by hand, rather than just be a simple way to configure them for people who
+don't know what they are doing.
 
 VyConf tries to simplify this daunting task and allow appliance developers to focus on the
 GUI frontend and the logic for generating application configs. It's being written primarily
@@ -34,6 +37,30 @@ free to commit or discard the changes.
 Safety first: system-wide config consistency checks must pass before it gets to generating
 application configs and restarting services. If anything goes wrong, the system can rollback
 to previous revision.
+
+## Making your own appliance with VyConf
+
+To give you some idea what making an appliance is supposed to be like:
+
+First, you define the interface you will expose. The system-wide config is represented as
+a multi-way tree, you define what nodes are allowed and what values can be attached to them.
+This is done declaratively in XML files (for which we provide a RelaxNG schema in data/schemata/interface_definition.rnc).
+See test/data/interface_definition_sample.xml for an example.
+
+In the interface definition, you define which component owns which node. When a change is made, the component
+responsible for the node is called. A component includes programs or options for three functions: verify (check
+consistency of the abstract config), generate (produce configs for applications), and apply (restart services etc.).
+The verify stage of every component is called first and if any of those fail, the commit fails. Since every component
+can read the entire configuration in a uniform way (as in Vyconf_session.get_value ["interfaces"; "ethernet"; "eth0"; "address"]),
+they can run cross-checks to verify that the configuration as a whole is consistent.
+
+What you get automatically from VyConf:
+* Parsing and loading the system-wide config (in a human-readable format)
+* A library for manipulating the abstract syntax tree of the config, for converting to new versions if you change anything in your node names and structure
+* An interactive shell for configuring the system, in the style of JunOS
+* An HTTP bridge for remote API calls (from a GUI frontend, management tools etc.)
+* Commit and rollback mechanisms for the configuration
+
 
 ## VyConf operation
 
