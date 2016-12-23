@@ -5,6 +5,7 @@
       <node name="login" owner="login">
         <children>
           <tagNode name="user">
+            <keepChildOrder/>
             <properties>
               <help>User name</help>
               <constraint>

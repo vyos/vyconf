@@ -29,3 +29,15 @@ val is_multi : t -> string list -> bool
 val is_hidden : t -> string list -> bool
 
 val is_secret : t -> string list -> bool
+
+val is_tag : t -> string list -> bool
+
+val is_leaf : t -> string list -> bool
+
+val is_valueless : t -> string list -> bool
+
+val get_keep_order : t -> string list -> bool
+
+val get_owner : t -> string list -> string option
+
+val get_help_string : t -> string list -> string

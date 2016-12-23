@@ -91,6 +91,66 @@ let test_is_hidden_invalid test_ctxt =
     let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
     assert_equal (is_hidden r ["system"; "login"; "user"; "full-name"]) false
 
+let test_is_tag_valid test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (is_tag r ["system"; "login"; "user"]) true
+
+let test_is_tag_invalid test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (is_tag r ["system"; "login"]) false
+
+let test_is_leaf_valid test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (is_leaf r ["system"; "login"; "user"; "full-name"]) true
+
+let test_is_leaf_invalid test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (is_leaf r ["system"; "login"; "user"]) false
+
+let test_is_valueless_valid test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (is_valueless r ["system"; "options"; "reboot-on-panic"]) true
+
+let test_is_valueless_invalid test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (is_valueless r ["system"; "login"; "user"; "full-name"]) false
+
+let test_get_keep_order_valid test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (get_keep_order r ["system"; "login"; "user"]) true
+
+let test_get_keep_order_invalid test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (get_keep_order r ["system"; "login"; "user"; "full-name"]) false
+
+let test_get_owner_valid test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (get_owner r ["system"; "login"]) (Some "login")
+
+let test_get_owner_invalid test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (get_owner r ["system"; "login"; "user"]) None
+
+let test_get_help_string_valid test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (get_help_string r ["system"; "login"; "user"; "full-name"]) ("User full name")
+
+let test_get_help_string_default test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    assert_equal (get_help_string r ["system"; "host-name"]) ("No help available")
+
 let suite =
     "Util tests" >::: [
         "test_load_valid_definition" >:: test_load_valid_definition;
@@ -109,6 +169,18 @@ let suite =
         "test_is_secret_invalid" >:: test_is_secret_invalid;
         "test_is_hidden_valid" >:: test_is_hidden_valid; 
         "test_is_hidden_invalid" >:: test_is_hidden_invalid;
+        "test_is_tag_valid" >:: test_is_tag_valid;
+        "test_is_tag_invalid" >:: test_is_tag_invalid;
+        "test_is_leaf_valid" >:: test_is_leaf_valid;
+        "test_is_leaf_invalid" >:: test_is_leaf_valid;
+        "test_is_valueless_valid" >:: test_is_valueless_valid;
+        "test_is_valueless_invalid" >:: test_is_valueless_valid;
+        "test_get_keep_order_valid" >:: test_get_keep_order_valid; 
+        "test_get_keep_order_invalid" >:: test_get_keep_order_invalid;
+        "test_get_owner_valid" >:: test_get_owner_valid;
+        "test_get_owner_invalid" >:: test_get_owner_invalid;
+        "test_get_help_string_valid" >:: test_get_help_string_valid;
+        "test_get_help_string_default" >:: test_get_help_string_default;
     ]
 
 let () =
