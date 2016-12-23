@@ -189,3 +189,32 @@ let is_hidden reftree path =
 let is_secret reftree path =
     let data = Vytree.get_data reftree path in
     data.secret
+
+let is_tag reftree path =
+    let data = Vytree.get_data reftree path in
+    match data.node_type with
+    | Tag -> true
+    | _ -> false
+
+let is_leaf reftree path = 
+    let data = Vytree.get_data reftree path in
+    match data.node_type with
+    | Leaf -> true
+    | _ -> false
+
+let is_valueless reftree path =
+    let data = Vytree.get_data reftree path in
+    data.valueless
+
+let get_keep_order reftree path =
+    let data = Vytree.get_data reftree path in
+    data.keep_order
+
+let get_owner reftree path =
+    let data = Vytree.get_data reftree path in
+    data.owner
+
+let get_help_string reftree path =
+    let data = Vytree.get_data reftree path in
+    data.help
+
