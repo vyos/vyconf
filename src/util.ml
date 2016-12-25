@@ -18,5 +18,5 @@ let string_of_path path =
         | x :: xs' -> aux xs' (Printf.sprintf "%s %s" acc x)
     in
     match path with
-    | [] -> "[]"
-    | x :: xs -> Printf.sprintf "[%s%s]" x (aux xs "")
+    | [] -> ""
+    | x :: xs -> Printf.sprintf "%s%s" x (aux xs "")
