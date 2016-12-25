@@ -123,3 +123,7 @@ let get_existent_path node path =
             | None -> acc
             | Some c -> aux c names (name :: acc)
     in List.rev (aux node path [])
+
+let children_of_path node path =
+    let node' = get node path in
+    list_children node'
