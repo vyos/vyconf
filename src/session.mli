@@ -15,8 +15,16 @@ type session_data = {
     changeset: cfg_op list
 }
 
+exception Session_error of string
+
 val make : world -> session_data
 
 val set : world -> session_data -> string list -> session_data
 
 val delete : world -> session_data -> string list -> session_data
+
+val get_value : world -> session_data -> string list -> string
+
+val get_values : world -> session_data -> string list -> string list
+
+val exists : world -> session_data -> string list -> bool
