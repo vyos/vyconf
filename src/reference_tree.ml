@@ -115,10 +115,7 @@ let load_from_xml reftree file =
     let xml_to_reftree xml reftree =
         match xml with
         | Xml.Element ("interfaceDefinition", attrs, children) ->
-            let basepath =
-                try Pcre.split (Xml.attrib xml "extends")
-                with _ -> []
-            in List.fold_left (insert_from_xml basepath) reftree children
+            List.fold_left (insert_from_xml []) reftree children
         | _ -> raise (Bad_interface_definition "Should start with <interfaceDefinition>")
     in
     try

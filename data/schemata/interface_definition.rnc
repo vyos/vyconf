@@ -24,14 +24,7 @@
 # Interface definition starts with interfaceDefinition tag that may contain node tags
 start = element interfaceDefinition
 {
-    extendsAttr?, node*
-}
-
-# Interface definitions may extend other definitions
-# In this case you specify a whitespace-separated path
-extendsAttr = attribute extends
-{
-    text
+    node*
 }
 
 # node tag may contain node, leafNode, or tagNode tags

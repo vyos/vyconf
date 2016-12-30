@@ -28,21 +28,11 @@
   <!-- Interface definition starts with interfaceDefinition tag that may contain node tags -->
   <start>
     <element name="interfaceDefinition">
-      <optional>
-        <ref name="extendsAttr"/>
-      </optional>
       <zeroOrMore>
         <ref name="node"/>
       </zeroOrMore>
     </element>
   </start>
-  <!--
-    Interface definitions may extend other definitions
-    In this case you specify a whitespace-separated path
-  -->
-  <define name="extendsAttr">
-    <attribute name="extends"/>
-  </define>
   <!--
     node tag may contain node, leafNode, or tagNode tags
     Those are intermediate configuration nodes that may only contain
