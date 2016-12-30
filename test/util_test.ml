@@ -16,7 +16,7 @@ let test_find_xml_child_nonexistent test_ctxt =
 
 let test_string_of_path test_ctxt =
     let path = ["foo"; "bar"; "baz"] in
-    assert_equal (string_of_path path) "[foo bar baz]"
+    assert_equal (String.trim (string_of_path path)) "foo bar baz"
 
 let suite =
     "Util tests" >::: [
