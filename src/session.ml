@@ -33,12 +33,12 @@ let string_of_op op =
         let path_str = Util.string_of_path path in
         (match value with
          | None -> Printf.sprintf "set %s" path_str
-         | Some v -> Printf.sprintf "set %s %s" path_str v)
+         | Some v -> Printf.sprintf "set %s \"%s\"" path_str v)
     | CfgDelete (path, value) ->
         let path_str = Util.string_of_path path in
         (match value with
          | None -> Printf.sprintf "delete %s" path_str
-         | Some v -> Printf.sprintf "delete %s %s" path_str v)
+         | Some v -> Printf.sprintf "delete %s \"%s\"" path_str v)
 
 
 let set_modified s =
