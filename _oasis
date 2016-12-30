@@ -135,6 +135,14 @@ Executable "vyconf_config_test"
   Install: false
   BuildDepends:  oUnit, toml, ppx_deriving.runtime, vyconf
 
+Executable "session_test"
+  Path: test
+  MainIs: session_test.ml
+  Build$: flag(tests)
+  CompiledObject: best
+  Install: false
+  BuildDepends: oUnit, vyconf, xml-light, fileutils, pcre
+
 Executable "vytree_load_test"
   Path: test
   MainIs: vytree_load_test.ml
@@ -184,3 +192,10 @@ Test "util_test"
   TestTools: util_test
   Command: $util_test
   WorkingDirectory: test
+
+Test "session_test"
+  Run$: flag(tests)
+  TestTools: session_test
+  Command: $session_test
+  WorkingDirectory: test
+
