@@ -28,3 +28,5 @@ val get_value : world -> session_data -> string list -> string
 val get_values : world -> session_data -> string list -> string list
 
 val exists : world -> session_data -> string list -> bool
+
+val string_of_op : cfg_op -> string
