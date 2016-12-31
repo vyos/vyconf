@@ -136,7 +136,7 @@ let load_from_xml reftree file =
         in the reference tree
  *)
 let rec validate_path validators_dir node path =
-    let show_path p = Util.string_of_path (List.rev p) in
+    let show_path p = Printf.sprintf "[%s]" @@ Util.string_of_path (List.rev p) in
     let rec aux node path acc =
         let data = Vytree.data_of_node node in
         match data.node_type with
@@ -145,7 +145,7 @@ let rec validate_path validators_dir node path =
              | [] ->
                  if data.valueless then (List.rev acc, None)
                  else raise (Validation_error
-                   (Printf.sprintf "Node \"%s\" requires a value" (show_path acc) ))
+                   (Printf.sprintf "Node %s requires a value" (show_path acc) ))
              | [p] ->
                  if not data.valueless then
                      (if (Value_checker.validate_any validators_dir data.constraints p) then (List.rev acc, Some p)
