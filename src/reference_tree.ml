@@ -215,3 +215,7 @@ let get_help_string reftree path =
     let data = Vytree.get_data reftree path in
     data.help
 
+let get_value_help reftree path =
+    let data = Vytree.get_data reftree path in
+    data.value_help
+

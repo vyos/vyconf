@@ -41,3 +41,5 @@ val get_keep_order : t -> string list -> bool
 val get_owner : t -> string list -> string option
 
 val get_help_string : t -> string list -> string
+
+val get_value_help : t -> string list -> (string * string) list
