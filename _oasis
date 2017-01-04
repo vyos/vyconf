@@ -38,6 +38,16 @@ Library "value_checker"
   FindlibParent: vyconf
   BuildDepends: pcre
 
+Library "curly_lexer"
+  Path: src
+  Modules: Curly_lexer
+  FindlibParent: vyconf
+
+Library "curly_parser"
+  Path: src
+  Modules: Curly_parser
+  FindlibParent: vyconf
+
 Library "util"
   Path: src
   Modules: Util

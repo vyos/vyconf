@@ -1,8 +1,9 @@
 # OASIS_START
-# DO NOT EDIT (digest: e1fbaa814f6e84974fc385e5d815bf45)
+# DO NOT EDIT (digest: 11f71f9fb0db5e0d6e22aa91f3d802d1)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
+true: annot, bin_annot
 <**/.svn>: -traverse
 <**/.svn>: not_hygienic
 ".bzr": -traverse
@@ -13,8 +14,98 @@
 ".git": not_hygienic
 "_darcs": -traverse
 "_darcs": not_hygienic
+# Library vyconf
+"src/vyconf.cmxs": use_vyconf
+# Library vytree
+"src/vytree.cmxs": use_vytree
+# Library reference_tree
+"src/reference_tree.cmxs": use_reference_tree
+# Library config_tree
+"src/config_tree.cmxs": use_config_tree
+# Library value_checker
+"src/value_checker.cmxs": use_value_checker
+<src/*.ml{,i,y}>: pkg_pcre
+# Library curly_lexer
+"src/curly_lexer.cmxs": use_curly_lexer
+# Library curly_parser
+"src/curly_parser.cmxs": use_curly_parser
+# Library util
+"src/util.cmxs": use_util
+<src/*.ml{,i,y}>: pkg_xml-light
+# Library session
+"src/session.cmxs": use_session
+# Library vyconf_config
+"src/vyconf_config.cmxs": use_vyconf_config
+<src/*.ml{,i,y}>: pkg_ppx_deriving.show
+# Library directories
+"src/directories.cmxs": use_directories
+# Library message
+"src/message.cmxs": use_message
+<src/*.ml{,i,y}>: pkg_ppx_deriving_yojson
+# Library startup
+"src/startup.cmxs": use_startup
+<src/*.ml{,i,y}>: pkg_lwt.log
 # Executable vyconfd
+<src/vyconfd.{native,byte}>: pkg_fileutils
+<src/vyconfd.{native,byte}>: pkg_lwt
+<src/vyconfd.{native,byte}>: pkg_lwt.ppx
+<src/vyconfd.{native,byte}>: pkg_lwt.unix
+<src/vyconfd.{native,byte}>: pkg_ppx_deriving.runtime
+<src/vyconfd.{native,byte}>: pkg_ppx_deriving_yojson.runtime
+<src/vyconfd.{native,byte}>: pkg_toml
+<src/vyconfd.{native,byte}>: use_vyconf
+<src/*.ml{,i,y}>: pkg_fileutils
+<src/*.ml{,i,y}>: pkg_lwt
+<src/*.ml{,i,y}>: pkg_lwt.ppx
+<src/*.ml{,i,y}>: pkg_lwt.unix
+<src/*.ml{,i,y}>: pkg_ppx_deriving.runtime
+<src/*.ml{,i,y}>: pkg_ppx_deriving_yojson.runtime
+<src/*.ml{,i,y}>: pkg_toml
+<src/*.ml{,i,y}>: use_vyconf
+# Executable vytree_test
+<test/vytree_test.{native,byte}>: pkg_oUnit
+<test/vytree_test.{native,byte}>: use_vyconf
+# Executable reference_tree_test
+<test/reference_tree_test.{native,byte}>: pkg_oUnit
+<test/reference_tree_test.{native,byte}>: pkg_pcre
+<test/reference_tree_test.{native,byte}>: pkg_xml-light
+<test/reference_tree_test.{native,byte}>: use_vyconf
+# Executable config_tree_test
+<test/config_tree_test.{native,byte}>: pkg_oUnit
+<test/config_tree_test.{native,byte}>: use_vyconf
+# Executable vylist_test
+<test/vylist_test.{native,byte}>: pkg_oUnit
+<test/vylist_test.{native,byte}>: use_vyconf
+# Executable value_checker_test
+<test/value_checker_test.{native,byte}>: pkg_oUnit
+<test/value_checker_test.{native,byte}>: pkg_pcre
+<test/value_checker_test.{native,byte}>: use_vyconf
+# Executable util_test
+<test/util_test.{native,byte}>: pkg_oUnit
+<test/util_test.{native,byte}>: pkg_xml-light
+<test/util_test.{native,byte}>: use_vyconf
+# Executable vyconf_config_test
+<test/vyconf_config_test.{native,byte}>: pkg_oUnit
+<test/vyconf_config_test.{native,byte}>: pkg_ppx_deriving.runtime
+<test/vyconf_config_test.{native,byte}>: pkg_toml
+<test/vyconf_config_test.{native,byte}>: use_vyconf
+<test/*.ml{,i,y}>: pkg_ppx_deriving.runtime
+<test/*.ml{,i,y}>: pkg_toml
+# Executable session_test
+<test/session_test.{native,byte}>: pkg_fileutils
+<test/session_test.{native,byte}>: pkg_oUnit
+<test/session_test.{native,byte}>: pkg_pcre
+<test/session_test.{native,byte}>: pkg_xml-light
+<test/session_test.{native,byte}>: use_vyconf
+<test/*.ml{,i,y}>: pkg_fileutils
+<test/*.ml{,i,y}>: pkg_oUnit
+<test/*.ml{,i,y}>: pkg_pcre
+<test/*.ml{,i,y}>: pkg_xml-light
+# Executable vytree_load_test
+<test/vytree_load_test.{native,byte}>: use_vyconf
+<test/*.ml{,i,y}>: use_vyconf
 # OASIS_STOP
 
 true: strict_sequence
 true: bin_annot
+true: use_menhir, explain
