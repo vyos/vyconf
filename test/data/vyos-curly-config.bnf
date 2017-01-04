@@ -4,9 +4,7 @@
 
 <node> ::= <identifier> "{" <innerNodes> "}" ;
 
-<innerNodes> ::= 5 <innerNodes> | <node> | <tagNode> | <leafNode> ;
-
-<tagNode> ::= <identifier> <identifier> "{" <innerNodes> "}" ;
+<innerNodes> ::= 5 <innerNodes> | <node> | <leafNode> ;
 
 <leafNode> ::= <identifier> <value> ";" ;
 
