@@ -3,7 +3,7 @@
   <!--
        component_definition.rnc: VyConf component definition XML grammar
     
-       Copyright (C) 2014 VyOS Development Group <maintainers@vyos.net>
+       Copyright (C) 2014,2017 VyOS Development Group <maintainers@vyos.net>
     
        This library is free software; you can redistribute it and/or
        modify it under the terms of the GNU Lesser General Public
@@ -23,6 +23,7 @@
   <start>
     <element name="component">
       <ref name="nameAttr"/>
+      <ref name="versionAttr"/>
       <zeroOrMore>
         <ref name="description"/>
       </zeroOrMore>
@@ -34,6 +35,11 @@
   </start>
   <define name="nameAttr">
     <attribute name="name"/>
+  </define>
+  <define name="versionAttr">
+    <attribute name="version">
+      <ref name="number"/>
+    </attribute>
   </define>
   <define name="description">
     <element name="description">

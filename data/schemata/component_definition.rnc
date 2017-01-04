@@ -1,6 +1,6 @@
 #    component_definition.rnc: VyConf component definition XML grammar
 #
-#    Copyright (C) 2014 VyOS Development Group <maintainers@vyos.net>
+#    Copyright (C) 2014,2017 VyOS Development Group <maintainers@vyos.net>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -20,6 +20,7 @@
 start = element component
 {
     nameAttr,
+    versionAttr,
     description*,
     dependencies*,
     executables
@@ -28,6 +29,11 @@ start = element component
 nameAttr = attribute name
 {
     text
+}
+
+versionAttr = attribute version
+{
+    number
 }
 
 description = element description
