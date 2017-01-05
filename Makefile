@@ -39,3 +39,7 @@ configure:
 .PHONY: build doc test all install uninstall reinstall clean distclean configure
 
 # OASIS_STOP
+
+.PHONY:
+protobuf:
+	ocaml-protoc -ml_out src/ data/vyconf.proto

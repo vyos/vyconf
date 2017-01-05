@@ -54,6 +54,12 @@ Library "util"
   FindlibParent: vyconf
   BuildDepends: xml-light
 
+Library "vyconf_pb"
+  Path: src
+  Modules: Vyconf_pb
+  FindlibParent: vyconf
+  BuildDepends: ocaml-protoc
+
 Library "session"
   Path: src
   Modules: Session
