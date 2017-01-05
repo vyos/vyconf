@@ -41,5 +41,9 @@ configure:
 # OASIS_STOP
 
 .PHONY:
+schema:
+       	scripts/rnc2rng.sh all data/schemata/
+
+.PHONY:
 protobuf:
 	ocaml-protoc -ml_out src/ data/vyconf.proto
