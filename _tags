@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 11f71f9fb0db5e0d6e22aa91f3d802d1)
+# DO NOT EDIT (digest: c2be8ef2e29762b40de09512178308e2)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -32,6 +32,9 @@ true: annot, bin_annot
 # Library util
 "src/util.cmxs": use_util
 <src/*.ml{,i,y}>: pkg_xml-light
+# Library vyconf_pb
+"src/vyconf_pb.cmxs": use_vyconf_pb
+<src/*.ml{,i,y}>: pkg_ocaml-protoc
 # Library session
 "src/session.cmxs": use_session
 # Library vyconf_config

@@ -4,12 +4,14 @@ message Request {
     JSON = 1;
   }
 
-  message Noop {
+  message Status {
   }
 
   message SetupSession {
     optional bool Exclusive = 1;
     optional bool OverrideExclusive = 2;
+    optional string ClientApplication = 3;
+    optional int32 OnBehalfOf = 4;
   }
 
   message Set {
@@ -91,7 +93,7 @@ message Request {
   }
 
   oneof msg {
-    Noop noop = 1;
+    Status status = 1;
     SetupSession setup_session = 2;
     Set set = 3;
     Delete delete = 4;
@@ -118,5 +120,8 @@ enum Status {
 
 message Response {
   required Status status = 1;
-  
+  optional string output = 2;
+  repeated string errors = 3;
+  repeated string warnings = 4;
+  repeated string notifications = 5;
 }

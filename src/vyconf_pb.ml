@@ -7,11 +7,15 @@ type request_config_format =
 type request_setup_session = {
   exclusive : bool option;
   override_exclusive : bool option;
+  client_application : string option;
+  on_behalf_of : int32 option;
 }
 
 and request_setup_session_mutable = {
   mutable exclusive : bool option;
   mutable override_exclusive : bool option;
+  mutable client_application : string option;
+  mutable on_behalf_of : int32 option;
 }
 
 type request_set = {
@@ -171,7 +175,7 @@ and request_run_op_mode_mutable = {
 }
 
 type request =
-  | Noop
+  | Status
   | Setup_session of request_setup_session
   | Set of request_set
   | Delete of request_delete
@@ -195,10 +199,18 @@ type status =
 
 type response = {
   status : status;
+  output : string option;
+  errors : string list;
+  warnings : string list;
+  notifications : string list;
 }
 
 and response_mutable = {
   mutable status : status;
+  mutable output : string option;
+  mutable errors : string list;
+  mutable warnings : string list;
+  mutable notifications : string list;
 }
 
 let rec default_request_config_format () = (Curly:request_config_format)
@@ -206,14 +218,20 @@ let rec default_request_config_format () = (Curly:request_config_format)
 let rec default_request_setup_session 
   ?exclusive:((exclusive:bool option) = None)
   ?override_exclusive:((override_exclusive:bool option) = None)
+  ?client_application:((client_application:string option) = None)
+  ?on_behalf_of:((on_behalf_of:int32 option) = None)
   () : request_setup_session  = {
   exclusive;
   override_exclusive;
+  client_application;
+  on_behalf_of;
 }
 
 and default_request_setup_session_mutable () : request_setup_session_mutable = {
   exclusive = None;
   override_exclusive = None;
+  client_application = None;
+  on_behalf_of = None;
 }
 
 let rec default_request_set 
@@ -418,18 +436,30 @@ and default_request_run_op_mode_mutable () : request_run_op_mode_mutable = {
   path = [];
 }
 
-let rec default_request (): request = Noop
+let rec default_request (): request = Status
 
 let rec default_status () = (Success:status)
 
 let rec default_response 
   ?status:((status:status) = default_status ())
+  ?output:((output:string option) = None)
+  ?errors:((errors:string list) = [])
+  ?warnings:((warnings:string list) = [])
+  ?notifications:((notifications:string list) = [])
   () : response  = {
   status;
+  output;
+  errors;
+  warnings;
+  notifications;
 }
 
 and default_response_mutable () : response_mutable = {
   status = default_status ();
+  output = None;
+  errors = [];
+  warnings = [];
+  notifications = [];
 }
 
 let rec decode_request_config_format d = 
@@ -457,6 +487,20 @@ let rec decode_request_setup_session d =
     )
     | Some (2, pk) -> raise (
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(request_setup_session), field(2)", pk))
+    )
+    | Some (3, Pbrt.Bytes) -> (
+      v.client_application <- Some (Pbrt.Decoder.string d);
+      loop ()
+    )
+    | Some (3, pk) -> raise (
+      Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(request_setup_session), field(3)", pk))
+    )
+    | Some (4, Pbrt.Varint) -> (
+      v.on_behalf_of <- Some (Pbrt.Decoder.int32_as_varint d);
+      loop ()
+    )
+    | Some (4, pk) -> raise (
+      Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(request_setup_session), field(4)", pk))
     )
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind; loop ()
   in
@@ -881,7 +925,7 @@ let rec decode_request d =
   let rec loop () = 
     let ret:request = match Pbrt.Decoder.key d with
       | None -> failwith "None of the known key is found"
-      | Some (1, _) -> (Pbrt.Decoder.empty_nested d ; Noop)
+      | Some (1, _) -> (Pbrt.Decoder.empty_nested d ; Status)
       | Some (2, _) -> Setup_session (decode_request_setup_session (Pbrt.Decoder.nested d))
       | Some (3, _) -> Set (decode_request_set (Pbrt.Decoder.nested d))
       | Some (4, _) -> Delete (decode_request_delete (Pbrt.Decoder.nested d))
@@ -918,6 +962,9 @@ let rec decode_response d =
   let rec loop () = 
     match Pbrt.Decoder.key d with
     | None -> (
+      v.notifications <- List.rev v.notifications;
+      v.warnings <- List.rev v.warnings;
+      v.errors <- List.rev v.errors;
     )
     | Some (1, Pbrt.Varint) -> (
       v.status <- decode_status d;
@@ -925,6 +972,34 @@ let rec decode_response d =
     )
     | Some (1, pk) -> raise (
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(response), field(1)", pk))
+    )
+    | Some (2, Pbrt.Bytes) -> (
+      v.output <- Some (Pbrt.Decoder.string d);
+      loop ()
+    )
+    | Some (2, pk) -> raise (
+      Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(response), field(2)", pk))
+    )
+    | Some (3, Pbrt.Bytes) -> (
+      v.errors <- (Pbrt.Decoder.string d) :: v.errors;
+      loop ()
+    )
+    | Some (3, pk) -> raise (
+      Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(response), field(3)", pk))
+    )
+    | Some (4, Pbrt.Bytes) -> (
+      v.warnings <- (Pbrt.Decoder.string d) :: v.warnings;
+      loop ()
+    )
+    | Some (4, pk) -> raise (
+      Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(response), field(4)", pk))
+    )
+    | Some (5, Pbrt.Bytes) -> (
+      v.notifications <- (Pbrt.Decoder.string d) :: v.notifications;
+      loop ()
+    )
+    | Some (5, pk) -> raise (
+      Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(response), field(5)", pk))
     )
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind; loop ()
   in
@@ -951,6 +1026,22 @@ let rec encode_request_setup_session (v:request_setup_session) encoder =
     | Some x -> (
       Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
       Pbrt.Encoder.bool x encoder;
+    )
+    | None -> ();
+  );
+  (
+    match v.client_application with 
+    | Some x -> (
+      Pbrt.Encoder.key (3, Pbrt.Bytes) encoder; 
+      Pbrt.Encoder.string x encoder;
+    )
+    | None -> ();
+  );
+  (
+    match v.on_behalf_of with 
+    | Some x -> (
+      Pbrt.Encoder.key (4, Pbrt.Varint) encoder; 
+      Pbrt.Encoder.int32_as_varint x encoder;
     )
     | None -> ();
   );
@@ -1148,7 +1239,7 @@ let rec encode_request_run_op_mode (v:request_run_op_mode) encoder =
 
 let rec encode_request (v:request) encoder = 
   match v with
-  | Noop -> (
+  | Status -> (
     Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
     Pbrt.Encoder.empty_nested encoder
   )
@@ -1225,6 +1316,26 @@ let rec encode_status (v:status) encoder =
 let rec encode_response (v:response) encoder = 
   Pbrt.Encoder.key (1, Pbrt.Varint) encoder; 
   encode_status v.status encoder;
+  (
+    match v.output with 
+    | Some x -> (
+      Pbrt.Encoder.key (2, Pbrt.Bytes) encoder; 
+      Pbrt.Encoder.string x encoder;
+    )
+    | None -> ();
+  );
+  List.iter (fun x -> 
+    Pbrt.Encoder.key (3, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.string x encoder;
+  ) v.errors;
+  List.iter (fun x -> 
+    Pbrt.Encoder.key (4, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.string x encoder;
+  ) v.warnings;
+  List.iter (fun x -> 
+    Pbrt.Encoder.key (5, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.string x encoder;
+  ) v.notifications;
   ()
 
 let rec pp_request_config_format fmt (v:request_config_format) =
@@ -1237,6 +1348,8 @@ let rec pp_request_setup_session fmt (v:request_setup_session) =
     Format.pp_open_vbox fmt 1;
     Pbrt.Pp.pp_record_field "exclusive" (Pbrt.Pp.pp_option Pbrt.Pp.pp_bool) fmt v.exclusive;
     Pbrt.Pp.pp_record_field "override_exclusive" (Pbrt.Pp.pp_option Pbrt.Pp.pp_bool) fmt v.override_exclusive;
+    Pbrt.Pp.pp_record_field "client_application" (Pbrt.Pp.pp_option Pbrt.Pp.pp_string) fmt v.client_application;
+    Pbrt.Pp.pp_record_field "on_behalf_of" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.on_behalf_of;
     Format.pp_close_box fmt ()
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
@@ -1385,7 +1498,7 @@ let rec pp_request_run_op_mode fmt (v:request_run_op_mode) =
 
 let rec pp_request fmt (v:request) =
   match v with
-  | Noop  -> Format.fprintf fmt "Noop"
+  | Status  -> Format.fprintf fmt "Status"
   | Setup_session x -> Format.fprintf fmt "@[Setup_session(%a)@]" pp_request_setup_session x
   | Set x -> Format.fprintf fmt "@[Set(%a)@]" pp_request_set x
   | Delete x -> Format.fprintf fmt "@[Delete(%a)@]" pp_request_delete x
@@ -1412,6 +1525,10 @@ let rec pp_response fmt (v:response) =
   let pp_i fmt () =
     Format.pp_open_vbox fmt 1;
     Pbrt.Pp.pp_record_field "status" pp_status fmt v.status;
+    Pbrt.Pp.pp_record_field "output" (Pbrt.Pp.pp_option Pbrt.Pp.pp_string) fmt v.output;
+    Pbrt.Pp.pp_record_field "errors" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.errors;
+    Pbrt.Pp.pp_record_field "warnings" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.warnings;
+    Pbrt.Pp.pp_record_field "notifications" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.notifications;
     Format.pp_close_box fmt ()
   in
   Pbrt.Pp.pp_brk pp_i fmt ()

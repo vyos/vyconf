@@ -10,6 +10,8 @@ type request_config_format =
 type request_setup_session = {
   exclusive : bool option;
   override_exclusive : bool option;
+  client_application : string option;
+  on_behalf_of : int32 option;
 }
 
 type request_set = {
@@ -91,7 +93,7 @@ type request_run_op_mode = {
 }
 
 type request =
-  | Noop
+  | Status
   | Setup_session of request_setup_session
   | Set of request_set
   | Delete of request_delete
@@ -115,6 +117,10 @@ type status =
 
 type response = {
   status : status;
+  output : string option;
+  errors : string list;
+  warnings : string list;
+  notifications : string list;
 }
 
 
@@ -126,6 +132,8 @@ val default_request_config_format : unit -> request_config_format
 val default_request_setup_session : 
   ?exclusive:bool option ->
   ?override_exclusive:bool option ->
+  ?client_application:string option ->
+  ?on_behalf_of:int32 option ->
   unit ->
   request_setup_session
 (** [default_request_setup_session ()] is the default value for type [request_setup_session] *)
@@ -248,6 +256,10 @@ val default_status : unit -> status
 
 val default_response : 
   ?status:status ->
+  ?output:string option ->
+  ?errors:string list ->
+  ?warnings:string list ->
+  ?notifications:string list ->
   unit ->
   response
 (** [default_response ()] is the default value for type [response] *)
