@@ -204,19 +204,25 @@ type request =
 type status =
   | Success 
   | Fail 
+  | Invalid_path 
+  | Invalid_value 
+  | Commit_in_progress 
+  | Configuration_locked 
+  | Internal_error 
+  | Permission_denied 
 
 type response = {
   status : status;
   output : string option;
-  errors : string list;
-  warnings : string list;
+  error : string option;
+  warning : string option;
 }
 
 and response_mutable = {
   mutable status : status;
   mutable output : string option;
-  mutable errors : string list;
-  mutable warnings : string list;
+  mutable error : string option;
+  mutable warning : string option;
 }
 
 let rec default_request_config_format () = (Curly:request_config_format)
@@ -456,20 +462,20 @@ let rec default_status () = (Success:status)
 let rec default_response 
   ?status:((status:status) = default_status ())
   ?output:((output:string option) = None)
-  ?errors:((errors:string list) = [])
-  ?warnings:((warnings:string list) = [])
+  ?error:((error:string option) = None)
+  ?warning:((warning:string option) = None)
   () : response  = {
   status;
   output;
-  errors;
-  warnings;
+  error;
+  warning;
 }
 
 and default_response_mutable () : response_mutable = {
   status = default_status ();
   output = None;
-  errors = [];
-  warnings = [];
+  error = None;
+  warning = None;
 }
 
 let rec decode_request_config_format d = 
@@ -979,6 +985,12 @@ let rec decode_status d =
   match Pbrt.Decoder.int_as_varint d with
   | 0 -> (Success:status)
   | 1 -> (Fail:status)
+  | 2 -> (Invalid_path:status)
+  | 3 -> (Invalid_value:status)
+  | 4 -> (Commit_in_progress:status)
+  | 5 -> (Configuration_locked:status)
+  | 6 -> (Internal_error:status)
+  | 7 -> (Permission_denied:status)
   | _ -> failwith "Unknown value for enum status"
 
 let rec decode_response d =
@@ -986,8 +998,6 @@ let rec decode_response d =
   let rec loop () = 
     match Pbrt.Decoder.key d with
     | None -> (
-      v.warnings <- List.rev v.warnings;
-      v.errors <- List.rev v.errors;
     )
     | Some (1, Pbrt.Varint) -> (
       v.status <- decode_status d;
@@ -1004,14 +1014,14 @@ let rec decode_response d =
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(response), field(2)", pk))
     )
     | Some (3, Pbrt.Bytes) -> (
-      v.errors <- (Pbrt.Decoder.string d) :: v.errors;
+      v.error <- Some (Pbrt.Decoder.string d);
       loop ()
     )
     | Some (3, pk) -> raise (
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(response), field(3)", pk))
     )
     | Some (4, Pbrt.Bytes) -> (
-      v.warnings <- (Pbrt.Decoder.string d) :: v.warnings;
+      v.warning <- Some (Pbrt.Decoder.string d);
       loop ()
     )
     | Some (4, pk) -> raise (
@@ -1339,6 +1349,12 @@ let rec encode_status (v:status) encoder =
   match v with
   | Success -> Pbrt.Encoder.int_as_varint (0) encoder
   | Fail -> Pbrt.Encoder.int_as_varint 1 encoder
+  | Invalid_path -> Pbrt.Encoder.int_as_varint 2 encoder
+  | Invalid_value -> Pbrt.Encoder.int_as_varint 3 encoder
+  | Commit_in_progress -> Pbrt.Encoder.int_as_varint 4 encoder
+  | Configuration_locked -> Pbrt.Encoder.int_as_varint 5 encoder
+  | Internal_error -> Pbrt.Encoder.int_as_varint 6 encoder
+  | Permission_denied -> Pbrt.Encoder.int_as_varint 7 encoder
 
 let rec encode_response (v:response) encoder = 
   Pbrt.Encoder.key (1, Pbrt.Varint) encoder; 
@@ -1351,14 +1367,22 @@ let rec encode_response (v:response) encoder =
     )
     | None -> ();
   );
-  List.iter (fun x -> 
-    Pbrt.Encoder.key (3, Pbrt.Bytes) encoder; 
-    Pbrt.Encoder.string x encoder;
-  ) v.errors;
-  List.iter (fun x -> 
-    Pbrt.Encoder.key (4, Pbrt.Bytes) encoder; 
-    Pbrt.Encoder.string x encoder;
-  ) v.warnings;
+  (
+    match v.error with 
+    | Some x -> (
+      Pbrt.Encoder.key (3, Pbrt.Bytes) encoder; 
+      Pbrt.Encoder.string x encoder;
+    )
+    | None -> ();
+  );
+  (
+    match v.warning with 
+    | Some x -> (
+      Pbrt.Encoder.key (4, Pbrt.Bytes) encoder; 
+      Pbrt.Encoder.string x encoder;
+    )
+    | None -> ();
+  );
   ()
 
 let rec pp_request_config_format fmt (v:request_config_format) =
@@ -1552,14 +1576,20 @@ let rec pp_status fmt (v:status) =
   match v with
   | Success -> Format.fprintf fmt "Success"
   | Fail -> Format.fprintf fmt "Fail"
+  | Invalid_path -> Format.fprintf fmt "Invalid_path"
+  | Invalid_value -> Format.fprintf fmt "Invalid_value"
+  | Commit_in_progress -> Format.fprintf fmt "Commit_in_progress"
+  | Configuration_locked -> Format.fprintf fmt "Configuration_locked"
+  | Internal_error -> Format.fprintf fmt "Internal_error"
+  | Permission_denied -> Format.fprintf fmt "Permission_denied"
 
 let rec pp_response fmt (v:response) = 
   let pp_i fmt () =
     Format.pp_open_vbox fmt 1;
     Pbrt.Pp.pp_record_field "status" pp_status fmt v.status;
     Pbrt.Pp.pp_record_field "output" (Pbrt.Pp.pp_option Pbrt.Pp.pp_string) fmt v.output;
-    Pbrt.Pp.pp_record_field "errors" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.errors;
-    Pbrt.Pp.pp_record_field "warnings" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.warnings;
+    Pbrt.Pp.pp_record_field "error" (Pbrt.Pp.pp_option Pbrt.Pp.pp_string) fmt v.error;
+    Pbrt.Pp.pp_record_field "warning" (Pbrt.Pp.pp_option Pbrt.Pp.pp_string) fmt v.warning;
     Format.pp_close_box fmt ()
   in
   Pbrt.Pp.pp_brk pp_i fmt ()

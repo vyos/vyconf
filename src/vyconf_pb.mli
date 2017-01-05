@@ -119,12 +119,18 @@ type request =
 type status =
   | Success 
   | Fail 
+  | Invalid_path 
+  | Invalid_value 
+  | Commit_in_progress 
+  | Configuration_locked 
+  | Internal_error 
+  | Permission_denied 
 
 type response = {
   status : status;
   output : string option;
-  errors : string list;
-  warnings : string list;
+  error : string option;
+  warning : string option;
 }
 
 
@@ -266,8 +272,8 @@ val default_status : unit -> status
 val default_response : 
   ?status:status ->
   ?output:string option ->
-  ?errors:string list ->
-  ?warnings:string list ->
+  ?error:string option ->
+  ?warning:string option ->
   unit ->
   response
 (** [default_response ()] is the default value for type [response] *)
