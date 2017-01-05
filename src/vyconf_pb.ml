@@ -192,6 +192,7 @@ type request =
   | Get_values of request_get_values
   | List_children of request_list_children
   | Run_op_mode of request_run_op_mode
+  | Confirm
 
 type status =
   | Success 
@@ -202,7 +203,6 @@ type response = {
   output : string option;
   errors : string list;
   warnings : string list;
-  notifications : string list;
 }
 
 and response_mutable = {
@@ -210,7 +210,6 @@ and response_mutable = {
   mutable output : string option;
   mutable errors : string list;
   mutable warnings : string list;
-  mutable notifications : string list;
 }
 
 let rec default_request_config_format () = (Curly:request_config_format)
@@ -445,13 +444,11 @@ let rec default_response
   ?output:((output:string option) = None)
   ?errors:((errors:string list) = [])
   ?warnings:((warnings:string list) = [])
-  ?notifications:((notifications:string list) = [])
   () : response  = {
   status;
   output;
   errors;
   warnings;
-  notifications;
 }
 
 and default_response_mutable () : response_mutable = {
@@ -459,7 +456,6 @@ and default_response_mutable () : response_mutable = {
   output = None;
   errors = [];
   warnings = [];
-  notifications = [];
 }
 
 let rec decode_request_config_format d = 
@@ -942,6 +938,7 @@ let rec decode_request d =
       | Some (15, _) -> Get_values (decode_request_get_values (Pbrt.Decoder.nested d))
       | Some (16, _) -> List_children (decode_request_list_children (Pbrt.Decoder.nested d))
       | Some (17, _) -> Run_op_mode (decode_request_run_op_mode (Pbrt.Decoder.nested d))
+      | Some (18, _) -> (Pbrt.Decoder.empty_nested d ; Confirm)
       | Some (n, payload_kind) -> (
         Pbrt.Decoder.skip d payload_kind; 
         loop () 
@@ -962,7 +959,6 @@ let rec decode_response d =
   let rec loop () = 
     match Pbrt.Decoder.key d with
     | None -> (
-      v.notifications <- List.rev v.notifications;
       v.warnings <- List.rev v.warnings;
       v.errors <- List.rev v.errors;
     )
@@ -993,13 +989,6 @@ let rec decode_response d =
     )
     | Some (4, pk) -> raise (
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(response), field(4)", pk))
-    )
-    | Some (5, Pbrt.Bytes) -> (
-      v.notifications <- (Pbrt.Decoder.string d) :: v.notifications;
-      loop ()
-    )
-    | Some (5, pk) -> raise (
-      Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(response), field(5)", pk))
     )
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind; loop ()
   in
@@ -1307,6 +1296,10 @@ let rec encode_request (v:request) encoder =
     Pbrt.Encoder.key (17, Pbrt.Bytes) encoder; 
     Pbrt.Encoder.nested (encode_request_run_op_mode x) encoder;
   )
+  | Confirm -> (
+    Pbrt.Encoder.key (18, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.empty_nested encoder
+  )
 
 let rec encode_status (v:status) encoder =
   match v with
@@ -1332,10 +1325,6 @@ let rec encode_response (v:response) encoder =
     Pbrt.Encoder.key (4, Pbrt.Bytes) encoder; 
     Pbrt.Encoder.string x encoder;
   ) v.warnings;
-  List.iter (fun x -> 
-    Pbrt.Encoder.key (5, Pbrt.Bytes) encoder; 
-    Pbrt.Encoder.string x encoder;
-  ) v.notifications;
   ()
 
 let rec pp_request_config_format fmt (v:request_config_format) =
@@ -1515,6 +1504,7 @@ let rec pp_request fmt (v:request) =
   | Get_values x -> Format.fprintf fmt "@[Get_values(%a)@]" pp_request_get_values x
   | List_children x -> Format.fprintf fmt "@[List_children(%a)@]" pp_request_list_children x
   | Run_op_mode x -> Format.fprintf fmt "@[Run_op_mode(%a)@]" pp_request_run_op_mode x
+  | Confirm  -> Format.fprintf fmt "Confirm"
 
 let rec pp_status fmt (v:status) =
   match v with
@@ -1528,7 +1518,6 @@ let rec pp_response fmt (v:response) =
     Pbrt.Pp.pp_record_field "output" (Pbrt.Pp.pp_option Pbrt.Pp.pp_string) fmt v.output;
     Pbrt.Pp.pp_record_field "errors" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.errors;
     Pbrt.Pp.pp_record_field "warnings" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.warnings;
-    Pbrt.Pp.pp_record_field "notifications" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.notifications;
     Format.pp_close_box fmt ()
   in
   Pbrt.Pp.pp_brk pp_i fmt ()

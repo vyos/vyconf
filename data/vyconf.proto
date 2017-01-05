@@ -92,6 +92,9 @@ message Request {
     repeated string Path = 1;
   }
 
+  message Confirm {
+  }
+
   oneof msg {
     Status status = 1;
     SetupSession setup_session = 2;
@@ -110,6 +113,7 @@ message Request {
     GetValues get_values = 15;
     ListChildren list_children = 16;
     RunOpMode run_op_mode = 17;
+    Confirm confirm = 18;
   }  
 }
 
@@ -123,5 +127,4 @@ message Response {
   optional string output = 2;
   repeated string errors = 3;
   repeated string warnings = 4;
-  repeated string notifications = 5;
 }

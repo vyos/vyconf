@@ -110,6 +110,7 @@ type request =
   | Get_values of request_get_values
   | List_children of request_list_children
   | Run_op_mode of request_run_op_mode
+  | Confirm
 
 type status =
   | Success 
@@ -120,7 +121,6 @@ type response = {
   output : string option;
   errors : string list;
   warnings : string list;
-  notifications : string list;
 }
 
 
@@ -259,7 +259,6 @@ val default_response :
   ?output:string option ->
   ?errors:string list ->
   ?warnings:string list ->
-  ?notifications:string list ->
   unit ->
   response
 (** [default_response ()] is the default value for type [response] *)
