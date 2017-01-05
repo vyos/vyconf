@@ -42,7 +42,7 @@ configure:
 
 .PHONY:
 schema:
-       	scripts/rnc2rng.sh all data/schemata/
+	scripts/rnc2rng.sh all data/schemata/
 
 .PHONY:
 protobuf:
