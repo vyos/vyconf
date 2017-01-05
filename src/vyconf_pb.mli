@@ -8,8 +8,6 @@ type request_config_format =
   | Json 
 
 type request_setup_session = {
-  exclusive : bool option;
-  override_exclusive : bool option;
   client_application : string option;
   on_behalf_of : int32 option;
 }
@@ -92,6 +90,11 @@ type request_run_op_mode = {
   path : string list;
 }
 
+type request_enter_configuration_mode = {
+  exclusive : bool option;
+  override_exclusive : bool option;
+}
+
 type request =
   | Status
   | Setup_session of request_setup_session
@@ -111,6 +114,7 @@ type request =
   | List_children of request_list_children
   | Run_op_mode of request_run_op_mode
   | Confirm
+  | Configure of request_enter_configuration_mode
 
 type status =
   | Success 
@@ -130,8 +134,6 @@ val default_request_config_format : unit -> request_config_format
 (** [default_request_config_format ()] is the default value for type [request_config_format] *)
 
 val default_request_setup_session : 
-  ?exclusive:bool option ->
-  ?override_exclusive:bool option ->
   ?client_application:string option ->
   ?on_behalf_of:int32 option ->
   unit ->
@@ -248,6 +250,13 @@ val default_request_run_op_mode :
   request_run_op_mode
 (** [default_request_run_op_mode ()] is the default value for type [request_run_op_mode] *)
 
+val default_request_enter_configuration_mode : 
+  ?exclusive:bool option ->
+  ?override_exclusive:bool option ->
+  unit ->
+  request_enter_configuration_mode
+(** [default_request_enter_configuration_mode ()] is the default value for type [request_enter_configuration_mode] *)
+
 val default_request : unit -> request
 (** [default_request ()] is the default value for type [request] *)
 
@@ -320,6 +329,9 @@ val decode_request_list_children : Pbrt.Decoder.t -> request_list_children
 val decode_request_run_op_mode : Pbrt.Decoder.t -> request_run_op_mode
 (** [decode_request_run_op_mode decoder] decodes a [request_run_op_mode] value from [decoder] *)
 
+val decode_request_enter_configuration_mode : Pbrt.Decoder.t -> request_enter_configuration_mode
+(** [decode_request_enter_configuration_mode decoder] decodes a [request_enter_configuration_mode] value from [decoder] *)
+
 val decode_request : Pbrt.Decoder.t -> request
 (** [decode_request decoder] decodes a [request] value from [decoder] *)
 
@@ -386,6 +398,9 @@ val encode_request_list_children : request_list_children -> Pbrt.Encoder.t -> un
 val encode_request_run_op_mode : request_run_op_mode -> Pbrt.Encoder.t -> unit
 (** [encode_request_run_op_mode v encoder] encodes [v] with the given [encoder] *)
 
+val encode_request_enter_configuration_mode : request_enter_configuration_mode -> Pbrt.Encoder.t -> unit
+(** [encode_request_enter_configuration_mode v encoder] encodes [v] with the given [encoder] *)
+
 val encode_request : request -> Pbrt.Encoder.t -> unit
 (** [encode_request v encoder] encodes [v] with the given [encoder] *)
 
@@ -451,6 +466,9 @@ val pp_request_list_children : Format.formatter -> request_list_children -> unit
 
 val pp_request_run_op_mode : Format.formatter -> request_run_op_mode -> unit 
 (** [pp_request_run_op_mode v] formats v *)
+
+val pp_request_enter_configuration_mode : Format.formatter -> request_enter_configuration_mode -> unit 
+(** [pp_request_enter_configuration_mode v] formats v *)
 
 val pp_request : Format.formatter -> request -> unit 
 (** [pp_request v] formats v *)

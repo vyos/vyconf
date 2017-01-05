@@ -5,15 +5,11 @@ type request_config_format =
   | Json 
 
 type request_setup_session = {
-  exclusive : bool option;
-  override_exclusive : bool option;
   client_application : string option;
   on_behalf_of : int32 option;
 }
 
 and request_setup_session_mutable = {
-  mutable exclusive : bool option;
-  mutable override_exclusive : bool option;
   mutable client_application : string option;
   mutable on_behalf_of : int32 option;
 }
@@ -174,6 +170,16 @@ and request_run_op_mode_mutable = {
   mutable path : string list;
 }
 
+type request_enter_configuration_mode = {
+  exclusive : bool option;
+  override_exclusive : bool option;
+}
+
+and request_enter_configuration_mode_mutable = {
+  mutable exclusive : bool option;
+  mutable override_exclusive : bool option;
+}
+
 type request =
   | Status
   | Setup_session of request_setup_session
@@ -193,6 +199,7 @@ type request =
   | List_children of request_list_children
   | Run_op_mode of request_run_op_mode
   | Confirm
+  | Configure of request_enter_configuration_mode
 
 type status =
   | Success 
@@ -215,20 +222,14 @@ and response_mutable = {
 let rec default_request_config_format () = (Curly:request_config_format)
 
 let rec default_request_setup_session 
-  ?exclusive:((exclusive:bool option) = None)
-  ?override_exclusive:((override_exclusive:bool option) = None)
   ?client_application:((client_application:string option) = None)
   ?on_behalf_of:((on_behalf_of:int32 option) = None)
   () : request_setup_session  = {
-  exclusive;
-  override_exclusive;
   client_application;
   on_behalf_of;
 }
 
 and default_request_setup_session_mutable () : request_setup_session_mutable = {
-  exclusive = None;
-  override_exclusive = None;
   client_application = None;
   on_behalf_of = None;
 }
@@ -435,6 +436,19 @@ and default_request_run_op_mode_mutable () : request_run_op_mode_mutable = {
   path = [];
 }
 
+let rec default_request_enter_configuration_mode 
+  ?exclusive:((exclusive:bool option) = None)
+  ?override_exclusive:((override_exclusive:bool option) = None)
+  () : request_enter_configuration_mode  = {
+  exclusive;
+  override_exclusive;
+}
+
+and default_request_enter_configuration_mode_mutable () : request_enter_configuration_mode_mutable = {
+  exclusive = None;
+  override_exclusive = None;
+}
+
 let rec default_request (): request = Status
 
 let rec default_status () = (Success:status)
@@ -470,33 +484,19 @@ let rec decode_request_setup_session d =
     match Pbrt.Decoder.key d with
     | None -> (
     )
-    | Some (1, Pbrt.Varint) -> (
-      v.exclusive <- Some (Pbrt.Decoder.bool d);
+    | Some (1, Pbrt.Bytes) -> (
+      v.client_application <- Some (Pbrt.Decoder.string d);
       loop ()
     )
     | Some (1, pk) -> raise (
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(request_setup_session), field(1)", pk))
     )
     | Some (2, Pbrt.Varint) -> (
-      v.override_exclusive <- Some (Pbrt.Decoder.bool d);
+      v.on_behalf_of <- Some (Pbrt.Decoder.int32_as_varint d);
       loop ()
     )
     | Some (2, pk) -> raise (
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(request_setup_session), field(2)", pk))
-    )
-    | Some (3, Pbrt.Bytes) -> (
-      v.client_application <- Some (Pbrt.Decoder.string d);
-      loop ()
-    )
-    | Some (3, pk) -> raise (
-      Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(request_setup_session), field(3)", pk))
-    )
-    | Some (4, Pbrt.Varint) -> (
-      v.on_behalf_of <- Some (Pbrt.Decoder.int32_as_varint d);
-      loop ()
-    )
-    | Some (4, pk) -> raise (
-      Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(request_setup_session), field(4)", pk))
     )
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind; loop ()
   in
@@ -917,6 +917,32 @@ let rec decode_request_run_op_mode d =
   let v:request_run_op_mode = Obj.magic v in
   v
 
+let rec decode_request_enter_configuration_mode d =
+  let v = default_request_enter_configuration_mode_mutable () in
+  let rec loop () = 
+    match Pbrt.Decoder.key d with
+    | None -> (
+    )
+    | Some (1, Pbrt.Varint) -> (
+      v.exclusive <- Some (Pbrt.Decoder.bool d);
+      loop ()
+    )
+    | Some (1, pk) -> raise (
+      Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(request_enter_configuration_mode), field(1)", pk))
+    )
+    | Some (2, Pbrt.Varint) -> (
+      v.override_exclusive <- Some (Pbrt.Decoder.bool d);
+      loop ()
+    )
+    | Some (2, pk) -> raise (
+      Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(request_enter_configuration_mode), field(2)", pk))
+    )
+    | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind; loop ()
+  in
+  loop ();
+  let v:request_enter_configuration_mode = Obj.magic v in
+  v
+
 let rec decode_request d = 
   let rec loop () = 
     let ret:request = match Pbrt.Decoder.key d with
@@ -939,6 +965,7 @@ let rec decode_request d =
       | Some (16, _) -> List_children (decode_request_list_children (Pbrt.Decoder.nested d))
       | Some (17, _) -> Run_op_mode (decode_request_run_op_mode (Pbrt.Decoder.nested d))
       | Some (18, _) -> (Pbrt.Decoder.empty_nested d ; Confirm)
+      | Some (19, _) -> Configure (decode_request_enter_configuration_mode (Pbrt.Decoder.nested d))
       | Some (n, payload_kind) -> (
         Pbrt.Decoder.skip d payload_kind; 
         loop () 
@@ -1003,25 +1030,9 @@ let rec encode_request_config_format (v:request_config_format) encoder =
 
 let rec encode_request_setup_session (v:request_setup_session) encoder = 
   (
-    match v.exclusive with 
-    | Some x -> (
-      Pbrt.Encoder.key (1, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.bool x encoder;
-    )
-    | None -> ();
-  );
-  (
-    match v.override_exclusive with 
-    | Some x -> (
-      Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.bool x encoder;
-    )
-    | None -> ();
-  );
-  (
     match v.client_application with 
     | Some x -> (
-      Pbrt.Encoder.key (3, Pbrt.Bytes) encoder; 
+      Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
       Pbrt.Encoder.string x encoder;
     )
     | None -> ();
@@ -1029,7 +1040,7 @@ let rec encode_request_setup_session (v:request_setup_session) encoder =
   (
     match v.on_behalf_of with 
     | Some x -> (
-      Pbrt.Encoder.key (4, Pbrt.Varint) encoder; 
+      Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
       Pbrt.Encoder.int32_as_varint x encoder;
     )
     | None -> ();
@@ -1226,6 +1237,25 @@ let rec encode_request_run_op_mode (v:request_run_op_mode) encoder =
   ) v.path;
   ()
 
+let rec encode_request_enter_configuration_mode (v:request_enter_configuration_mode) encoder = 
+  (
+    match v.exclusive with 
+    | Some x -> (
+      Pbrt.Encoder.key (1, Pbrt.Varint) encoder; 
+      Pbrt.Encoder.bool x encoder;
+    )
+    | None -> ();
+  );
+  (
+    match v.override_exclusive with 
+    | Some x -> (
+      Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
+      Pbrt.Encoder.bool x encoder;
+    )
+    | None -> ();
+  );
+  ()
+
 let rec encode_request (v:request) encoder = 
   match v with
   | Status -> (
@@ -1300,6 +1330,10 @@ let rec encode_request (v:request) encoder =
     Pbrt.Encoder.key (18, Pbrt.Bytes) encoder; 
     Pbrt.Encoder.empty_nested encoder
   )
+  | Configure x -> (
+    Pbrt.Encoder.key (19, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.nested (encode_request_enter_configuration_mode x) encoder;
+  )
 
 let rec encode_status (v:status) encoder =
   match v with
@@ -1335,8 +1369,6 @@ let rec pp_request_config_format fmt (v:request_config_format) =
 let rec pp_request_setup_session fmt (v:request_setup_session) = 
   let pp_i fmt () =
     Format.pp_open_vbox fmt 1;
-    Pbrt.Pp.pp_record_field "exclusive" (Pbrt.Pp.pp_option Pbrt.Pp.pp_bool) fmt v.exclusive;
-    Pbrt.Pp.pp_record_field "override_exclusive" (Pbrt.Pp.pp_option Pbrt.Pp.pp_bool) fmt v.override_exclusive;
     Pbrt.Pp.pp_record_field "client_application" (Pbrt.Pp.pp_option Pbrt.Pp.pp_string) fmt v.client_application;
     Pbrt.Pp.pp_record_field "on_behalf_of" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.on_behalf_of;
     Format.pp_close_box fmt ()
@@ -1485,6 +1517,15 @@ let rec pp_request_run_op_mode fmt (v:request_run_op_mode) =
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
 
+let rec pp_request_enter_configuration_mode fmt (v:request_enter_configuration_mode) = 
+  let pp_i fmt () =
+    Format.pp_open_vbox fmt 1;
+    Pbrt.Pp.pp_record_field "exclusive" (Pbrt.Pp.pp_option Pbrt.Pp.pp_bool) fmt v.exclusive;
+    Pbrt.Pp.pp_record_field "override_exclusive" (Pbrt.Pp.pp_option Pbrt.Pp.pp_bool) fmt v.override_exclusive;
+    Format.pp_close_box fmt ()
+  in
+  Pbrt.Pp.pp_brk pp_i fmt ()
+
 let rec pp_request fmt (v:request) =
   match v with
   | Status  -> Format.fprintf fmt "Status"
@@ -1505,6 +1546,7 @@ let rec pp_request fmt (v:request) =
   | List_children x -> Format.fprintf fmt "@[List_children(%a)@]" pp_request_list_children x
   | Run_op_mode x -> Format.fprintf fmt "@[Run_op_mode(%a)@]" pp_request_run_op_mode x
   | Confirm  -> Format.fprintf fmt "Confirm"
+  | Configure x -> Format.fprintf fmt "@[Configure(%a)@]" pp_request_enter_configuration_mode x
 
 let rec pp_status fmt (v:status) =
   match v with

@@ -8,10 +8,8 @@ message Request {
   }
 
   message SetupSession {
-    optional bool Exclusive = 1;
-    optional bool OverrideExclusive = 2;
-    optional string ClientApplication = 3;
-    optional int32 OnBehalfOf = 4;
+    optional string ClientApplication = 1;
+    optional int32 OnBehalfOf = 2;
   }
 
   message Set {
@@ -95,6 +93,11 @@ message Request {
   message Confirm {
   }
 
+  message EnterConfigurationMode {
+    optional bool Exclusive = 1;
+    optional bool OverrideExclusive = 2;
+  }
+
   oneof msg {
     Status status = 1;
     SetupSession setup_session = 2;
@@ -114,6 +117,7 @@ message Request {
     ListChildren list_children = 16;
     RunOpMode run_op_mode = 17;
     Confirm confirm = 18;
+    EnterConfigurationMode configure = 19;
   }  
 }
 
