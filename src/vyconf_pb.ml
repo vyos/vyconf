@@ -16,24 +16,20 @@ and request_setup_session_mutable = {
 
 type request_set = {
   path : string list;
-  value : string option;
   ephemeral : bool option;
 }
 
 and request_set_mutable = {
   mutable path : string list;
-  mutable value : string option;
   mutable ephemeral : bool option;
 }
 
 type request_delete = {
   path : string list;
-  value : string option;
 }
 
 and request_delete_mutable = {
   mutable path : string list;
-  mutable value : string option;
 }
 
 type request_rename = {
@@ -210,6 +206,7 @@ type status =
   | Configuration_locked 
   | Internal_error 
   | Permission_denied 
+  | Path_already_exists 
 
 type response = {
   status : status;
@@ -242,31 +239,25 @@ and default_request_setup_session_mutable () : request_setup_session_mutable = {
 
 let rec default_request_set 
   ?path:((path:string list) = [])
-  ?value:((value:string option) = None)
   ?ephemeral:((ephemeral:bool option) = None)
   () : request_set  = {
   path;
-  value;
   ephemeral;
 }
 
 and default_request_set_mutable () : request_set_mutable = {
   path = [];
-  value = None;
   ephemeral = None;
 }
 
 let rec default_request_delete 
   ?path:((path:string list) = [])
-  ?value:((value:string option) = None)
   () : request_delete  = {
   path;
-  value;
 }
 
 and default_request_delete_mutable () : request_delete_mutable = {
   path = [];
-  value = None;
 }
 
 let rec default_request_rename 
@@ -524,13 +515,6 @@ let rec decode_request_set d =
     | Some (1, pk) -> raise (
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(request_set), field(1)", pk))
     )
-    | Some (2, Pbrt.Bytes) -> (
-      v.value <- Some (Pbrt.Decoder.string d);
-      loop ()
-    )
-    | Some (2, pk) -> raise (
-      Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(request_set), field(2)", pk))
-    )
     | Some (3, Pbrt.Varint) -> (
       v.ephemeral <- Some (Pbrt.Decoder.bool d);
       loop ()
@@ -557,13 +541,6 @@ let rec decode_request_delete d =
     )
     | Some (1, pk) -> raise (
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(request_delete), field(1)", pk))
-    )
-    | Some (2, Pbrt.Bytes) -> (
-      v.value <- Some (Pbrt.Decoder.string d);
-      loop ()
-    )
-    | Some (2, pk) -> raise (
-      Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(request_delete), field(2)", pk))
     )
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind; loop ()
   in
@@ -991,6 +968,7 @@ let rec decode_status d =
   | 5 -> (Configuration_locked:status)
   | 6 -> (Internal_error:status)
   | 7 -> (Permission_denied:status)
+  | 8 -> (Path_already_exists:status)
   | _ -> failwith "Unknown value for enum status"
 
 let rec decode_response d =
@@ -1063,14 +1041,6 @@ let rec encode_request_set (v:request_set) encoder =
     Pbrt.Encoder.string x encoder;
   ) v.path;
   (
-    match v.value with 
-    | Some x -> (
-      Pbrt.Encoder.key (2, Pbrt.Bytes) encoder; 
-      Pbrt.Encoder.string x encoder;
-    )
-    | None -> ();
-  );
-  (
     match v.ephemeral with 
     | Some x -> (
       Pbrt.Encoder.key (3, Pbrt.Varint) encoder; 
@@ -1085,14 +1055,6 @@ let rec encode_request_delete (v:request_delete) encoder =
     Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
     Pbrt.Encoder.string x encoder;
   ) v.path;
-  (
-    match v.value with 
-    | Some x -> (
-      Pbrt.Encoder.key (2, Pbrt.Bytes) encoder; 
-      Pbrt.Encoder.string x encoder;
-    )
-    | None -> ();
-  );
   ()
 
 let rec encode_request_rename (v:request_rename) encoder = 
@@ -1355,6 +1317,7 @@ let rec encode_status (v:status) encoder =
   | Configuration_locked -> Pbrt.Encoder.int_as_varint 5 encoder
   | Internal_error -> Pbrt.Encoder.int_as_varint 6 encoder
   | Permission_denied -> Pbrt.Encoder.int_as_varint 7 encoder
+  | Path_already_exists -> Pbrt.Encoder.int_as_varint 8 encoder
 
 let rec encode_response (v:response) encoder = 
   Pbrt.Encoder.key (1, Pbrt.Varint) encoder; 
@@ -1403,7 +1366,6 @@ let rec pp_request_set fmt (v:request_set) =
   let pp_i fmt () =
     Format.pp_open_vbox fmt 1;
     Pbrt.Pp.pp_record_field "path" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.path;
-    Pbrt.Pp.pp_record_field "value" (Pbrt.Pp.pp_option Pbrt.Pp.pp_string) fmt v.value;
     Pbrt.Pp.pp_record_field "ephemeral" (Pbrt.Pp.pp_option Pbrt.Pp.pp_bool) fmt v.ephemeral;
     Format.pp_close_box fmt ()
   in
@@ -1413,7 +1375,6 @@ let rec pp_request_delete fmt (v:request_delete) =
   let pp_i fmt () =
     Format.pp_open_vbox fmt 1;
     Pbrt.Pp.pp_record_field "path" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.path;
-    Pbrt.Pp.pp_record_field "value" (Pbrt.Pp.pp_option Pbrt.Pp.pp_string) fmt v.value;
     Format.pp_close_box fmt ()
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
@@ -1582,6 +1543,7 @@ let rec pp_status fmt (v:status) =
   | Configuration_locked -> Format.fprintf fmt "Configuration_locked"
   | Internal_error -> Format.fprintf fmt "Internal_error"
   | Permission_denied -> Format.fprintf fmt "Permission_denied"
+  | Path_already_exists -> Format.fprintf fmt "Path_already_exists"
 
 let rec pp_response fmt (v:response) = 
   let pp_i fmt () =

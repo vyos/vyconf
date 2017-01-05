@@ -14,13 +14,11 @@ message Request {
 
   message Set {
     repeated string Path = 1;
-    optional string Value = 2;
     optional bool Ephemeral = 3; 
   }
 
   message Delete {
     repeated string Path = 1;
-    optional string Value = 2;
   }
 
   message Rename {
@@ -130,6 +128,7 @@ enum Status {
   CONFIGURATION_LOCKED = 5;
   INTERNAL_ERROR = 6;
   PERMISSION_DENIED = 7;
+  PATH_ALREADY_EXISTS = 8;
 }
 
 message Response {

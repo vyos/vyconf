@@ -14,13 +14,11 @@ type request_setup_session = {
 
 type request_set = {
   path : string list;
-  value : string option;
   ephemeral : bool option;
 }
 
 type request_delete = {
   path : string list;
-  value : string option;
 }
 
 type request_rename = {
@@ -125,6 +123,7 @@ type status =
   | Configuration_locked 
   | Internal_error 
   | Permission_denied 
+  | Path_already_exists 
 
 type response = {
   status : status;
@@ -148,7 +147,6 @@ val default_request_setup_session :
 
 val default_request_set : 
   ?path:string list ->
-  ?value:string option ->
   ?ephemeral:bool option ->
   unit ->
   request_set
@@ -156,7 +154,6 @@ val default_request_set :
 
 val default_request_delete : 
   ?path:string list ->
-  ?value:string option ->
   unit ->
   request_delete
 (** [default_request_delete ()] is the default value for type [request_delete] *)
