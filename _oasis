@@ -77,12 +77,6 @@ Library "directories"
   FindlibParent: vyconf
   BuildDepends: fileutils
 
-Library "message"
-  Path: src
-  Modules: Message
-  FindlibParent: vyconf
-  BuildDepends: ppx_deriving_yojson
-
 Library "startup"
   Path: src
   Modules: Startup
