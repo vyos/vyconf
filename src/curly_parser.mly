@@ -61,6 +61,6 @@ node_content: n = node { n } | n = leaf_node { n } | n = tag_node { n };
 %public config:
     ns = list(node);  EOF
   {
-    let root = make "root" in List.fold_left Vytree.adopt root (List.rev ns)
+    let root = make "root" in List.fold_left Vytree.adopt root (List.rev ns) |> Vytree.merge_children
   }
 ;
