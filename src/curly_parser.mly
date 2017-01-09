@@ -35,6 +35,8 @@ values:
 leaf_node:
   | comment = opt_comment; name = IDENTIFIER; values = values; SEMI
     { Vytree.make_full {default_data with values=(List.rev values); comment=comment} name []}
+  | comment = opt_comment; name = IDENTIFIER; SEMI (* valueless node *)
+    { Vytree.make_full {default_data with comment=comment} name [] }
 ;
 
 node:

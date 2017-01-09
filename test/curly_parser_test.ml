@@ -15,6 +15,7 @@ let config_tag_top_level = "foo bar { baz quux; }"
 let config_with_leaf = "foo { bar baz; }"
 let config_with_leaf_url_unquoted = "foo { bar http://www2.example.org/foo; }"
 let config_with_leaf_value_quoted = "foo { bar \"foo bar\"; }"
+let config_with_leaf_valueless = "foo { bar; }"
 
 (* XXX: naive use of Menhir's separated_list doesn't allow [baz; xyzzy;],
         perhaps we should support it too *)
@@ -57,6 +58,11 @@ let test_parse_with_leaf_url_unquoted test_ctxt =
 let test_parse_with_leaf_value_quoted test_ctxt =
     let config = parse config_with_leaf_value_quoted in
     assert_equal (CT.get_value config ["foo"; "bar"]) "foo bar"
+
+(* Valueless leaf nodes work *)
+let test_parse_with_leaf_valueless test_ctxt =
+    let config = parse config_with_leaf_valueless in
+    assert_equal (Vytree.get config ["foo"] |> Vytree.list_children) ["bar"]
 
 (* Top level leaf nodes are not allowed *)
 let test_parse_top_level_leaf_node test_ctxt =
@@ -102,6 +108,7 @@ let suite =
         "test_parse_with_leaf" >:: test_parse_with_leaf;
         "test_parse_with_leaf_url_unquoted" >:: test_parse_with_leaf_url_unquoted;
         "test_parse_with_leaf_value_quoted" >:: test_parse_with_leaf_value_quoted;
+        "test_parse_with_leaf_valueless" >:: test_parse_with_leaf_valueless;
         "test_parse_top_level_leaf_node" >:: test_parse_top_level_leaf_node;
         "test_parse_top_level_tag_node" >:: test_parse_top_level_tag_node;
         "test_parse_with_multi" >:: test_parse_with_multi;
