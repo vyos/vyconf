@@ -29,24 +29,36 @@ value:
 values:
   | v = value { [v] }
   | LEFT_BRACKET; vs = separated_nonempty_list(SEMI, value); RIGHT_BRACKET
-    { vs }
+    { (List.rev vs) }
 ;
 
 leaf_node:
   | comment = opt_comment; name = IDENTIFIER; values = values; SEMI
-    { Vytree.make_full {default_data with values=values; comment=comment} name []}
+    { Vytree.make_full {default_data with values=(List.rev values); comment=comment} name []}
 ;
 
 node:
   | comment = opt_comment; name = IDENTIFIER; LEFT_BRACE; children = list(node_content); RIGHT_BRACE
-    { let node = Vytree.make_full {default_data with comment=comment} name [] in List.fold_left Vytree.adopt node children  }
+    {
+        let node = Vytree.make_full {default_data with comment=comment} name [] in
+        List.fold_left Vytree.adopt node (List.rev children) |> Vytree.merge_children
+    }
 ;
 
-node_content: n = node { n } | n = leaf_node { n };
+tag_node:
+  | comment = opt_comment; name = IDENTIFIER; tag = IDENTIFIER; LEFT_BRACE; children = list(node_content); RIGHT_BRACE
+  {
+      let outer_node = Vytree.make_full default_data name [] in
+      let inner_node = Vytree.make_full {default_data with comment=comment} tag [] in
+      let inner_node = List.fold_left Vytree.adopt inner_node (List.rev children) |> Vytree.merge_children
+      in Vytree.adopt outer_node inner_node
+  }
+
+node_content: n = node { n } | n = leaf_node { n } | n = tag_node { n };
 
 %public config:
     ns = list(node);  EOF
   {
-    let root = make "root" in List.fold_left Vytree.adopt root ns
+    let root = make "root" in List.fold_left Vytree.adopt root (List.rev ns)
   }
 ;
