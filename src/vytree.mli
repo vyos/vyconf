@@ -1,4 +1,4 @@
-type 'a t
+type 'a t [@@deriving yojson]
 
 exception Empty_path
 exception Duplicate_child

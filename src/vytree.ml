@@ -2,7 +2,7 @@ type 'a	t = {
     name: string;
     data: 'a;
     children: 'a t list
-}
+} [@@deriving yojson]
 
 type position = Before of string | After of string | End | Default
 

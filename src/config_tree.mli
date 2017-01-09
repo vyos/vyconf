@@ -8,9 +8,9 @@ type config_node_data = {
   comment : string option;
   inactive : bool;
   ephemeral : bool;
-}
+} [@@deriving yojson]
 
-type t = config_node_data Vytree.t
+type t = config_node_data Vytree.t [@@deriving yojson]
 
 val default_data : config_node_data
 

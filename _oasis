@@ -20,6 +20,7 @@ Library "vytree"
   Path: src
   Modules: Vytree
   FindlibParent: vyconf
+  BuildDepends: ppx_deriving_yojson
 
 Library "reference_tree"
   Path: src
@@ -31,6 +32,7 @@ Library "config_tree"
   Path: src
   Modules: Config_tree
   FindlibParent: vyconf
+  BuildDepends: ppx_deriving_yojson
 
 Library "value_checker"
   Path: src
@@ -95,7 +97,7 @@ Executable "vytree_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends: oUnit, vyconf
+  BuildDepends: oUnit, ppx_deriving.runtime, ppx_deriving_yojson.runtime, vyconf
 
 Executable "reference_tree_test"
   Path: test
@@ -103,7 +105,7 @@ Executable "reference_tree_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends: oUnit, xml-light, pcre, vyconf
+  BuildDepends: oUnit, ppx_deriving.runtime, ppx_deriving_yojson.runtime, xml-light, pcre, vyconf
 
 Executable "config_tree_test"
   Path: test
@@ -111,7 +113,7 @@ Executable "config_tree_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends: oUnit, vyconf
+  BuildDepends: oUnit, ppx_deriving.runtime, ppx_deriving_yojson.runtime, vyconf
 
 Executable "vylist_test"
   Path: test
@@ -151,7 +153,7 @@ Executable "curly_parser_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends: oUnit, vyconf
+  BuildDepends: oUnit, ppx_deriving.runtime, ppx_deriving_yojson.runtime, vyconf
 
 Executable "session_test"
   Path: test
@@ -159,7 +161,7 @@ Executable "session_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends: oUnit, vyconf, xml-light, fileutils, pcre
+  BuildDepends: oUnit, ppx_deriving.runtime, ppx_deriving_yojson.runtime, xml-light, fileutils, pcre, vyconf
 
 Executable "vytree_load_test"
   Path: test
@@ -167,7 +169,7 @@ Executable "vytree_load_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends: vyconf
+  BuildDepends: ppx_deriving.runtime, ppx_deriving_yojson.runtime, vyconf
 
 Test "vytree_test"
   Run$: flag(tests)

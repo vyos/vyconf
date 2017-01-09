@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: adbc5f656e7c012d33ba25a4cb9be2ac)
+# DO NOT EDIT (digest: 0757c9ec9f5d35df060616ca6806b8dd)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -22,6 +22,7 @@ true: annot, bin_annot
 "src/reference_tree.cmxs": use_reference_tree
 # Library config_tree
 "src/config_tree.cmxs": use_config_tree
+<src/*.ml{,i,y}>: pkg_ppx_deriving_yojson
 # Library value_checker
 "src/value_checker.cmxs": use_value_checker
 <src/*.ml{,i,y}>: pkg_pcre
@@ -64,14 +65,20 @@ true: annot, bin_annot
 <src/*.ml{,i,y}>: use_vyconf
 # Executable vytree_test
 <test/vytree_test.{native,byte}>: pkg_oUnit
+<test/vytree_test.{native,byte}>: pkg_ppx_deriving.runtime
+<test/vytree_test.{native,byte}>: pkg_ppx_deriving_yojson.runtime
 <test/vytree_test.{native,byte}>: use_vyconf
 # Executable reference_tree_test
 <test/reference_tree_test.{native,byte}>: pkg_oUnit
 <test/reference_tree_test.{native,byte}>: pkg_pcre
+<test/reference_tree_test.{native,byte}>: pkg_ppx_deriving.runtime
+<test/reference_tree_test.{native,byte}>: pkg_ppx_deriving_yojson.runtime
 <test/reference_tree_test.{native,byte}>: pkg_xml-light
 <test/reference_tree_test.{native,byte}>: use_vyconf
 # Executable config_tree_test
 <test/config_tree_test.{native,byte}>: pkg_oUnit
+<test/config_tree_test.{native,byte}>: pkg_ppx_deriving.runtime
+<test/config_tree_test.{native,byte}>: pkg_ppx_deriving_yojson.runtime
 <test/config_tree_test.{native,byte}>: use_vyconf
 # Executable vylist_test
 <test/vylist_test.{native,byte}>: pkg_oUnit
@@ -89,15 +96,18 @@ true: annot, bin_annot
 <test/vyconf_config_test.{native,byte}>: pkg_ppx_deriving.runtime
 <test/vyconf_config_test.{native,byte}>: pkg_toml
 <test/vyconf_config_test.{native,byte}>: use_vyconf
-<test/*.ml{,i,y}>: pkg_ppx_deriving.runtime
 <test/*.ml{,i,y}>: pkg_toml
 # Executable curly_parser_test
 <test/curly_parser_test.{native,byte}>: pkg_oUnit
+<test/curly_parser_test.{native,byte}>: pkg_ppx_deriving.runtime
+<test/curly_parser_test.{native,byte}>: pkg_ppx_deriving_yojson.runtime
 <test/curly_parser_test.{native,byte}>: use_vyconf
 # Executable session_test
 <test/session_test.{native,byte}>: pkg_fileutils
 <test/session_test.{native,byte}>: pkg_oUnit
 <test/session_test.{native,byte}>: pkg_pcre
+<test/session_test.{native,byte}>: pkg_ppx_deriving.runtime
+<test/session_test.{native,byte}>: pkg_ppx_deriving_yojson.runtime
 <test/session_test.{native,byte}>: pkg_xml-light
 <test/session_test.{native,byte}>: use_vyconf
 <test/*.ml{,i,y}>: pkg_fileutils
@@ -105,7 +115,11 @@ true: annot, bin_annot
 <test/*.ml{,i,y}>: pkg_pcre
 <test/*.ml{,i,y}>: pkg_xml-light
 # Executable vytree_load_test
+<test/vytree_load_test.{native,byte}>: pkg_ppx_deriving.runtime
+<test/vytree_load_test.{native,byte}>: pkg_ppx_deriving_yojson.runtime
 <test/vytree_load_test.{native,byte}>: use_vyconf
+<test/*.ml{,i,y}>: pkg_ppx_deriving.runtime
+<test/*.ml{,i,y}>: pkg_ppx_deriving_yojson.runtime
 <test/*.ml{,i,y}>: use_vyconf
 # OASIS_STOP
 
