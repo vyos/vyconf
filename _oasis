@@ -145,6 +145,14 @@ Executable "vyconf_config_test"
   Install: false
   BuildDepends:  oUnit, toml, ppx_deriving.runtime, vyconf
 
+Executable "curly_parser_test"
+  Path: test
+  MainIs: curly_parser_test.ml
+  Build$: flag(tests)
+  CompiledObject: best
+  Install: false
+  BuildDepends: oUnit, vyconf
+
 Executable "session_test"
   Path: test
   MainIs: session_test.ml
@@ -195,6 +203,12 @@ Test "vyconf_config_test"
   Run$: flag(tests)
   TestTools: vyconf_config_test
   Command: $vyconf_config_test
+  WorkingDirectory: test
+
+Test "curly_parser_test"
+  Run$: flag(tests)
+  TestTools: curly_parser_test
+  Command: $curly_parser_test
   WorkingDirectory: test
 
 Test "util_test"
