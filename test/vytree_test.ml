@@ -132,6 +132,29 @@ let test_get_data test_ctxt =
     let node = insert node ["foo"; "bar"] 42 in
     assert_equal (get_data node ["foo"; "bar"]) 42
 
+(* merge_children should have no effect if there are
+   no children with duplicate names *)
+let test_merge_children_no_duplicates test_ctxt =
+    let node = make_full () "root"
+      [make_full () "foo" [make () "bar"];
+       make () "bar";
+       make_full () "baz" [make () "quuz"]] in
+    let node' = merge_children node in
+    assert_equal (list_children node') ["foo"; "bar"; "baz"]
+
+
+(* If node has children with duplicate names, then
+   1. Only the first should be left
+   2. Children of all other nodes should be appended to its own *)
+let test_merge_children_has_duplicates test_ctxt =
+    let node = make_full () "root"
+      [make_full () "foo" [make () "bar"];
+       make () "quux";
+       make_full () "foo" [make () "baz"]] in
+    let node' = merge_children node in
+    assert_equal (list_children node') ["foo"; "quux"];
+    assert_equal (get node' ["foo"] |> list_children) ["bar"; "baz"]
+
 let suite =
     "VyConf tree tests" >::: [
         "test_make_node" >:: test_make_node;
@@ -152,6 +175,8 @@ let suite =
         "test_exists_existent" >:: test_exists_existent;
         "test_exists_nonexistent" >:: test_exists_nonexistent;
         "test_get_data" >:: test_get_data;
+        "test_merge_children_has_duplicates" >:: test_merge_children_has_duplicates;
+        "test_merge_children_no_duplicates" >:: test_merge_children_no_duplicates;
     ]
 
 let () =

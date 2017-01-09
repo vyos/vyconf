@@ -81,6 +81,42 @@ let rec insert ?(position=Default) node path data =
         | None ->
             raise (Insert_error "Path does not exist")
 
+(** Given a node N check if it has children with duplicate names,
+    and merge subsequent children's children into the first child by
+    that name.
+
+    While all insert functions maintain the "every child has unique name"
+    invariant, for nodes constructed manually with make/make_full and adopt
+    it may not hold, and constructing nodes this way is a sensible approach
+    for config parsing. Depending on the config format, duplicate node names
+    may be normal and even expected, such as "ethernet eth0" and "ethernet eth1"
+    in the "curly" format.
+ *)
+let merge_children node =
+    (* Given a node N and a list of nodes NS, find all nodes in NS that
+       have the same name as N and merge their children into N *)
+    let rec merge_into n ns  =
+        match ns with
+        | [] -> n
+        | n' :: ns' ->
+            if n.name = n'.name then
+                let children = List.append n.children n'.children in
+                let n = {n with children=children} in
+                merge_into n ns'
+            else merge_into n ns'
+    in
+    (* Given a list of nodes, for every node, find subsequent children with
+       the same name and merge them into the first node, then delete remaining
+       nodes from the list *)
+    let rec aux ns =
+        match ns with
+        | [] -> []
+        | n :: ns ->
+            let n = merge_into n ns in
+            let ns = List.filter (fun x -> x.name <> n.name) ns in
+            n :: (aux ns)
+    in {node with children=(aux node.children)}
+
 (* When inserting at a path that, entirely or partially,
    does not exist yet, create missing nodes on the way with default data *)
 let rec insert_multi_level default_data node path_done path_remaining data =
