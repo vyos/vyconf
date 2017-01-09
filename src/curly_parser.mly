@@ -17,7 +17,7 @@
 
 opt_comment:
   | (* empty *) { None }
-  | c = COMMENT { Some c }
+  | c = COMMENT { Some (String.trim c) }
 
 value:
   | v = STRING

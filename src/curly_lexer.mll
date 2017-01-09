@@ -19,7 +19,7 @@ rule token = parse
     { RIGHT_BRACKET }
 | ';'
     { SEMI }
-| ['a' - 'z' 'A' - 'Z' '0' - '9' '-' '.' ]+ as s
+| ['a' -'z' 'A' - 'Z' '0' - '9' '.' '/' ':' '@' '$' '-' ]+ as s
     { IDENTIFIER s}
 | eof
     { EOF }
