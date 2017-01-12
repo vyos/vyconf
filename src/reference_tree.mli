@@ -20,7 +20,11 @@ type t = ref_node_data Vytree.t
 
 val default_data : ref_node_data
 
+val default : t
+
 val load_from_xml : t -> string -> t
+
+val load_interface_definitions : string -> t
 
 val validate_path : string -> t -> string list -> string list * string option
 

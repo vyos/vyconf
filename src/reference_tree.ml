@@ -34,6 +34,8 @@ let default_data = {
     secret = false;
 }
 
+let default = Vytree.make default_data "root"
+
 (* Loading from XML *)
 
 let node_type_of_string s =
@@ -119,6 +121,17 @@ let load_from_xml reftree file =
     with
     | Xml.File_not_found msg -> raise (Bad_interface_definition msg)
     | Xml.Error e -> raise (Bad_interface_definition (Xml.error e))
+
+let load_interface_definitions dir =
+    let relative_paths =
+        try
+            FileUtil.ls dir
+        with Sys_error no_dir_msg -> Startup.panic no_dir_msg
+    in
+    let absolute_paths = List.map Util.absolute_path relative_paths in
+    try
+        List.fold_left load_from_xml default absolute_paths
+    with Bad_interface_definition msg -> Startup.panic msg
 
 (* Validation function *)
 
