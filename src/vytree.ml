@@ -92,16 +92,17 @@ let rec insert ?(position=Default) node path data =
     may be normal and even expected, such as "ethernet eth0" and "ethernet eth1"
     in the "curly" format.
  *)
-let merge_children node =
+let merge_children merge_data node =
     (* Given a node N and a list of nodes NS, find all nodes in NS that
        have the same name as N and merge their children into N *)
-    let rec merge_into n ns  =
+    let rec merge_into n ns =
         match ns with
         | [] -> n
         | n' :: ns' ->
             if n.name = n'.name then
                 let children = List.append n.children n'.children in
-                let n = {n with children=children} in
+                let data = merge_data n.data n'.data in
+                let n = {n with children=children; data=data} in
                 merge_into n ns'
             else merge_into n ns'
     in

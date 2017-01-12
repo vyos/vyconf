@@ -23,7 +23,7 @@ val insert : ?position:position -> 'a t -> string list -> 'a -> 'a t
 
 val insert_multi_level : 'a -> 'a t -> string list -> string list -> 'a -> 'a t
 
-val merge_children : 'a t -> 'a t
+val merge_children : ('a -> 'a -> 'a) -> 'a t -> 'a t
 
 val delete : 'a t -> string list -> 'a t
 

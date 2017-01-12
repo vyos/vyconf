@@ -27,6 +27,10 @@ let config_with_comment = "foo { /* comment */ bar { } }"
 let config_with_leaf_node_comment = "foo { /* comment */ bar baz; }"
 let config_with_tag_node_comment = "foo { /* comment */ bar baz { } }"
 
+let config_with_duplicate_node = "foo { bar { baz {} } bar { baz {} } }"
+let config_with_duplicate_tag_node = "foo { bar baz0 { } bar baz0 { } }"
+let config_with_duplicate_leaf_node = "foo { bar baz; bar quux; }"
+
 let parse s = Curly_parser.config Curly_lexer.token (Lexing.from_string s)
 
 (* Empty config is considered valid, creates just the root node *)
@@ -99,6 +103,22 @@ let test_parse_with_tag test_ctxt =
     assert_equal (CT.get_value config ["foo"; "bar"; "baz"; "quux"]) "xyzzy";
     assert_equal (CT.get_value config ["foo"; "bar"; "qwerty"; "quux"]) "foobar"
 
+(* Normal nodes with duplicate children are detected *)
+let test_parse_node_duplicate_child test_ctxt =
+    try ignore @@ parse config_with_duplicate_node; assert_failure "Duplicated node child didn't cause errors"
+    with (Failure _) -> ()
+
+(* Tag nodes with duplicate children are detected *)
+let test_parse_tag_node_duplicate_child test_ctxt =
+    try ignore @@ parse config_with_duplicate_tag_node; assert_failure "Duplicated tag node child didn't cause errors"
+    with (Failure _) -> ()
+
+(* If there are duplicate leaf nodes, values of the next ones are merged into the first one,
+   the rest of the data is lost *)
+let test_parse_duplicate_leaf_node test_ctxt =
+    let config = parse config_with_duplicate_leaf_node in
+    assert_equal (CT.get_values config ["foo"; "bar"]) ["baz"; "quux"]
+
 
 let suite =
     "VyConf curly config parser tests" >::: [
@@ -116,6 +136,9 @@ let suite =
         "test_parse_with_comment" >:: test_parse_with_comment;
         "test_parse_with_leaf_node_comment" >:: test_parse_with_leaf_node_comment;
         "test_parse_with_tag_node_comment" >:: test_parse_with_tag_node_comment;
+        "test_parse_node_duplicate_child" >:: test_parse_node_duplicate_child;
+        "test_parse_tag_node_duplicate_child" >:: test_parse_tag_node_duplicate_child;
+        "test_parse_duplicate_leaf_node" >:: test_parse_duplicate_leaf_node;
     ]
 
 let () =
