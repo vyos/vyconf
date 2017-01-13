@@ -19,6 +19,10 @@ rule token = parse
     { Lexing.new_line lexbuf ; token lexbuf }
 | "/*"
     { read_comment (Buffer.create 16) lexbuf }
+| "#INACTIVE"
+    { INACTIVE }
+| "#EPHEMERAL"
+    { EPHEMERAL }
 | '{'
     { LEFT_BRACE }
 | '}'

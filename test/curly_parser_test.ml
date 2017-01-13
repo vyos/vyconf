@@ -33,6 +33,17 @@ let config_with_duplicate_node = "foo { bar { baz {} } bar { baz {} } }"
 let config_with_duplicate_tag_node = "foo { bar baz0 { } bar baz0 { } }"
 let config_with_duplicate_leaf_node = "foo { bar baz; bar quux; }"
 
+let config_with_inactive_node = "#INACTIVE foo { bar baz; }"
+let config_with_inactive_leaf_node = "foo { #INACTIVE bar baz; quux xyzzy; }"
+let config_with_inactive_tag_node = "foo { #INACTIVE bar baz { quux xyzzy; } }"
+
+let config_with_ephemeral_node = "#EPHEMERAL foo { } bar { }"
+let config_with_ephemeral_leaf_node = "foo { #EPHEMERAL bar baz; quux xyzzy; } bar { }"
+let config_with_ephemeral_tag_node = "foo { #EPHEMERAL bar baz { #INACTIVE quux xyzzy; } }"
+
+let config_with_inactive_and_ephemeral_node = "#INACTIVE #EPHEMERAL foo { bar { } }"
+let config_with_inactive_node_and_comment = "/* comment */ #INACTIVE #EPHEMERAL foo { }"
+
 let parse s = Curly_parser.config Curly_lexer.token (Lexing.from_string s)
 
 (* Empty config is considered valid, creates just the root node *)
@@ -131,6 +142,53 @@ let test_parse_duplicate_leaf_node test_ctxt =
     let config = parse config_with_duplicate_leaf_node in
     assert_equal (CT.get_values config ["foo"; "bar"]) ["baz"; "quux"]
 
+(* Inactive nodes are parsed correctly *)
+let test_parse_inactive_node test_ctxt =
+    let config = parse config_with_inactive_node in
+    assert_equal (CT.is_inactive config ["foo"]) true
+
+(* Inactive leaf nodes are parsed correctly *)
+let test_parse_inactive_leaf_node test_ctxt =
+    let config = parse config_with_inactive_leaf_node in
+    assert_equal (CT.is_inactive config ["foo"; "bar"]) true
+
+(* Inactive leaf nodes are parsed correctly *)
+let test_parse_inactive_tag_node test_ctxt =
+    let config = parse config_with_inactive_tag_node in
+    assert_equal (CT.is_inactive config ["foo"; "bar"; "baz"]) true
+
+(* Normally ephemeral nodes shouldn't appear in config files, since it's the whole
+   point of ephemeral nodes that they are ignored when saving the config,
+   but they are a part of the format so we get to parse them.
+   Besides, HA scripts may want to use load or merge instead of executing set commands *)
+
+(* Ephemeral nodes are parsed correctly *)
+let test_parse_ephemeral_node test_ctxt =
+    let config = parse config_with_ephemeral_node in
+    assert_equal (CT.is_ephemeral config ["foo"]) true
+
+(* Ephemeral leaf nodes are parsed correctly *)
+let test_parse_ephemeral_leaf_node test_ctxt =
+    let config = parse config_with_ephemeral_leaf_node in
+    assert_equal (CT.is_ephemeral config ["foo"; "bar"]) true
+
+(* Ephemeral leaf nodes are parsed correctly *)
+let test_parse_ephemeral_tag_node test_ctxt =
+    let config = parse config_with_ephemeral_tag_node in
+    assert_equal (CT.is_ephemeral config ["foo"; "bar"; "baz"]) true
+
+(* Unusual but not impossible: a node that is both inactive and ephemeral *)
+let test_parse_inactive_and_ephemeral_node test_ctxt =
+    let config = parse config_with_inactive_and_ephemeral_node in
+    assert_equal (CT.is_ephemeral config ["foo"]) true;
+    assert_equal (CT.is_inactive config ["foo"]) true
+
+(* Comments and ephemeral/inactive properties mix well *)
+let test_parse_inactive_node_and_comment test_ctxt =
+    let config = parse config_with_inactive_node_and_comment in
+    assert_equal (CT.is_ephemeral config ["foo"]) true;
+    assert_equal (CT.is_inactive config ["foo"]) true;
+    assert_equal (CT.get_comment config ["foo"]) (Some "comment")
 
 let suite =
     "VyConf curly config parser tests" >::: [
@@ -153,6 +211,14 @@ let suite =
         "test_parse_node_duplicate_child" >:: test_parse_node_duplicate_child;
         "test_parse_tag_node_duplicate_child" >:: test_parse_tag_node_duplicate_child;
         "test_parse_duplicate_leaf_node" >:: test_parse_duplicate_leaf_node;
+        "test_parse_inactive_node" >:: test_parse_inactive_node;
+        "test_parse_inactive_leaf_node" >:: test_parse_inactive_leaf_node;
+        "test_parse_inactive_tag_node" >:: test_parse_inactive_tag_node;
+        "test_parse_ephemeral_node" >:: test_parse_ephemeral_node;
+        "test_parse_ephemeral_leaf_node" >:: test_parse_ephemeral_leaf_node;
+        "test_parse_ephemeral_tag_node" >:: test_parse_ephemeral_tag_node;
+        "test_parse_inactive_and_ephemeral_node" >:: test_parse_inactive_and_ephemeral_node;
+        "test_parse_inactive_node_and_comment" >:: test_parse_inactive_node_and_comment;
     ]
 
 let () =
