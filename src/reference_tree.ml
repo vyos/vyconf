@@ -127,7 +127,18 @@ let load_from_xml reftree file =
 
 (* Validation function *)
 
-(* A path can be created in the config tree unless:
+let has_illegal_characters name =
+    (** Checks if string name has illegal characters in it.
+        All whitespace, curly braces, square brackets, and quotes
+        are disallowed due to their special significance to the curly config
+        format parser *)
+    try Some (Pcre.get_substring (Pcre.exec ~pat:"[\\s\\{\\}\\[\\]\"\'#]" name) 0)
+    with Not_found -> None
+
+(** Takes a list of string that represents a configuration path that may have
+    node value at the end, validates it, and splits it into path and value parts.
+
+   A list of strings is a valid path that can be created in the config tree unless:
      1. It's a tag node without a child
      2. It's a non-valueless leaf node without a value
      3. It's a valueless node with a value
@@ -156,12 +167,15 @@ let rec validate_path validators_dir node path =
         | Tag ->
             (match path with
              | p :: p' :: ps ->
-                 if (Value_checker.validate_any validators_dir data.constraints p) then
-                     let child = Vytree.find node p' in
-                     (match child with
-                      | Some c -> aux c ps (p' :: p :: acc)
-                      | None -> raise (Validation_error (Printf.sprintf "Node %s has no child %s" (show_path acc) p')))
-                 else raise (Validation_error (Printf.sprintf "%s is not a valid child name for node %s" p (show_path acc)))
+                 (match (has_illegal_characters p) with
+                 | Some c -> raise (Validation_error (Printf.sprintf "Illegal character \"%s\" in node name \"%s\"" c p))
+                 | None ->
+                     if (Value_checker.validate_any validators_dir data.constraints p) then
+                         let child = Vytree.find node p' in
+                         (match child with
+                          | Some c -> aux c ps (p' :: p :: acc)
+                          | None -> raise (Validation_error (Printf.sprintf "Node %s has no child %s" (show_path acc) p')))
+                     else raise (Validation_error (Printf.sprintf "%s is not a valid child name for node %s" p (show_path acc))))
              | [p] -> if (Value_checker.validate_any validators_dir data.constraints p) then (List.rev acc, None)
                           else raise (Validation_error (Printf.sprintf "Node %s has no child %s" (show_path acc) p))
              | _ -> raise (Validation_error (Printf.sprintf "Path %s is incomplete" (show_path acc))))

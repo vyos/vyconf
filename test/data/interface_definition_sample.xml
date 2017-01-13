@@ -60,4 +60,21 @@
       </node>
     </children>
   </node>
+  <node name="interfaces">
+    <children>
+      <tagNode name="ethernet">
+        <properties>
+          <!-- no constraint, for testing if tag nodes with invalid characters in names
+               are detected -->
+        </properties>
+        <children>
+          <leafNode name="disable">
+            <properties>
+              <valueless/>
+            </properties>
+          </leafNode>
+        </children>
+      </tagNode>
+    </children>
+  </node>
 </interfaceDefinition>

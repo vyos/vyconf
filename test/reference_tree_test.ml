@@ -10,7 +10,8 @@ let raises_validation_error f =
 let test_load_valid_definition test_ctxt =
     let r = Vytree.make default_data "root" in
     let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
-    assert_equal (Vytree.list_children r) ["system"]
+    assert_equal (Vylist.in_list (Vytree.list_children r) "system") true;
+    assert_equal (Vylist.in_list (Vytree.list_children r) "interfaces") true
 
 (* Path validation tests *)
 let test_validate_path_leaf_valid test_ctxt =
@@ -33,6 +34,12 @@ let test_validate_path_tag_node_complete_valid test_ctxt =
     let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
     assert_equal (validate_path (get_dir test_ctxt) r ["system"; "login"; "user"; "test"; "full-name"; "test user"])
                  (["system"; "login"; "user"; "test"; "full-name";], Some "test user")
+
+let test_validate_path_tag_node_illegal_characters test_ctxt =
+    let r = Vytree.make default_data "root" in
+    let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
+    (* the space in "eth 0" is on purpose *)
+    assert_equal (raises_validation_error (fun () -> ignore @@ validate_path (get_dir test_ctxt) r ["interfaces"; "ethernet"; "eth 0"; "disable"])) true
 
 let test_validate_path_tag_node_invalid_name test_ctxt =
     let r = Vytree.make default_data "root" in
@@ -157,6 +164,7 @@ let suite =
         "test_validate_path_leaf_valid" >:: test_validate_path_leaf_valid;
         "test_validate_path_leaf_invalid" >:: test_validate_path_leaf_invalid;
         "test_validate_path_leaf_incomplete" >:: test_validate_path_leaf_incomplete;
+        "test_validate_path_tag_node_illegal_characters" >:: test_validate_path_tag_node_illegal_characters;
         "test_validate_path_tag_node_complete_valid" >:: test_validate_path_tag_node_complete_valid;
         "test_validate_path_tag_node_invalid_name" >:: test_validate_path_tag_node_invalid_name;
         "test_validate_path_tag_node_incomplete" >:: test_validate_path_tag_node_incomplete;
