@@ -15,6 +15,7 @@ let config_tag_top_level = "foo bar { baz quux; }"
 let config_with_leaf = "foo { bar baz; }"
 let config_with_leaf_url_unquoted = "foo { bar http://www2.example.org/foo; }"
 let config_with_leaf_value_quoted = "foo { bar \"foo bar\"; }"
+let config_with_leaf_value_single_quoted = "foo { bar \'foo bar\'; }"
 let config_with_leaf_valueless = "foo { bar; }"
 
 (* XXX: naive use of Menhir's separated_list doesn't allow [baz; xyzzy;],
@@ -22,6 +23,7 @@ let config_with_leaf_valueless = "foo { bar; }"
 let config_with_multi = "foo { bar [baz; xyzzy]; }"
 
 let config_with_tag = "foo { bar baz { quux xyzzy; } bar qwerty { quux foobar; } }"
+let config_with_tag_nonalpha = "foo { bar baz0.99 { } bar baz1-8 { } }"
 
 let config_with_comment = "foo { /* comment */ bar { } }"
 let config_with_leaf_node_comment = "foo { /* comment */ bar baz; }"
@@ -53,7 +55,7 @@ let test_parse_with_leaf test_ctxt =
     let config = parse config_with_leaf in
     assert_equal (CT.get_value config ["foo"; "bar"]) "baz"
 
-(* Leaf nodes with [.:/] in values are parsed correctly *)
+(* Leaf nodes with non-alphanumeric characters in values are parsed correctly *)
 let test_parse_with_leaf_url_unquoted test_ctxt =
     let config = parse config_with_leaf_url_unquoted in
     assert_equal (CT.get_value config ["foo"; "bar"]) "http://www2.example.org/foo"
@@ -61,6 +63,11 @@ let test_parse_with_leaf_url_unquoted test_ctxt =
 (* Leaf nodes with quoted values are parsed correctly *)
 let test_parse_with_leaf_value_quoted test_ctxt =
     let config = parse config_with_leaf_value_quoted in
+    assert_equal (CT.get_value config ["foo"; "bar"]) "foo bar"
+
+(* Leaf nodes with single quoted values are parsed correctly *)
+let test_parse_with_leaf_value_single_quoted test_ctxt =
+    let config = parse config_with_leaf_value_single_quoted in
     assert_equal (CT.get_value config ["foo"; "bar"]) "foo bar"
 
 (* Valueless leaf nodes work *)
@@ -103,6 +110,11 @@ let test_parse_with_tag test_ctxt =
     assert_equal (CT.get_value config ["foo"; "bar"; "baz"; "quux"]) "xyzzy";
     assert_equal (CT.get_value config ["foo"; "bar"; "qwerty"; "quux"]) "foobar"
 
+(* Non-alphanumeric characters are allowed in tag nodes *)
+let test_parse_with_tag_nonalpha test_ctxt =
+    let config = parse config_with_tag_nonalpha in
+    assert_equal (Vytree.get config ["foo"; "bar"] |> Vytree.list_children) ["baz0.99"; "baz1-8"]
+
 (* Normal nodes with duplicate children are detected *)
 let test_parse_node_duplicate_child test_ctxt =
     try ignore @@ parse config_with_duplicate_node; assert_failure "Duplicated node child didn't cause errors"
@@ -128,11 +140,13 @@ let suite =
         "test_parse_with_leaf" >:: test_parse_with_leaf;
         "test_parse_with_leaf_url_unquoted" >:: test_parse_with_leaf_url_unquoted;
         "test_parse_with_leaf_value_quoted" >:: test_parse_with_leaf_value_quoted;
+        "test_parse_with_leaf_value_single_quoted" >:: test_parse_with_leaf_value_single_quoted;
         "test_parse_with_leaf_valueless" >:: test_parse_with_leaf_valueless;
         "test_parse_top_level_leaf_node" >:: test_parse_top_level_leaf_node;
         "test_parse_top_level_tag_node" >:: test_parse_top_level_tag_node;
         "test_parse_with_multi" >:: test_parse_with_multi;
         "test_parse_with_tag" >:: test_parse_with_tag;
+        "test_parse_with_tag_nonalpha" >:: test_parse_with_tag_nonalpha;
         "test_parse_with_comment" >:: test_parse_with_comment;
         "test_parse_with_leaf_node_comment" >:: test_parse_with_leaf_node_comment;
         "test_parse_with_tag_node_comment" >:: test_parse_with_tag_node_comment;
