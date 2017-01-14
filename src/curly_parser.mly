@@ -56,16 +56,20 @@ values:
 ;
 
 leaf_node:
-  | comment = opt_comment; inactive = boption(INACTIVE); ephemeral = boption(EPHEMERAL); name = IDENTIFIER; values = values; SEMI
+  | comment = opt_comment; inactive = boption(INACTIVE); ephemeral = boption(EPHEMERAL);
+    name = IDENTIFIER; values = values; SEMI
     { Vytree.make_full {values=(List.rev values); comment=comment; inactive=inactive; ephemeral=ephemeral} name []}
-  | comment = opt_comment; inactive = boption(INACTIVE); ephemeral = boption(EPHEMERAL); name = IDENTIFIER; SEMI (* valueless node *)
+  | comment = opt_comment; inactive = boption(INACTIVE); ephemeral = boption(EPHEMERAL);
+    name = IDENTIFIER; SEMI (* valueless node *)
     { Vytree.make_full {default_data with comment=comment; inactive=inactive; ephemeral=ephemeral} name [] }
 ;
 
 node:
-  | comment = opt_comment; inactive = boption(INACTIVE); ephemeral = boption(EPHEMERAL); name = IDENTIFIER; LEFT_BRACE; children = list(node_content); RIGHT_BRACE
+  | comment = opt_comment; inactive = boption(INACTIVE); ephemeral = boption(EPHEMERAL);
+    name = IDENTIFIER; LEFT_BRACE; children = list(node_content); RIGHT_BRACE
     {
-        let node = Vytree.make_full {default_data with comment=comment; inactive=inactive; ephemeral=ephemeral} name [] in
+        let node =
+            Vytree.make_full {default_data with comment=comment; inactive=inactive; ephemeral=ephemeral} name [] in
         let node = List.fold_left Vytree.adopt node (List.rev children) |> Vytree.merge_children merge_data in
         try
             List.iter find_duplicate_children (Vytree.children_of_node node);
@@ -77,10 +81,12 @@ node:
 ;
 
 tag_node:
-  | comment = opt_comment; inactive = boption(INACTIVE); ephemeral = boption(EPHEMERAL); name = IDENTIFIER; tag = IDENTIFIER; LEFT_BRACE; children = list(node_content); RIGHT_BRACE
+  | comment = opt_comment; inactive = boption(INACTIVE); ephemeral = boption(EPHEMERAL);
+    name = IDENTIFIER; tag = IDENTIFIER; LEFT_BRACE; children = list(node_content); RIGHT_BRACE
   {
       let outer_node = Vytree.make_full default_data name [] in
-      let inner_node = Vytree.make_full {default_data with comment=comment; inactive=inactive; ephemeral=ephemeral} tag [] in
+      let inner_node =
+          Vytree.make_full {default_data with comment=comment; inactive=inactive; ephemeral=ephemeral} tag [] in
       let inner_node = List.fold_left Vytree.adopt inner_node (List.rev children) |> Vytree.merge_children merge_data in
       let node = Vytree.adopt outer_node inner_node in
       try
