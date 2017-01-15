@@ -85,11 +85,23 @@ Library "startup"
   FindlibParent: vyconf
   BuildDepends: fileutils, lwt, lwt.log
 
+Library "message"
+  Path: src
+  Modules: Message
+  FindlibParent: vyconf
+  BuildDepends: lwt, lwt.log, lwt.unix, lwt.ppx, ocplib-endian
+
+Library "vyconf_client"
+  Path: src
+  Modules: Vyconf_client
+  FindlibParent: vyconf
+  BuildDepends: lwt, lwt.log, lwt.unix, lwt.ppx, ocplib-endian
+
 Executable "vyconfd"
   Path: src
   MainIs: vyconfd.ml
   CompiledObject: best
-  BuildDepends: ppx_deriving.runtime, ppx_deriving_yojson.runtime, lwt, lwt.unix, lwt.ppx, toml, fileutils, vyconf
+  BuildDepends: ppx_deriving.runtime, ppx_deriving_yojson.runtime, lwt, lwt.unix, lwt.ppx, toml, fileutils, ocaml-protoc, ocplib-endian, vyconf
 
 Executable "vytree_test"
   Path: test

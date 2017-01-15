@@ -43,3 +43,19 @@ let check_dirs dirs =
     | Ok _ -> ()
     | Error err -> panic err
 
+(** Bind to a UNIX socket *)
+let create_socket sockfile =
+    let open Lwt_unix in
+    let backlog = 10 in
+    let%lwt sock = socket PF_UNIX SOCK_STREAM 0 |> Lwt.return in
+    (* XXX: replace with just bind after Lwt 3.0.0 release *)
+    let%lwt () = Lwt_unix.Versioned.bind_2 sock @@ ADDR_UNIX(sockfile) in
+    listen sock backlog;
+    Lwt.return sock
+
+(** Create the server loop function *)
+let create_server accept_connection sock =
+    let open Lwt in
+    let rec serve () =
+        Lwt_unix.accept sock >>= accept_connection >>= serve
+    in serve

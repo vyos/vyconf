@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 0757c9ec9f5d35df060616ca6806b8dd)
+# DO NOT EDIT (digest: 961843de21a9e59181cb630343a7c107)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -35,7 +35,6 @@ true: annot, bin_annot
 <src/*.ml{,i,y}>: pkg_xml-light
 # Library vyconf_pb
 "src/vyconf_pb.cmxs": use_vyconf_pb
-<src/*.ml{,i,y}>: pkg_ocaml-protoc
 # Library session
 "src/session.cmxs": use_session
 # Library vyconf_config
@@ -45,12 +44,18 @@ true: annot, bin_annot
 "src/directories.cmxs": use_directories
 # Library startup
 "src/startup.cmxs": use_startup
+# Library message
+"src/message.cmxs": use_message
+# Library vyconf_client
+"src/vyconf_client.cmxs": use_vyconf_client
 <src/*.ml{,i,y}>: pkg_lwt.log
 # Executable vyconfd
 <src/vyconfd.{native,byte}>: pkg_fileutils
 <src/vyconfd.{native,byte}>: pkg_lwt
 <src/vyconfd.{native,byte}>: pkg_lwt.ppx
 <src/vyconfd.{native,byte}>: pkg_lwt.unix
+<src/vyconfd.{native,byte}>: pkg_ocaml-protoc
+<src/vyconfd.{native,byte}>: pkg_ocplib-endian
 <src/vyconfd.{native,byte}>: pkg_ppx_deriving.runtime
 <src/vyconfd.{native,byte}>: pkg_ppx_deriving_yojson.runtime
 <src/vyconfd.{native,byte}>: pkg_toml
@@ -59,6 +64,8 @@ true: annot, bin_annot
 <src/*.ml{,i,y}>: pkg_lwt
 <src/*.ml{,i,y}>: pkg_lwt.ppx
 <src/*.ml{,i,y}>: pkg_lwt.unix
+<src/*.ml{,i,y}>: pkg_ocaml-protoc
+<src/*.ml{,i,y}>: pkg_ocplib-endian
 <src/*.ml{,i,y}>: pkg_ppx_deriving.runtime
 <src/*.ml{,i,y}>: pkg_ppx_deriving_yojson.runtime
 <src/*.ml{,i,y}>: pkg_toml
