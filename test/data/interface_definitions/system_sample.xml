@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<interfaceDefinition>
+  <node name="system">
+    <children>
+      <node name="login" owner="login">
+        <children>
+          <tagNode name="user">
+            <keepChildOrder/>
+            <properties>
+              <help>User name</help>
+              <constraint>
+                <regex>[a-zA-Z][a-zA-Z0-9\-]+</regex>
+              </constraint>
+              <constraintErrorMessage>User name must start with a letter and consist of letters and digits</constraintErrorMessage>
+            </properties>
+            <children>
+              <leafNode name="full-name">
+                <properties>
+                  <help>User full name</help>
+                </properties>
+              </leafNode>
+            </children>
+          </tagNode>
+          <leafNode name="password">
+            <properties>
+              <help>A password</help>
+              <secret/>
+            </properties>
+          </leafNode>
+        </children>
+      </node>
+      <leafNode name="host-name">
+        <properties>
+          <constraint>
+            <regex>[a-zA-Z][a-zA-Z0-9\-]</regex>
+          </constraint>
+        </properties>
+      </leafNode>
+      <leafNode name="ntp-server">
+        <properties>
+          <help>NTP server address</help>
+          <multi/>
+        </properties>
+      </leafNode>
+      <node name="options">
+        <children>
+          <leafNode name="reboot-on-panic">
+            <properties>
+              <help>Reboot automatically if kernel panic occurs</help>
+              <valueless/>
+            </properties>
+          </leafNode>
+          <leafNode name="enable-dangerous-features">
+            <properties>
+              <help>Enable dangerous features</help>
+              <hidden/>
+            </properties>
+          </leafNode>
+        </children>
+      </node>
+    </children>
+  </node>
+</interfaceDefinition>
