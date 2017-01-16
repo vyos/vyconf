@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: dda8b70cfde7f0c3aceab1a7fa9b6f8e) *)
+(* DO NOT EDIT (digest: 57762fb8ab0adc51aba52517380af070) *)
 module OASISGettext = struct
 (* # 22 "src/oasis/OASISGettext.ml" *)
 
@@ -886,23 +886,7 @@ open Ocamlbuild_plugin;;
 let package_default =
   {
      MyOCamlbuildBase.lib_ocaml =
-       [
-          ("vyconf", ["src"], []);
-          ("vytree", ["src"], []);
-          ("reference_tree", ["src"], []);
-          ("config_tree", ["src"], []);
-          ("value_checker", ["src"], []);
-          ("curly_lexer", ["src"], []);
-          ("curly_parser", ["src"], []);
-          ("util", ["src"], []);
-          ("vyconf_pb", ["src"], []);
-          ("session", ["src"], []);
-          ("vyconf_config", ["src"], []);
-          ("directories", ["src"], []);
-          ("startup", ["src"], []);
-          ("message", ["src"], []);
-          ("vyconf_client", ["src"], [])
-       ];
+       [("vyconf", ["src"], []); ("vyconf-client", ["src"], [])];
      lib_c = [];
      flags = [];
      includes = [("test", ["src"])]
@@ -913,6 +897,6 @@ let conf = {MyOCamlbuildFindlib.no_automatic_syntax = false}
 
 let dispatch_default = MyOCamlbuildBase.dispatch_default conf package_default;;
 
-# 917 "myocamlbuild.ml"
+# 901 "myocamlbuild.ml"
 (* OASIS_STOP *)
 Ocamlbuild_plugin.dispatch dispatch_default;;

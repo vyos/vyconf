@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 47626218d7b75810502e6588e70b6c85)
+# DO NOT EDIT (digest: 1815d8b26cc41cf7f9f54c73eca4a2f0)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -16,39 +16,8 @@ true: annot, bin_annot
 "_darcs": not_hygienic
 # Library vyconf
 "src/vyconf.cmxs": use_vyconf
-# Library vytree
-"src/vytree.cmxs": use_vytree
-# Library reference_tree
-"src/reference_tree.cmxs": use_reference_tree
-# Library config_tree
-"src/config_tree.cmxs": use_config_tree
-<src/*.ml{,i,y}>: pkg_ppx_deriving_yojson
-# Library value_checker
-"src/value_checker.cmxs": use_value_checker
-<src/*.ml{,i,y}>: pkg_pcre
-# Library curly_lexer
-"src/curly_lexer.cmxs": use_curly_lexer
-# Library curly_parser
-"src/curly_parser.cmxs": use_curly_parser
-# Library util
-"src/util.cmxs": use_util
-<src/*.ml{,i,y}>: pkg_xml-light
-# Library vyconf_pb
-"src/vyconf_pb.cmxs": use_vyconf_pb
-# Library session
-"src/session.cmxs": use_session
-# Library vyconf_config
-"src/vyconf_config.cmxs": use_vyconf_config
-<src/*.ml{,i,y}>: pkg_ppx_deriving.show
-# Library directories
-"src/directories.cmxs": use_directories
-# Library startup
-"src/startup.cmxs": use_startup
-# Library message
-"src/message.cmxs": use_message
-# Library vyconf_client
-"src/vyconf_client.cmxs": use_vyconf_client
-<src/*.ml{,i,y}>: pkg_lwt.log
+# Library vyconf-client
+"src/vyconf-client.cmxs": use_vyconf-client
 # Executable vyconfd
 <src/vyconfd.{native,byte}>: pkg_fileutils
 <src/vyconfd.{native,byte}>: pkg_lwt
@@ -56,80 +25,68 @@ true: annot, bin_annot
 <src/vyconfd.{native,byte}>: pkg_lwt.unix
 <src/vyconfd.{native,byte}>: pkg_ocaml-protoc
 <src/vyconfd.{native,byte}>: pkg_ocplib-endian
-<src/vyconfd.{native,byte}>: pkg_ppx_deriving.runtime
-<src/vyconfd.{native,byte}>: pkg_ppx_deriving_yojson.runtime
+<src/vyconfd.{native,byte}>: pkg_pcre
+<src/vyconfd.{native,byte}>: pkg_ppx_deriving.show
+<src/vyconfd.{native,byte}>: pkg_ppx_deriving_yojson
 <src/vyconfd.{native,byte}>: pkg_sha
 <src/vyconfd.{native,byte}>: pkg_toml
-<src/vyconfd.{native,byte}>: use_vyconf
+<src/vyconfd.{native,byte}>: pkg_xml-light
 <src/*.ml{,i,y}>: pkg_fileutils
 <src/*.ml{,i,y}>: pkg_lwt
 <src/*.ml{,i,y}>: pkg_lwt.ppx
 <src/*.ml{,i,y}>: pkg_lwt.unix
 <src/*.ml{,i,y}>: pkg_ocaml-protoc
 <src/*.ml{,i,y}>: pkg_ocplib-endian
-<src/*.ml{,i,y}>: pkg_ppx_deriving.runtime
-<src/*.ml{,i,y}>: pkg_ppx_deriving_yojson.runtime
+<src/*.ml{,i,y}>: pkg_pcre
+<src/*.ml{,i,y}>: pkg_ppx_deriving.show
+<src/*.ml{,i,y}>: pkg_ppx_deriving_yojson
 <src/*.ml{,i,y}>: pkg_sha
 <src/*.ml{,i,y}>: pkg_toml
-<src/*.ml{,i,y}>: use_vyconf
+<src/*.ml{,i,y}>: pkg_xml-light
 # Executable vytree_test
 <test/vytree_test.{native,byte}>: pkg_oUnit
-<test/vytree_test.{native,byte}>: pkg_ppx_deriving.runtime
-<test/vytree_test.{native,byte}>: pkg_ppx_deriving_yojson.runtime
-<test/vytree_test.{native,byte}>: use_vyconf
+<test/vytree_test.{native,byte}>: pkg_ppx_deriving_yojson
 # Executable reference_tree_test
 <test/reference_tree_test.{native,byte}>: pkg_oUnit
 <test/reference_tree_test.{native,byte}>: pkg_pcre
-<test/reference_tree_test.{native,byte}>: pkg_ppx_deriving.runtime
-<test/reference_tree_test.{native,byte}>: pkg_ppx_deriving_yojson.runtime
+<test/reference_tree_test.{native,byte}>: pkg_ppx_deriving_yojson
 <test/reference_tree_test.{native,byte}>: pkg_xml-light
-<test/reference_tree_test.{native,byte}>: use_vyconf
 # Executable config_tree_test
 <test/config_tree_test.{native,byte}>: pkg_oUnit
-<test/config_tree_test.{native,byte}>: pkg_ppx_deriving.runtime
-<test/config_tree_test.{native,byte}>: pkg_ppx_deriving_yojson.runtime
-<test/config_tree_test.{native,byte}>: use_vyconf
+<test/config_tree_test.{native,byte}>: pkg_ppx_deriving_yojson
 # Executable vylist_test
 <test/vylist_test.{native,byte}>: pkg_oUnit
-<test/vylist_test.{native,byte}>: use_vyconf
 # Executable value_checker_test
 <test/value_checker_test.{native,byte}>: pkg_oUnit
 <test/value_checker_test.{native,byte}>: pkg_pcre
-<test/value_checker_test.{native,byte}>: use_vyconf
 # Executable util_test
 <test/util_test.{native,byte}>: pkg_oUnit
 <test/util_test.{native,byte}>: pkg_xml-light
 <test/util_test.{native,byte}>: use_vyconf
+<test/*.ml{,i,y}>: use_vyconf
 # Executable vyconf_config_test
 <test/vyconf_config_test.{native,byte}>: pkg_oUnit
 <test/vyconf_config_test.{native,byte}>: pkg_ppx_deriving.runtime
 <test/vyconf_config_test.{native,byte}>: pkg_toml
-<test/vyconf_config_test.{native,byte}>: use_vyconf
-<test/*.ml{,i,y}>: pkg_toml
+<test/*.ml{,i,y}>: pkg_ppx_deriving.runtime
 # Executable curly_parser_test
 <test/curly_parser_test.{native,byte}>: pkg_oUnit
-<test/curly_parser_test.{native,byte}>: pkg_ppx_deriving.runtime
-<test/curly_parser_test.{native,byte}>: pkg_ppx_deriving_yojson.runtime
-<test/curly_parser_test.{native,byte}>: use_vyconf
+<test/curly_parser_test.{native,byte}>: pkg_ppx_deriving_yojson
 # Executable session_test
 <test/session_test.{native,byte}>: pkg_fileutils
 <test/session_test.{native,byte}>: pkg_oUnit
 <test/session_test.{native,byte}>: pkg_pcre
-<test/session_test.{native,byte}>: pkg_ppx_deriving.runtime
-<test/session_test.{native,byte}>: pkg_ppx_deriving_yojson.runtime
+<test/session_test.{native,byte}>: pkg_ppx_deriving_yojson
+<test/session_test.{native,byte}>: pkg_toml
 <test/session_test.{native,byte}>: pkg_xml-light
-<test/session_test.{native,byte}>: use_vyconf
 <test/*.ml{,i,y}>: pkg_fileutils
 <test/*.ml{,i,y}>: pkg_oUnit
 <test/*.ml{,i,y}>: pkg_pcre
+<test/*.ml{,i,y}>: pkg_toml
 <test/*.ml{,i,y}>: pkg_xml-light
 # Executable vytree_load_test
-<test/vytree_load_test.{native,byte}>: pkg_ppx_deriving.runtime
-<test/vytree_load_test.{native,byte}>: pkg_ppx_deriving_yojson.runtime
-<test/vytree_load_test.{native,byte}>: use_vyconf
-<test/*.ml{,i,y}>: pkg_ppx_deriving.runtime
-<test/*.ml{,i,y}>: pkg_ppx_deriving_yojson.runtime
-<test/*.ml{,i,y}>: use_vyconf
+<test/vytree_load_test.{native,byte}>: pkg_ppx_deriving_yojson
+<test/*.ml{,i,y}>: pkg_ppx_deriving_yojson
 # OASIS_STOP
 
 true: strict_sequence
