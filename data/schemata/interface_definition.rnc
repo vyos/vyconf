@@ -114,8 +114,8 @@ constraint = element constraint
 # A constraint may also use an external validator rather than regex
 validator = element validator
 {
-    ( (attribute argument { text }) &
-      (attribute name { text }) ),
+    ( (attribute name { text })  &
+      (attribute argument { text })? ),
     empty
 }
 
