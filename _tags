@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 961843de21a9e59181cb630343a7c107)
+# DO NOT EDIT (digest: 47626218d7b75810502e6588e70b6c85)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -58,6 +58,7 @@ true: annot, bin_annot
 <src/vyconfd.{native,byte}>: pkg_ocplib-endian
 <src/vyconfd.{native,byte}>: pkg_ppx_deriving.runtime
 <src/vyconfd.{native,byte}>: pkg_ppx_deriving_yojson.runtime
+<src/vyconfd.{native,byte}>: pkg_sha
 <src/vyconfd.{native,byte}>: pkg_toml
 <src/vyconfd.{native,byte}>: use_vyconf
 <src/*.ml{,i,y}>: pkg_fileutils
@@ -68,6 +69,7 @@ true: annot, bin_annot
 <src/*.ml{,i,y}>: pkg_ocplib-endian
 <src/*.ml{,i,y}>: pkg_ppx_deriving.runtime
 <src/*.ml{,i,y}>: pkg_ppx_deriving_yojson.runtime
+<src/*.ml{,i,y}>: pkg_sha
 <src/*.ml{,i,y}>: pkg_toml
 <src/*.ml{,i,y}>: use_vyconf
 # Executable vytree_test

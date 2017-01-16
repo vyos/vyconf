@@ -101,7 +101,7 @@ Executable "vyconfd"
   Path: src
   MainIs: vyconfd.ml
   CompiledObject: best
-  BuildDepends: ppx_deriving.runtime, ppx_deriving_yojson.runtime, lwt, lwt.unix, lwt.ppx, toml, fileutils, ocaml-protoc, ocplib-endian, vyconf
+  BuildDepends: ppx_deriving.runtime, ppx_deriving_yojson.runtime, lwt, lwt.unix, lwt.ppx, toml, fileutils, ocaml-protoc, ocplib-endian, sha, vyconf
 
 Executable "vytree_test"
   Path: test

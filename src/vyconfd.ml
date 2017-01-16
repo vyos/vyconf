@@ -2,6 +2,9 @@ open Lwt
 open Defaults
 open Vyconf_config
 
+(* On UNIX, self_init uses /dev/random for seed *)
+let () = Random.self_init ()
+
 let () = Lwt_log.add_rule "*" Lwt_log.Info
 
 (* Default VyConf configuration *)
@@ -10,6 +13,7 @@ let config_file = ref defaults.config_file
 let log_file = ref None
 
 (* Global data *)
+
 
 (* Command line arguments *)
 let args = [
@@ -22,6 +26,9 @@ let args = [
         ("--version", Arg.Unit (fun () -> print_endline @@ Version.version_info (); exit 0), "Print version and exit")
     ]
 let usage = "Usage: " ^ Sys.argv.(0) ^ " [options]"
+
+let make_session_token () =
+    Sha1.string (string_of_int (Random.bits ())) |> Sha1.to_hex
 
 let rec handle_connection ic oc () =
     let open Vyconf_pb in
