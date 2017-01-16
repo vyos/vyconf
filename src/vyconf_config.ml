@@ -47,9 +47,7 @@ let mandatory_field conf table field =
 
 let optional_field default conf table field =
     let value = get_field conf table field in
-    match value with
-    | Some value -> value
-    | None -> default
+    Util.substitute_default value default
 
 let load filename =
     try
