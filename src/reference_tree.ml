@@ -73,16 +73,9 @@ let data_from_xml d x =
         | Xml.Element ("constraint", _, _) -> load_constraint_from_xml d x
         | Xml.Element ("hidden", _, _) -> {d with hidden=true}
         | Xml.Element ("secret", _, _) -> {d with secret=true}
+        | Xml.Element ("keepChildOrder", _, _) -> {d with keep_order=true}
         | _ -> raise (Bad_interface_definition "Malformed property tag")
     in Xml.fold aux d x
-
-let get_keep_child_order xml =
-    match xml with
-    | Xml.Element ("tagNode", _, _) ->
-        (match (Util.find_xml_child "keepChildOrder" xml) with
-         | Some _ -> true
-         | None -> false)
-    | _ -> false
 
 let rec insert_from_xml basepath reftree xml =
     match xml with
@@ -97,8 +90,7 @@ let rec insert_from_xml basepath reftree xml =
         let node_owner = try let o = Xml.attrib xml "owner" in Some o
                          with _ -> None
         in
-        let keep_order = get_keep_child_order xml in
-        let data = {data with node_type = node_type; owner = node_owner; keep_order = keep_order} in
+        let data = {data with node_type=node_type; owner=node_owner} in
         let name = Xml.attrib xml "name" in
         let path = basepath @ [name] in
         let new_tree = Vytree.insert reftree path data in
