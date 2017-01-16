@@ -12,12 +12,14 @@ type world = {
 type session_data = {
     proposed_config : Config_tree.t;
     modified: bool;
-    changeset: cfg_op list
+    changeset: cfg_op list;
+    client_app: string;
+    user: string
 }
 
 exception Session_error of string
 
-val make : world -> session_data
+val make : world -> string -> string -> session_data
 
 val set : world -> session_data -> string list -> session_data
 

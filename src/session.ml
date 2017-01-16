@@ -18,13 +18,17 @@ type world = {
 type session_data = {
     proposed_config : Config_tree.t;
     modified: bool;
-    changeset: cfg_op list
+    changeset: cfg_op list;
+    client_app: string;
+    user: string;
 }
 
-let make world = {
+let make world client_app user = {
     proposed_config = world.running_config;
     modified = false;
-    changeset = []
+    changeset = [];
+    client_app = client_app;
+    user = user
 }
 
 let string_of_op op =
