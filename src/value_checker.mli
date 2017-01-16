@@ -1,4 +1,4 @@
-type value_constraint = Regex of string | External of string * string
+type value_constraint = Regex of string | External of string * string option
 
 exception Bad_validator of string
 

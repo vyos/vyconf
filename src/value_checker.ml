@@ -1,6 +1,6 @@
 module F = Filename
 
-type value_constraint = Regex of string | External of string * string
+type value_constraint = Regex of string | External of string * string option
 
 exception Bad_validator of string
 
@@ -16,7 +16,8 @@ let validate_value dir value_constraint value =
                 We should do something about it.
          *)
         let validator = F.concat dir v in
-        let result = Unix.system (Printf.sprintf "%s %s %s" validator c value) in
+        let arg = Util.substitute_default c "" in
+        let result = Unix.system (Printf.sprintf "%s %s %s" validator arg value) in
         match result with
         | Unix.WEXITED 0 -> true
         | Unix.WEXITED 127 -> raise (Bad_validator (Printf.sprintf "Could not execute validator %s" validator))

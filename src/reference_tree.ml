@@ -51,7 +51,10 @@ let load_constraint_from_xml d c =
             let cs = (Value_checker.Regex s) :: d.constraints in
             {d with constraints=cs}
         | Xml.Element ("validator", [("name", n); ("argument", a)], _) ->
-            let cs = (Value_checker.External (n, a)) :: d.constraints in
+            let cs = (Value_checker.External (n, Some a)) :: d.constraints in
+            {d with constraints=cs}
+        | Xml.Element ("validator", [("name", n)], _) ->
+            let cs = (Value_checker.External (n, None)) :: d.constraints in
             {d with constraints=cs}
         | _ -> raise (Bad_interface_definition "Malformed constraint")
     in Xml.fold aux d c
