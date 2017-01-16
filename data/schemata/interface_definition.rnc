@@ -43,7 +43,7 @@ node = element node
 tagNode = element tagNode
 {
     (ownerAttr? & nodeNameAttr),
-    (properties? & (element keepChildOrder { empty })? & children )
+    (properties? & children )
 }
 
 # Leaf nodes are terminal configuration nodes that can't have children,
@@ -79,6 +79,7 @@ properties = element properties
 {
     help? &
     constraint? &
+    valueHelp* &
     (element constraintErrorMessage { text })? &
 
     # These are meaningful only for leaf nodes
@@ -86,7 +87,9 @@ properties = element properties
     (element multi { empty })? &
     (element hidden { empty })? &
     (element secret { empty })? &
-    valueHelp* 
+
+    # These are meaningful only for tag nodes
+    (element keepChildOrder { empty })?
 }
 
 # All nodes must have "name" attribute
