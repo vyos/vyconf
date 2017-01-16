@@ -5,8 +5,8 @@
       <node name="login" owner="login">
         <children>
           <tagNode name="user">
-            <keepChildOrder/>
             <properties>
+              <keepChildOrder/>
               <help>User name</help>
               <constraint>
                 <regex>[a-zA-Z][a-zA-Z0-9\-]+</regex>

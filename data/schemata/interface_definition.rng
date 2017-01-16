@@ -74,11 +74,6 @@
         <optional>
           <ref name="properties"/>
         </optional>
-        <optional>
-          <element name="keepChildOrder">
-            <empty/>
-          </element>
-        </optional>
         <ref name="children"/>
       </interleave>
     </element>
@@ -131,6 +126,9 @@
         <optional>
           <ref name="constraint"/>
         </optional>
+        <zeroOrMore>
+          <ref name="valueHelp"/>
+        </zeroOrMore>
         <optional>
           <element name="constraintErrorMessage">
             <text/>
@@ -159,9 +157,14 @@
             <empty/>
           </element>
         </optional>
-        <zeroOrMore>
-          <ref name="valueHelp"/>
-        </zeroOrMore>
+        <optional>
+          <!-- These are meaningful only for tag nodes -->
+          <group>
+            <element name="keepChildOrder">
+              <empty/>
+            </element>
+          </group>
+        </optional>
       </interleave>
     </element>
   </define>
@@ -197,8 +200,10 @@
   <define name="validator">
     <element name="validator">
       <interleave>
-        <attribute name="argument"/>
         <attribute name="name"/>
+        <optional>
+          <attribute name="argument"/>
+        </optional>
       </interleave>
       <empty/>
     </element>
