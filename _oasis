@@ -13,7 +13,7 @@ Plugins: META (0.4), DevFiles (0.4)
 
 Library "vyconf"
   Path: src
-  Modules: Vytree, Vylist, Value_checker, Vyconf_config
+  Modules: Vytree, Vylist, Value_checker, Vyconf_config, Util
   Install: false
 
 Library "vytree"

@@ -20,3 +20,8 @@ let string_of_path path =
     match path with
     | [] -> ""
     | x :: xs -> Printf.sprintf "%s%s" x (aux xs "")
+
+let substitute_default o d =
+    match o with
+    | None -> d
+    | Some v -> v
