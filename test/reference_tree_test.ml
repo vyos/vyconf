@@ -3,6 +3,10 @@ open Reference_tree
 
 let get_dir test_ctxt = in_testdata_dir test_ctxt ["validators"]
 
+let ok_or_failure result = match result with
+    | Ok value  -> value
+    | Error msg -> assert_failure msg
+
 let raises_validation_error f =
     try ignore @@ f (); false
     with Validation_error _ -> true
@@ -158,6 +162,19 @@ let test_get_help_string_default test_ctxt =
     let r = load_from_xml r (in_testdata_dir test_ctxt ["interface_definition_sample.xml"]) in
     assert_equal (get_help_string r ["system"; "host-name"]) ("No help available")
 
+let test_load_interface_definitions_children test_ctxt =
+    let interface_definitions_dir = in_testdata_dir test_ctxt ["interface_definitions"] in
+    let r = ok_or_failure (load_interface_definitions interface_definitions_dir) in
+    let children = Vytree.list_children r in
+    assert_equal children ["system"; "login"]
+
+let test_load_interface_definitions_leaves test_ctxt =
+    let interface_definitions_dir = in_testdata_dir test_ctxt ["interface_definitions"] in
+    let r = ok_or_failure (load_interface_definitions interface_definitions_dir) in
+    let has_system_leaf = is_leaf r ["system"; "login"; "user"; "full-name"] in
+    let has_login_leaf  = is_leaf r ["login"; "user"; "full-name"] in
+    assert_equal (has_system_leaf && has_login_leaf) true
+
 let suite =
     "Util tests" >::: [
         "test_load_valid_definition" >:: test_load_valid_definition;
@@ -189,6 +206,8 @@ let suite =
         "test_get_owner_invalid" >:: test_get_owner_invalid;
         "test_get_help_string_valid" >:: test_get_help_string_valid;
         "test_get_help_string_default" >:: test_get_help_string_default;
+        "test_load_interface_definitions_children " >:: test_load_interface_definitions_children;
+        "test_load_interface_definitions_leaves" >:: test_load_interface_definitions_leaves
     ]
 
 let () =
