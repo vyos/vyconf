@@ -13,20 +13,28 @@ Plugins: META (0.4), DevFiles (0.4)
 
 Library "vyconf"
   Path: src
-  Modules: Config_tree, Reference_tree, Curly_parser, Curly_lexer
-  InternalModules: Defaults, Directories, Startup, Util, Value_checker, Vylist, Vytree 
+  Modules: Config_tree, Reference_tree, Curly_parser, Curly_lexer, Value_checker, Vytree
+  InternalModules: Util, Vylist
+  BuildDepends: fileutils, pcre, ppx_deriving.show, ppx_deriving_yojson, xml-light
+
+Library "vyconf-config"
+  Path: src
+  Modules: Vyconf_config
+  FindlibParent: vyconf
+  BuildDepends: toml, fileutils, ppx_deriving.show
 
 Library "vyconf-client"
   Path: src
-  Modules: Vyconf_client, Vyconf_config
+  Modules: Vyconf_client
+  InternalModules: Vyconf_pb
   FindlibParent: vyconf
+  BuildDepends: ocaml-protoc, ocplib-endian
 
 Executable "vyconfd"
   Path: src
   MainIs: vyconfd.ml
   CompiledObject: best
-  BuildDepends: ppx_deriving_yojson, ppx_deriving.show, lwt, lwt.unix, lwt.ppx, pcre,
-                xml-light, toml, fileutils, ocaml-protoc, ocplib-endian, sha
+  BuildDepends: lwt, lwt.unix, lwt.ppx, ocaml-protoc, ocplib-endian, sha, vyconf, vyconf.vyconf-config
 
 Executable "vytree_test"
   Path: test
@@ -34,7 +42,7 @@ Executable "vytree_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends: oUnit, ppx_deriving_yojson
+  BuildDepends: oUnit, vyconf
 
 Executable "reference_tree_test"
   Path: test
@@ -42,7 +50,7 @@ Executable "reference_tree_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends: oUnit, ppx_deriving_yojson, xml-light, pcre, fileutils
+  BuildDepends: oUnit, vyconf
 
 Executable "config_tree_test"
   Path: test
@@ -50,7 +58,7 @@ Executable "config_tree_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends: oUnit, ppx_deriving_yojson
+  BuildDepends: oUnit, vyconf
 
 Executable "vylist_test"
   Path: test
@@ -66,7 +74,7 @@ Executable "value_checker_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends:  oUnit, pcre, fileutils
+  BuildDepends:  oUnit, vyconf
 
 Executable "util_test"
   Path: test
@@ -74,7 +82,7 @@ Executable "util_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends: oUnit, vyconf, xml-light, fileutils
+  BuildDepends: oUnit, vyconf
 
 Executable "vyconf_config_test"
   Path: test
@@ -82,7 +90,7 @@ Executable "vyconf_config_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends:  oUnit, toml, ppx_deriving.runtime, fileutils
+  BuildDepends:  oUnit, vyconf.vyconf-config
 
 Executable "curly_parser_test"
   Path: test
@@ -90,7 +98,7 @@ Executable "curly_parser_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends: oUnit, ppx_deriving_yojson
+  BuildDepends: oUnit, vyconf
 
 Executable "session_test"
   Path: test
@@ -98,7 +106,7 @@ Executable "session_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends: oUnit, ppx_deriving_yojson, xml-light, fileutils, pcre, toml
+  BuildDepends: oUnit, vyconf, vyconf.vyconf-config
 
 Executable "vytree_load_test"
   Path: test
@@ -106,7 +114,7 @@ Executable "vytree_load_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends: ppx_deriving_yojson
+  BuildDepends: vyconf
 
 Test "vytree_test"
   Run$: flag(tests)

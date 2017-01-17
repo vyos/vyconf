@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 57762fb8ab0adc51aba52517380af070) *)
+(* DO NOT EDIT (digest: bdb3fd5d41e0b702a74a64a780ae3714) *)
 module OASISGettext = struct
 (* # 22 "src/oasis/OASISGettext.ml" *)
 
@@ -886,7 +886,11 @@ open Ocamlbuild_plugin;;
 let package_default =
   {
      MyOCamlbuildBase.lib_ocaml =
-       [("vyconf", ["src"], []); ("vyconf-client", ["src"], [])];
+       [
+          ("vyconf", ["src"], []);
+          ("vyconf-config", ["src"], []);
+          ("vyconf-client", ["src"], [])
+       ];
      lib_c = [];
      flags = [];
      includes = [("test", ["src"])]
@@ -897,6 +901,6 @@ let conf = {MyOCamlbuildFindlib.no_automatic_syntax = false}
 
 let dispatch_default = MyOCamlbuildBase.dispatch_default conf package_default;;
 
-# 901 "myocamlbuild.ml"
+# 905 "myocamlbuild.ml"
 (* OASIS_STOP *)
 Ocamlbuild_plugin.dispatch dispatch_default;;
