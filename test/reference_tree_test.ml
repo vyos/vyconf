@@ -166,7 +166,8 @@ let test_load_interface_definitions_children test_ctxt =
     let interface_definitions_dir = in_testdata_dir test_ctxt ["interface_definitions"] in
     let r = ok_or_failure (load_interface_definitions interface_definitions_dir) in
     let children = Vytree.list_children r in
-    assert_equal children ["system"; "login"]
+    assert_equal (Vylist.in_list children "system") true;
+    assert_equal (Vylist.in_list children "login") true
 
 let test_load_interface_definitions_leaves test_ctxt =
     let interface_definitions_dir = in_testdata_dir test_ctxt ["interface_definitions"] in
