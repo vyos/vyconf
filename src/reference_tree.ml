@@ -123,15 +123,15 @@ let load_from_xml reftree file =
     | Xml.Error e -> raise (Bad_interface_definition (Xml.error e))
 
 let load_interface_definitions dir =
-    let relative_paths =
-        try
-            FileUtil.ls dir
-        with Sys_error no_dir_msg -> Startup.panic no_dir_msg
+    let relative_paths = FileUtil.ls dir in
+    let absolute_paths =
+        try Ok (List.map Util.absolute_path relative_paths)
+        with Sys_error no_dir_msg -> Error no_dir_msg
     in
-    let absolute_paths = List.map Util.absolute_path relative_paths in
-    try
-        List.fold_left load_from_xml default absolute_paths
-    with Bad_interface_definition msg -> Startup.panic msg
+    try match absolute_paths with
+        | Ok paths  -> Ok (List.fold_left load_from_xml default paths)
+        | Error msg -> Error msg
+    with Bad_interface_definition msg -> Error msg
 
 (* Validation function *)
 
