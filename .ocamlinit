@@ -1,4 +1,4 @@
-(* Vyconf development utop environment
+(* Vyconf development environment for OCaml toplevel
  *
  * NOTE: To keep this functioning as expected, we will need to register new
  * package dependencies here as they are added to the project.
@@ -16,7 +16,6 @@ let () =
 #require "lwt";;
 #require "lwt.unix";;
 #require "lwt.ppx";;
-#require "ppx_deriving.runtime";;
 #require "ppx_deriving.show";;
 #require "ppx_deriving_yojson";;
 #require "fileutils";;
@@ -24,7 +23,6 @@ let () =
 #require "toml";;
 #require "xml-light";;
 
-#directory "/Users/sf/Programming/VyConf/vyconf/_build";;
 #cd "_build/src";;
 
 print_string "VyConf .ocamlinit has been successfully loaded\n";;
