@@ -41,7 +41,7 @@ Executable "reference_tree_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends: oUnit, ppx_deriving_yojson, xml-light, pcre
+  BuildDepends: oUnit, ppx_deriving_yojson, xml-light, pcre, fileutils
 
 Executable "config_tree_test"
   Path: test
@@ -65,7 +65,7 @@ Executable "value_checker_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends:  oUnit, pcre
+  BuildDepends:  oUnit, pcre, fileutils
 
 Executable "util_test"
   Path: test
@@ -73,7 +73,7 @@ Executable "util_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends: oUnit, vyconf, xml-light
+  BuildDepends: oUnit, vyconf, xml-light, fileutils
 
 Executable "vyconf_config_test"
   Path: test
@@ -81,7 +81,7 @@ Executable "vyconf_config_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends:  oUnit, toml, ppx_deriving.runtime
+  BuildDepends:  oUnit, toml, ppx_deriving.runtime, fileutils
 
 Executable "curly_parser_test"
   Path: test
