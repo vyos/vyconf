@@ -13,7 +13,8 @@ Plugins: META (0.4), DevFiles (0.4)
 
 Library "vyconf"
   Path: src
-  Modules: Vytree, Config_tree, Reference_tree, Curly_parser
+  Modules: Config_tree, Reference_tree, Curly_parser
+  InternalModules: Defaults, Directories, Startup, Util, Value_checker, Vylist, Vytree 
 
 Library "vyconf-client"
   Path: src
