@@ -79,16 +79,35 @@ and the #vyos IRC channel on Freenode.
 
 Don't forget to add unit tests for things you add or change!
 
-If you are new to OCaml, you need to install (opam)[http://opam.ocaml.org/] first, then you need to install
-the compiler (e.g. "opam switch 4.03.0"), then install the build tools and build dependencies:
+If you are new to OCaml, you need to install (opam)[http://opam.ocaml.org/]
+first. Then install the correct version of the compiler, the build tools, and
+the build dependencies:
 
 ```
+opam switch 4.03.0
 opam install oasis
-opam install xml-light lwt ppx_deriving_yojson pcre ounit fileutils toml
+opam install fileutils lwt ocplib-endian ounit pcre ppx_deriving_yojson sha toml xml-light
 ```
 
-I also recommend that you setup utop (a great interactive REPL) and setup your editor with merlin to
-see the inferred types. For GNU Emacs, consider installing tuareg-mode.
+To build the project, run the setup script, then `make`:
+
+```
+./build-setup.sh
+make
+```
+
+If the project gets in a weird state, and isn't building correctly, you can clean it up with
+
+```
+ocaml setup.ml -dist-clean
+```
+
+then build as before.
+ 
+I also recommend that you setup [utop](https://opam.ocaml.org/blog/about-utop/)
+(a great interactive REPL) and setup your editor with
+[merlin](https://github.com/ocaml/merlin) to see the inferred types. For GNU
+Emacs, consider installing [tuareg-mode](https://github.com/ocaml/tuareg).
 
 Don't hesitate to ask if you have any setup or build issues, and specifically for OCaml issues,
 there's #ocaml channel on Freenode too.
