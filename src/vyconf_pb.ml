@@ -167,13 +167,13 @@ and request_run_op_mode_mutable = {
 }
 
 type request_enter_configuration_mode = {
-  exclusive : bool option;
-  override_exclusive : bool option;
+  exclusive : bool;
+  override_exclusive : bool;
 }
 
 and request_enter_configuration_mode_mutable = {
-  mutable exclusive : bool option;
-  mutable override_exclusive : bool option;
+  mutable exclusive : bool;
+  mutable override_exclusive : bool;
 }
 
 type request =
@@ -196,6 +196,18 @@ type request =
   | Run_op_mode of request_run_op_mode
   | Confirm
   | Configure of request_enter_configuration_mode
+  | Exit_configure
+  | Teardown of string
+
+type request_envelope = {
+  token : string option;
+  request : request;
+}
+
+and request_envelope_mutable = {
+  mutable token : string option;
+  mutable request : request;
+}
 
 type status =
   | Success 
@@ -434,19 +446,32 @@ and default_request_run_op_mode_mutable () : request_run_op_mode_mutable = {
 }
 
 let rec default_request_enter_configuration_mode 
-  ?exclusive:((exclusive:bool option) = None)
-  ?override_exclusive:((override_exclusive:bool option) = None)
+  ?exclusive:((exclusive:bool) = false)
+  ?override_exclusive:((override_exclusive:bool) = false)
   () : request_enter_configuration_mode  = {
   exclusive;
   override_exclusive;
 }
 
 and default_request_enter_configuration_mode_mutable () : request_enter_configuration_mode_mutable = {
-  exclusive = None;
-  override_exclusive = None;
+  exclusive = false;
+  override_exclusive = false;
 }
 
 let rec default_request (): request = Status
+
+let rec default_request_envelope 
+  ?token:((token:string option) = None)
+  ?request:((request:request) = default_request ())
+  () : request_envelope  = {
+  token;
+  request;
+}
+
+and default_request_envelope_mutable () : request_envelope_mutable = {
+  token = None;
+  request = default_request ();
+}
 
 let rec default_status () = (Success:status)
 
@@ -907,14 +932,14 @@ let rec decode_request_enter_configuration_mode d =
     | None -> (
     )
     | Some (1, Pbrt.Varint) -> (
-      v.exclusive <- Some (Pbrt.Decoder.bool d);
+      v.exclusive <- Pbrt.Decoder.bool d;
       loop ()
     )
     | Some (1, pk) -> raise (
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(request_enter_configuration_mode), field(1)", pk))
     )
     | Some (2, Pbrt.Varint) -> (
-      v.override_exclusive <- Some (Pbrt.Decoder.bool d);
+      v.override_exclusive <- Pbrt.Decoder.bool d;
       loop ()
     )
     | Some (2, pk) -> raise (
@@ -949,6 +974,8 @@ let rec decode_request d =
       | Some (17, _) -> Run_op_mode (decode_request_run_op_mode (Pbrt.Decoder.nested d))
       | Some (18, _) -> (Pbrt.Decoder.empty_nested d ; Confirm)
       | Some (19, _) -> Configure (decode_request_enter_configuration_mode (Pbrt.Decoder.nested d))
+      | Some (20, _) -> (Pbrt.Decoder.empty_nested d ; Exit_configure)
+      | Some (21, _) -> Teardown (Pbrt.Decoder.string d)
       | Some (n, payload_kind) -> (
         Pbrt.Decoder.skip d payload_kind; 
         loop () 
@@ -957,6 +984,32 @@ let rec decode_request d =
     ret
   in
   loop ()
+
+let rec decode_request_envelope d =
+  let v = default_request_envelope_mutable () in
+  let rec loop () = 
+    match Pbrt.Decoder.key d with
+    | None -> (
+    )
+    | Some (1, Pbrt.Bytes) -> (
+      v.token <- Some (Pbrt.Decoder.string d);
+      loop ()
+    )
+    | Some (1, pk) -> raise (
+      Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(request_envelope), field(1)", pk))
+    )
+    | Some (2, Pbrt.Bytes) -> (
+      v.request <- decode_request (Pbrt.Decoder.nested d);
+      loop ()
+    )
+    | Some (2, pk) -> raise (
+      Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(request_envelope), field(2)", pk))
+    )
+    | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind; loop ()
+  in
+  loop ();
+  let v:request_envelope = Obj.magic v in
+  v
 
 let rec decode_status d = 
   match Pbrt.Decoder.int_as_varint d with
@@ -1210,22 +1263,10 @@ let rec encode_request_run_op_mode (v:request_run_op_mode) encoder =
   ()
 
 let rec encode_request_enter_configuration_mode (v:request_enter_configuration_mode) encoder = 
-  (
-    match v.exclusive with 
-    | Some x -> (
-      Pbrt.Encoder.key (1, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.bool x encoder;
-    )
-    | None -> ();
-  );
-  (
-    match v.override_exclusive with 
-    | Some x -> (
-      Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.bool x encoder;
-    )
-    | None -> ();
-  );
+  Pbrt.Encoder.key (1, Pbrt.Varint) encoder; 
+  Pbrt.Encoder.bool v.exclusive encoder;
+  Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
+  Pbrt.Encoder.bool v.override_exclusive encoder;
   ()
 
 let rec encode_request (v:request) encoder = 
@@ -1306,6 +1347,27 @@ let rec encode_request (v:request) encoder =
     Pbrt.Encoder.key (19, Pbrt.Bytes) encoder; 
     Pbrt.Encoder.nested (encode_request_enter_configuration_mode x) encoder;
   )
+  | Exit_configure -> (
+    Pbrt.Encoder.key (20, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.empty_nested encoder
+  )
+  | Teardown x -> (
+    Pbrt.Encoder.key (21, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.string x encoder;
+  )
+
+let rec encode_request_envelope (v:request_envelope) encoder = 
+  (
+    match v.token with 
+    | Some x -> (
+      Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
+      Pbrt.Encoder.string x encoder;
+    )
+    | None -> ();
+  );
+  Pbrt.Encoder.key (2, Pbrt.Bytes) encoder; 
+  Pbrt.Encoder.nested (encode_request v.request) encoder;
+  ()
 
 let rec encode_status (v:status) encoder =
   match v with
@@ -1505,8 +1567,8 @@ let rec pp_request_run_op_mode fmt (v:request_run_op_mode) =
 let rec pp_request_enter_configuration_mode fmt (v:request_enter_configuration_mode) = 
   let pp_i fmt () =
     Format.pp_open_vbox fmt 1;
-    Pbrt.Pp.pp_record_field "exclusive" (Pbrt.Pp.pp_option Pbrt.Pp.pp_bool) fmt v.exclusive;
-    Pbrt.Pp.pp_record_field "override_exclusive" (Pbrt.Pp.pp_option Pbrt.Pp.pp_bool) fmt v.override_exclusive;
+    Pbrt.Pp.pp_record_field "exclusive" Pbrt.Pp.pp_bool fmt v.exclusive;
+    Pbrt.Pp.pp_record_field "override_exclusive" Pbrt.Pp.pp_bool fmt v.override_exclusive;
     Format.pp_close_box fmt ()
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
@@ -1532,6 +1594,17 @@ let rec pp_request fmt (v:request) =
   | Run_op_mode x -> Format.fprintf fmt "@[Run_op_mode(%a)@]" pp_request_run_op_mode x
   | Confirm  -> Format.fprintf fmt "Confirm"
   | Configure x -> Format.fprintf fmt "@[Configure(%a)@]" pp_request_enter_configuration_mode x
+  | Exit_configure  -> Format.fprintf fmt "Exit_configure"
+  | Teardown x -> Format.fprintf fmt "@[Teardown(%a)@]" Pbrt.Pp.pp_string x
+
+let rec pp_request_envelope fmt (v:request_envelope) = 
+  let pp_i fmt () =
+    Format.pp_open_vbox fmt 1;
+    Pbrt.Pp.pp_record_field "token" (Pbrt.Pp.pp_option Pbrt.Pp.pp_string) fmt v.token;
+    Pbrt.Pp.pp_record_field "request" pp_request fmt v.request;
+    Format.pp_close_box fmt ()
+  in
+  Pbrt.Pp.pp_brk pp_i fmt ()
 
 let rec pp_status fmt (v:status) =
   match v with

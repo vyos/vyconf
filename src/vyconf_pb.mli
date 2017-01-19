@@ -89,8 +89,8 @@ type request_run_op_mode = {
 }
 
 type request_enter_configuration_mode = {
-  exclusive : bool option;
-  override_exclusive : bool option;
+  exclusive : bool;
+  override_exclusive : bool;
 }
 
 type request =
@@ -113,6 +113,13 @@ type request =
   | Run_op_mode of request_run_op_mode
   | Confirm
   | Configure of request_enter_configuration_mode
+  | Exit_configure
+  | Teardown of string
+
+type request_envelope = {
+  token : string option;
+  request : request;
+}
 
 type status =
   | Success 
@@ -254,14 +261,21 @@ val default_request_run_op_mode :
 (** [default_request_run_op_mode ()] is the default value for type [request_run_op_mode] *)
 
 val default_request_enter_configuration_mode : 
-  ?exclusive:bool option ->
-  ?override_exclusive:bool option ->
+  ?exclusive:bool ->
+  ?override_exclusive:bool ->
   unit ->
   request_enter_configuration_mode
 (** [default_request_enter_configuration_mode ()] is the default value for type [request_enter_configuration_mode] *)
 
 val default_request : unit -> request
 (** [default_request ()] is the default value for type [request] *)
+
+val default_request_envelope : 
+  ?token:string option ->
+  ?request:request ->
+  unit ->
+  request_envelope
+(** [default_request_envelope ()] is the default value for type [request_envelope] *)
 
 val default_status : unit -> status
 (** [default_status ()] is the default value for type [status] *)
@@ -338,6 +352,9 @@ val decode_request_enter_configuration_mode : Pbrt.Decoder.t -> request_enter_co
 val decode_request : Pbrt.Decoder.t -> request
 (** [decode_request decoder] decodes a [request] value from [decoder] *)
 
+val decode_request_envelope : Pbrt.Decoder.t -> request_envelope
+(** [decode_request_envelope decoder] decodes a [request_envelope] value from [decoder] *)
+
 val decode_status : Pbrt.Decoder.t -> status
 (** [decode_status decoder] decodes a [status] value from [decoder] *)
 
@@ -407,6 +424,9 @@ val encode_request_enter_configuration_mode : request_enter_configuration_mode -
 val encode_request : request -> Pbrt.Encoder.t -> unit
 (** [encode_request v encoder] encodes [v] with the given [encoder] *)
 
+val encode_request_envelope : request_envelope -> Pbrt.Encoder.t -> unit
+(** [encode_request_envelope v encoder] encodes [v] with the given [encoder] *)
+
 val encode_status : status -> Pbrt.Encoder.t -> unit
 (** [encode_status v encoder] encodes [v] with the given [encoder] *)
 
@@ -475,6 +495,9 @@ val pp_request_enter_configuration_mode : Format.formatter -> request_enter_conf
 
 val pp_request : Format.formatter -> request -> unit 
 (** [pp_request v] formats v *)
+
+val pp_request_envelope : Format.formatter -> request_envelope -> unit 
+(** [pp_request_envelope v] formats v *)
 
 val pp_status : Format.formatter -> status -> unit 
 (** [pp_status v] formats v *)

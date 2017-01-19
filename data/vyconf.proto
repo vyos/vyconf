@@ -92,8 +92,11 @@ message Request {
   }
 
   message EnterConfigurationMode {
-    optional bool Exclusive = 1;
-    optional bool OverrideExclusive = 2;
+    required bool Exclusive = 1;
+    required bool OverrideExclusive = 2;
+  }
+
+  message ExitConfigurationMode {
   }
 
   oneof msg {
@@ -116,7 +119,14 @@ message Request {
     RunOpMode run_op_mode = 17;
     Confirm confirm = 18;
     EnterConfigurationMode configure = 19;
+    ExitConfigurationMode exit_configure = 20;
+    string teardown = 21;
   }  
+}
+
+message RequestEnvelope {
+    optional string token = 1;
+    required Request request = 2;
 }
 
 enum Status {

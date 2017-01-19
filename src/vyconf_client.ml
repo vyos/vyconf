@@ -10,6 +10,11 @@ type t = {
     closed: bool
 }
 
+let substitute_default d o=
+    match o with
+    | None -> d
+    | Some v -> v
+
 let create sockfile =
     let open Lwt_unix in
     let sock = socket PF_UNIX SOCK_STREAM 0 in
@@ -39,3 +44,14 @@ let get_status client =
     let req = Status in
     let%lwt resp = do_request client req in
     Lwt.return resp
+
+let setup_session ?(on_behalf_of=None) client client_app =
+    let id = on_behalf_of |> (function None -> None | Some x -> (Some (Int32.of_int x))) in
+    let req = Setup_session {client_application=(Some client_app); on_behalf_of=id} in
+    let%lwt resp = do_request client req in
+    match resp.status with
+    | Success ->
+        (match resp.output with
+         | Some token -> Lwt.return (Ok token)
+         | None -> failwith "setup_session did not return a token!")
+    | _ -> Error (substitute_default "Unknown error" resp.error) |> Lwt.return

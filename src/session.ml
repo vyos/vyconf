@@ -9,7 +9,7 @@ type cfg_op =
     | CfgDelete of string list * string	option
 
 type world = {
-    mutable running_config: CT.t;
+    running_config: CT.t;
     reference_tree: RT.t;
     vyconf_config: Vyconf_config.t;
     dirs: Directories.t
@@ -18,6 +18,7 @@ type world = {
 type session_data = {
     proposed_config : Config_tree.t;
     modified: bool;
+    conf_mode: bool;
     changeset: cfg_op list;
     client_app: string;
     user: string;
@@ -26,6 +27,7 @@ type session_data = {
 let make world client_app user = {
     proposed_config = world.running_config;
     modified = false;
+    conf_mode = false;
     changeset = [];
     client_app = client_app;
     user = user
