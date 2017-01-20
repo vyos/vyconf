@@ -47,7 +47,7 @@ let mandatory_field conf table field =
 
 let optional_field default conf table field =
     let value = get_field conf table field in
-    Util.substitute_default value default
+    BatOption.default default value
 
 let load filename =
     try

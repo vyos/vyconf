@@ -21,10 +21,5 @@ let string_of_path path =
     | [] -> ""
     | x :: xs -> Printf.sprintf "%s%s" x (aux xs "")
 
-let substitute_default o d =
-    match o with
-    | None -> d
-    | Some v -> v
-
 let absolute_path relative_path =
     FilePath.make_absolute (Sys.getcwd ()) relative_path

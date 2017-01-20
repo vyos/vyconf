@@ -15,13 +15,14 @@ Library "vyconf"
   Path: src
   Modules: Config_tree, Reference_tree, Curly_parser, Curly_lexer, Value_checker, Vytree
   InternalModules: Util, Vylist
-  BuildDepends: fileutils, pcre, ppx_deriving.show, ppx_deriving_yojson, xml-light
+  BuildDepends: fileutils, pcre, ppx_deriving.show, ppx_deriving_yojson, xml-light, batteries
 
 Library "vyconf-config"
   Path: src
   Modules: Vyconf_config
+  InternalModules: Message
   FindlibParent: vyconf
-  BuildDepends: toml, fileutils, ppx_deriving.show
+  BuildDepends: toml, fileutils, ppx_deriving.show, batteries
 
 Library "vyconf-client"
   Path: src
@@ -34,7 +35,7 @@ Executable "vyconfd"
   Path: src
   MainIs: vyconfd.ml
   CompiledObject: best
-  BuildDepends: lwt, lwt.unix, lwt.ppx, ocaml-protoc, ocplib-endian, sha, vyconf, vyconf.vyconf-config
+  BuildDepends: lwt, lwt.unix, lwt.ppx, ocaml-protoc, ocplib-endian, sha, batteries, vyconf, vyconf.vyconf-config
 
 Executable "vytree_test"
   Path: test

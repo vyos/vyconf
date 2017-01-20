@@ -16,7 +16,7 @@ let validate_value dir value_constraint value =
                 We should do something about it.
          *)
         let validator = F.concat dir v in
-        let arg = Util.substitute_default c "" in
+        let arg = BatOption.default "" c in
         let result = Unix.system (Printf.sprintf "%s %s %s" validator arg value) in
         match result with
         | Unix.WEXITED 0 -> true

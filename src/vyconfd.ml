@@ -40,7 +40,7 @@ let make_session_token () =
 let setup_session world req =
     let token = make_session_token () in
     let user = "unknown user" in
-    let client_app = Util.substitute_default req.client_application "unknown client" in
+    let client_app = BatOption.default "unknown client" req.client_application in
     let () = Hashtbl.add sessions token (Session.make world client_app user) in
     {response_tmpl with output=(Some token)}
 

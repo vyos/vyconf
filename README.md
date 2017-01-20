@@ -86,7 +86,7 @@ the build dependencies:
 ```
 opam switch 4.03.0
 opam install oasis
-opam install fileutils lwt ocplib-endian ounit pcre ppx_deriving_yojson sha toml xml-light
+opam install fileutils lwt ocplib-endian ounit pcre ppx_deriving_yojson sha toml xml-light batteries
 ```
 
 To build the project, run the setup script, then `make`:
