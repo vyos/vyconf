@@ -89,11 +89,13 @@ opam install oasis
 opam install fileutils lwt ocplib-endian ounit pcre ppx_deriving_yojson sha toml xml-light batteries
 ```
 
-To build the project, run the setup script, then `make`:
+To build the project and run the unit tests, do this:
 
 ```
 ./build-setup.sh
+./configure --enable-test
 make
+make test
 ```
 
 If the project gets in a weird state, and isn't building correctly, you can clean it up with
