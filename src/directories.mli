@@ -6,6 +6,6 @@ type t = {
     interface_definitions: string;
 }
 
-val make : Vyconf_config.t -> t
+val make : string -> Vyconf_config.t -> t
 
 val test : t -> (unit, string) result

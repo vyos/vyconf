@@ -17,14 +17,16 @@ let relative_dirs = {
     interface_definitions = "interfaces";
 }
 
-let make conf =
+let concat = List.fold_left F.concat ""
+
+let make basepath conf =
     let open Vyconf_config in
     {
-      components = F.concat conf.program_dir relative_dirs.components;
-      validators = F.concat conf.program_dir relative_dirs.validators;
-      migrators = F.concat conf.program_dir relative_dirs.migrators;
-      component_definitions = F.concat conf.data_dir relative_dirs.component_definitions;
-      interface_definitions = F.concat conf.data_dir relative_dirs.interface_definitions
+      components = concat [basepath; conf.program_dir; relative_dirs.components];
+      validators = concat [basepath; conf.program_dir; relative_dirs.validators];
+      migrators = concat [basepath; conf.program_dir; relative_dirs.migrators];
+      component_definitions = concat [basepath; conf.data_dir; relative_dirs.component_definitions];
+      interface_definitions = concat [basepath; conf.data_dir; relative_dirs.interface_definitions]
     }
 
 (** Check if required directories exist

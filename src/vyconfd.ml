@@ -3,6 +3,8 @@ open Defaults
 open Vyconf_config
 open Vyconf_pb
 
+module FP = FilePath
+
 (* On UNIX, self_init uses /dev/random for seed *)
 let () = Random.self_init ()
 
@@ -11,6 +13,7 @@ let () = Lwt_log.add_rule "*" Lwt_log.Info
 (* Default VyConf configuration *)
 let daemonize = ref true
 let config_file = ref defaults.config_file
+let basepath = ref "/"
 let log_file = ref None
 
 (* Global data *)
@@ -22,14 +25,13 @@ let conf_mode_lock : string option ref = ref None
 
 (* Command line arguments *)
 let args = [
-    ("--no-daemon", Arg.Unit (fun () -> daemonize := false),
-         "Do not daemonize");
-        ("--config", Arg.String (fun s -> config_file := s),
-         (Printf.sprintf "<string>    Configuration file, default is %s" defaults.config_file));
-        ("--log-file", Arg.String (fun s -> log_file := Some s),
-        "<string>    Log file");
-        ("--version", Arg.Unit (fun () -> print_endline @@ Version.version_info (); exit 0), "Print version and exit")
-    ]
+    ("--no-daemon", Arg.Unit (fun () -> daemonize := false), "Do not daemonize");
+    ("--config", Arg.String (fun s -> config_file := s),
+    (Printf.sprintf "<string>  Configuration file, default is %s" defaults.config_file));
+    ("--log-file", Arg.String (fun s -> log_file := Some s), "<string>  Log file");
+    ("--base-path", Arg.String (fun s -> basepath := s), "<string>  Appliance base path");
+    ("--version", Arg.Unit (fun () -> print_endline @@ Version.version_info (); exit 0), "Print version and exit")
+   ]
 let usage = "Usage: " ^ Sys.argv.(0) ^ " [options]"
 
 let response_tmpl = {status=Success; output=None; error=None; warning=None}
@@ -116,11 +118,12 @@ let accept_connection world conn =
     Lwt.on_failure (handle_connection world ic oc ()) (fun e -> Lwt_log.ign_error (Printexc.to_string e));
     Lwt_log.info "New connection" >>= return
 
-let main_loop world () =
+let main_loop basepath world () =
     let open Session in
-    let%lwt () = Startup.setup_logger !daemonize !log_file world.vyconf_config.log_template in
+    let log_file = BatOption.bind !log_file (fun s -> Some (FP.concat basepath s)) in
+    let%lwt () = Startup.setup_logger !daemonize log_file world.vyconf_config.log_template in
     let%lwt () = Lwt_log.notice @@ Printf.sprintf "Starting VyConf for %s" world.vyconf_config.app_name in
-    let%lwt sock = Startup.create_socket world.vyconf_config.socket in
+    let%lwt sock = Startup.create_socket (FP.concat basepath world.vyconf_config.socket) in
     let%lwt serve = Startup.create_server (accept_connection world) sock () in
     serve ()
 
@@ -142,8 +145,8 @@ let () =
   let () = Arg.parse args (fun f -> ()) usage in
   let config = Startup.load_config !config_file in
   let () = Lwt_log.load_rules ("* -> " ^ config.log_level) in
-  let dirs = Directories.make config in
+  let dirs = Directories.make !basepath config in
   Startup.check_dirs dirs;
   let world = make_world config dirs in
-  Lwt_main.run @@ main_loop world ()
+  Lwt_main.run @@ main_loop !basepath world ()
   
