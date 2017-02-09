@@ -49,24 +49,21 @@ let optional_field default conf table field =
     let value = get_field conf table field in
     BatOption.default default value
 
-let (+/) l r = FilePath.concat l r
-
 let load filename =
     try
         let open Defaults in
         let conf_toml = Toml.Parser.from_filename filename |> Toml.Parser.unsafe in
-        let basepath = optional_field "" conf_toml "appliance" "basepath" in
         let conf = empty_config in
             (* Mandatory fields *)
-            let conf = {conf with app_name = basepath +/ (mandatory_field conf_toml "appliance" "name")} in
-            let conf = {conf with data_dir = basepath +/ (mandatory_field conf_toml "appliance" "data_dir")} in
-            let conf = {conf with config_dir = basepath +/ (mandatory_field conf_toml "appliance" "config_dir")} in
-            let conf = {conf with program_dir = basepath +/ (mandatory_field conf_toml "appliance" "program_dir")} in
-            let conf = {conf with primary_config = basepath +/ (mandatory_field conf_toml "appliance" "primary_config")} in
-            let conf = {conf with fallback_config = basepath +/ (mandatory_field conf_toml "appliance" "fallback_config")} in
+            let conf = {conf with app_name = mandatory_field conf_toml "appliance" "name"} in
+            let conf = {conf with data_dir = mandatory_field conf_toml "appliance" "data_dir"} in
+            let conf = {conf with config_dir = mandatory_field conf_toml "appliance" "config_dir"} in
+            let conf = {conf with program_dir = mandatory_field conf_toml "appliance" "program_dir"} in
+            let conf = {conf with primary_config = mandatory_field conf_toml "appliance" "primary_config"} in
+            let conf = {conf with fallback_config = mandatory_field conf_toml "appliance" "fallback_config"} in
             (* Optional fields *)
-            let conf = {conf with pid_file = basepath +/ (optional_field defaults.pid_file conf_toml "vyconf" "pid_file")} in
-            let conf = {conf with socket = basepath +/ (optional_field defaults.socket conf_toml "vyconf" "socket")} in
+            let conf = {conf with pid_file = optional_field defaults.pid_file conf_toml "vyconf" "pid_file"} in
+            let conf = {conf with socket = optional_field defaults.socket conf_toml "vyconf" "socket"} in
             let conf = {conf with log_template = optional_field defaults.log_template conf_toml "vyconf" "log_template"} in
             let conf = {conf with log_level = optional_field defaults.log_level conf_toml "vyconf" "log_level"} in
             (* log_file is already string option, so we don't need to unwrap *)
