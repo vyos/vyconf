@@ -35,3 +35,9 @@ val is_inactive : t -> string list -> bool
 val set_ephemeral : t -> string list -> bool -> t
 
 val is_ephemeral : t -> string list -> bool
+
+val render :
+    ?indent:int -> ?reftree:'a -> ?cmp:(string -> string -> int) ->
+    ?showephemeral:bool -> ?showinactive:bool ->
+    t -> string
+

@@ -105,4 +105,72 @@ let is_ephemeral node path =
     let data = Vytree.get_data node path in
     data.ephemeral
 
-
+(* TODO Reference tree version *)
+let render
+        ?(indent=4)
+        ?reftree
+        ?(cmp=BatString.numeric_compare)
+        ?(showephemeral=false)
+        ?(showinactive=false)
+        (config_tree:t)
+    =
+    let is_hidden_node data =
+        (not showephemeral && data.ephemeral) ||
+        (not showinactive && data.inactive)
+    in
+    let render_values = function
+        | [v] -> Printf.sprintf "%s;" v
+        | vs  -> String.concat "; " vs |> Printf.sprintf "[%s];"
+    in
+    let render_inactive data =
+        if data.inactive
+        then Some "#INACTIVE"
+        else None
+    in
+    let render_ephemeral data =
+        if data.ephemeral
+        then Some "#EPHEMERAL"
+        else None
+    in
+    let render_comment = function
+        | None   -> None
+        | Some c -> Some (Printf.sprintf "/*%s*/ " c)
+    in
+    let render_outer outer =
+        let rec filter = function
+            | [] -> []
+            | Some x :: rest -> x :: filter rest
+            | None   :: rest -> filter rest
+        in
+        String.concat " " (filter outer)
+    in
+    let rec render_node level node =
+        let data = Vytree.data_of_node node in
+        (* Hide inactive and ephemeral when necessary *)
+        if  is_hidden_node data
+        then ""
+        else
+            let indents  = String.make (level * indent) ' ' in
+            let name     = Vytree.name_of_node node in
+            let children = Vytree.children_of_node node in
+            let outer = render_outer [render_inactive data;
+                                      render_ephemeral data;
+                                      render_comment data.comment;
+                                      Some name]
+            in
+            (* Children are ignored if the node has values. *)
+            let inner = match data.values with
+                | []     -> render_children (level + 1) children
+                | values -> render_values values
+            in
+            match inner with
+            | "" -> Printf.sprintf "%s%s { }" indents outer  (* Hidden or empty descendents *)
+            | _  -> Printf.sprintf "%s%s {\n%s\n%s}" indents outer inner indents
+    and render_children level = function
+        | []       -> ""
+        | children -> List.map (render_node level) children
+                      |> String.concat "\n"
+    in
+    match reftree with
+    | None    -> render_node 0 config_tree
+    | Some rt -> raise No_such_value (* render_node_rt 0 config_tree *)
