@@ -11,5 +11,9 @@
 *.byte
 *.mllib
 *.mldylib
+*.rej
 setup.log
 setup.data
+.ocp-indent
+_build
+META
