@@ -101,7 +101,8 @@ let test_render_nested_empty_with_comment test_ctxt =
     let desired_rendered_form =
 "root {
     foo {
-        /*comment*/  bar { }
+        /*comment*/
+        bar { }
     }
 }"
     in
@@ -134,6 +135,8 @@ let test_render_ephemeral_shown teset_ctxt =
 }"
     in
     assert_equal rendered_curly_config desired_rendered_form
+
+
 
 let suite =
     "VyConf config tree tests" >::: [

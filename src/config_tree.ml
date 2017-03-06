@@ -105,72 +105,147 @@ let is_ephemeral node path =
     let data = Vytree.get_data node path in
     data.ephemeral
 
-(* TODO Reference tree version *)
-let render
-        ?(indent=4)
-        ?reftree
-        ?(cmp=BatString.numeric_compare)
-        ?(showephemeral=false)
-        ?(showinactive=false)
-        (config_tree:t)
-    =
-    let is_hidden_node data =
-        (not showephemeral && data.ephemeral) ||
-        (not showinactive && data.inactive)
-    in
+module Renderer =
+struct
+    (* TODO Replace use of Printf with Format *)
+
+    module L  = List
+    module S  = String
+    module PF = Printf
+    module VT = Vytree
+    module RT = Reference_tree
+
+    (* Nodes are ordered based on a comarison of their names *)
+    let compare cmp node1 node2 =
+        let name1 = VT.name_of_node node1 in
+        let name2 = VT.name_of_node node2 in
+        cmp name1 name2
+
+    let indentation indent level = S.make (level * indent) ' '
+
+    let render_inactive data  = if data.inactive  then "#INACTIVE "  else ""
+    let render_ephemeral data = if data.ephemeral then "#EPHEMERAL " else ""
+
+    let render_comment data indents =
+        match data.comment with
+        | None   -> ""
+        (* Trailing indentation for the rest of the material on the next line *)
+        | Some c -> PF.sprintf "/*%s*/\n%s" c indents
+
+    let render_tag = function
+        | None     -> ""
+        | Some tag -> PF.sprintf "%s " tag
+
+    let render_outer indents data name tag =
+        [render_comment data indents ;
+         render_inactive data;
+         render_ephemeral data;
+         render_tag tag;
+         name]
+        |> S.concat ""
+
     let render_values = function
-        | [v] -> Printf.sprintf "%s;" v
-        | vs  -> String.concat "; " vs |> Printf.sprintf "[%s];"
-    in
-    let render_inactive data =
-        if data.inactive
-        then Some "#INACTIVE"
-        else None
-    in
-    let render_ephemeral data =
-        if data.ephemeral
-        then Some "#EPHEMERAL"
-        else None
-    in
-    let render_comment = function
-        | None   -> None
-        | Some c -> Some (Printf.sprintf "/*%s*/ " c)
-    in
-    let render_outer outer =
-        let rec filter = function
-            | [] -> []
-            | Some x :: rest -> x :: filter rest
-            | None   :: rest -> filter rest
+        | [v] -> PF.sprintf "\"%s\";" v
+        | vs  -> S.concat "; " vs |> PF.sprintf "[%s];"
+
+    let render_inner_and_outer indents inner outer =
+        if inner = ""
+        (* Hidden or empty descendents yield empty nodes *)
+        then PF.sprintf "%s%s { }" indents outer
+        else PF.sprintf "%s%s %s" indents outer inner
+
+    let render
+            ?(indent=4)
+            ?(reftree)
+            ?(cmp=BatString.numeric_compare)
+            ?(showephemeral=false)
+            ?(showinactive=false)
+            (config_tree:t)
+        =
+        let is_hidden data =
+            (not showephemeral && data.ephemeral) ||
+            (not showinactive && data.inactive)
         in
-        String.concat " " (filter outer)
-    in
-    let rec render_node level node =
-        let data = Vytree.data_of_node node in
-        (* Hide inactive and ephemeral when necessary *)
-        if  is_hidden_node data
-        then ""
-        else
-            let indents  = String.make (level * indent) ' ' in
-            let name     = Vytree.name_of_node node in
-            let children = Vytree.children_of_node node in
-            let outer = render_outer [render_inactive data;
-                                      render_ephemeral data;
-                                      render_comment data.comment;
-                                      Some name]
+        let rec render_node level ?tag node =
+            let data = VT.data_of_node node in
+            let name = VT.name_of_node node in
+            (* Hide inactive and ephemeral when necessary *)
+            if is_hidden data then ""
+            else
+                let indents = indentation indent level in
+                let outer = render_outer indents data name tag in
+                let inner = (* Children are ignored if the node has values *)
+                    match data.values with
+                    | [] -> VT.children_of_node node |> render_children level
+                    | values -> render_values values
+                in
+                PF.sprintf "%s%s %s" indents outer inner
+        and render_children level = function
+            | [] -> "{ }"
+            | children ->
+            let indents = indentation indent level in
+            let render_child node = render_node (level + 1) node in
+            let rendered_children = L.map render_child children |> S.concat "\n"
             in
-            (* Children are ignored if the node has values. *)
-            let inner = match data.values with
-                | []     -> render_children (level + 1) children
-                | values -> render_values values
-            in
-            match inner with
-            | "" -> Printf.sprintf "%s%s { }" indents outer  (* Hidden or empty descendents *)
-            | _  -> Printf.sprintf "%s%s {\n%s\n%s}" indents outer inner indents
-    and render_children level = function
-        | []       -> ""
-        | children -> List.map (render_node level) children
-                      |> String.concat "\n"
-    in
-    match reftree with
-    | None    -> render_node 0 config_tree
-    | Some rt -> raise No_such_value (* render_node_rt 0 config_tree *)
+            if rendered_children = "" then "{ }"
+            else PF.sprintf "{\n%s\n%s}" rendered_children indents
+        in
+        (* Walks the reftree and config_tree side-by-side *)
+        let rec render_node_rt level tag rt node =
+            let data    = VT.data_of_node node in
+            let name    = VT.name_of_node node in
+            let rt_data = VT.data_of_node rt in
+            let rt_name = VT.name_of_node rt in
+            (* Hide inactive and ephemeral when necessary *)
+            if is_hidden data  then ""
+            else
+                (* TODO refactor this ugly approach*)
+                let (outer_name, level', inner) =
+                    let open RT in
+                    let children = VT.children_of_node node in
+                    let ordered = rt_data.keep_order in
+                    match rt_data.node_type with
+                    | Tag   ->
+                        ("", 0, render_children_rt level (Some name) ordered rt children)
+                    | Other ->
+                        (name, level, render_children_rt level None ordered rt children)
+                    | Leaf  ->
+                        (name, level, render_values data.values)
+                in
+                let indents = indentation indent level' in
+                let outer = render_outer indents data outer_name tag in
+                PF.sprintf "%s%s %s" indents outer inner
+        and render_children_rt level tag ordered rt = function
+            | [] -> "{ }"
+            | children ->
+                let is_tagged = BatOption.is_some tag in
+                let indents = indentation indent level in
+                let reorder nodes =
+                    if ordered then nodes
+                    else L.sort (compare cmp) nodes
+                in
+                let render_child node =
+                    let level' = if is_tagged then level else level + 1 in
+                    let node_reftree = VT.find rt (VT.name_of_node node) in
+                    (* If there is no reftree for a node, default to stand-alone *)
+                    match node_reftree with
+                    | Some rt' -> render_node_rt level' tag rt' node
+                    | None     -> render_node level' ?tag node
+                in
+                let rendered_children = children
+                                        |> reorder
+                                        |> L.map render_child
+                                        |> S.concat "\n"
+                in
+                if rendered_children = "" then "{ }"
+                else if is_tagged
+                then rendered_children
+                else PF.sprintf "{\n%s\n%s}" rendered_children indents
+        in
+        match reftree with
+        | None    -> render_node 0 config_tree
+        | Some rt -> render_node_rt 0 None rt config_tree
+
+end (* Renderer *)
+
+let render = Renderer.render
