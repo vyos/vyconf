@@ -136,7 +136,67 @@ let test_render_ephemeral_shown teset_ctxt =
     in
     assert_equal rendered_curly_config desired_rendered_form
 
+let load_reftree test_ctxt =
+    let file_name = "interface_definition_sample.xml" in
+    let r = Vytree.make Reference_tree.default_data "root" in
+    Reference_tree.load_from_xml r (in_testdata_dir test_ctxt [file_name])
 
+let test_render_rt_tag_node test_ctxt =
+    let reftree = load_reftree test_ctxt in
+    let path = ["system"; "login"; "user"; "full-name"] in
+    let node = CT.make "root" in
+    let node = CT.set node path (Some "name here") CT.AddValue in
+    let rendered_curly_config = CT.render ~reftree node in
+    let desired_rendered_form =
+"root {
+    system {
+        login {
+            user {
+                user full-name \"name here\";
+            }
+        }
+    }
+}"
+    in
+    assert_equal rendered_curly_config desired_rendered_form
+
+let test_render_rt_tag_node test_ctxt =
+    let reftree = load_reftree test_ctxt in
+    let path = ["system"; "login"; "user"; "full-name"] in
+    let node = CT.make "root" in
+    let node = CT.set node path (Some "name here") CT.AddValue in
+    let rendered_curly_config = CT.render ~reftree node in
+    let desired_rendered_form =
+"root {
+    system {
+        login {
+            user {
+                user full-name \"name here\";
+            }
+        }
+    }
+}"
+    in
+    assert_equal rendered_curly_config desired_rendered_form
+
+let test_render_rt_unspecified_node test_ctxt =
+    let reftree = load_reftree test_ctxt in
+    let path = ["system"; "login"; "user"; "unspecified_node"] in
+    let node = CT.make "root" in
+    let node = CT.set node path (Some "name here") CT.AddValue in
+    let rendered_curly_config = CT.render ~reftree node in
+    let desired_rendered_form =
+"root {
+    system {
+        login {
+            user {
+                unspecified_node \"name here\";
+            }
+        }
+    }
+}"
+    in
+    assert_equal rendered_curly_config desired_rendered_form
 
 let suite =
     "VyConf config tree tests" >::: [
@@ -153,7 +213,9 @@ let suite =
         "test_set_ephemeral" >:: test_set_ephemeral;
         "test_render_nested_empty_with_comment" >:: test_render_nested_empty_with_comment;
         "test_render_ephemeral_hidden " >:: test_render_ephemeral_hidden;
-        "test_render_ephemeral_shown"  >:: test_render_ephemeral_shown
+        "test_render_ephemeral_shown"  >:: test_render_ephemeral_shown;
+        "test_render_rt_tag_node" >:: test_render_rt_tag_node;
+        "test_render_rt_unspecified_node" >:: test_render_rt_unspecified_node
     ]
 
 let () =
