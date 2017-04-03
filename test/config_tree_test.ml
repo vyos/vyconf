@@ -92,6 +92,102 @@ let test_set_ephemeral test_ctxt =
     let node = CT.set_ephemeral node path (true) in
     assert_equal (CT.is_ephemeral node path) true
 
+(*** Refactoring test setup *)
+let set ?(how=CT.AddValue) path value node = CT.set node path value how
+
+let config_tree_of_path path = CT.make "root" |> set path None
+
+let set_in_config_tree ~how ?(path=[]) ?value =
+    let node = config_tree_of_path path in
+    how node path value
+
+let toggle_in_config_tree ~how ?(path=[]) ?(value=false) =
+    let node = config_tree_of_path path in
+    how node path value
+
+let load_reftree test_ctxt =
+    let file_name = "interface_definition_sample.xml" in
+    let r = Vytree.make Reference_tree.default_data "root" in
+    Reference_tree.load_from_xml r (in_testdata_dir test_ctxt [file_name])
+
+let foobar = ["foo"; "bar"]
+
+(*** Rendering tests *)
+
+(**** Standalone rendering *)
+let test_render_nested_empty_with_comment test_ctxt =
+    let rendered = CT.render @@
+        set_in_config_tree
+            ~how:CT.set_comment ~value:"comment"
+            ~path:foobar
+    in
+    assert_equal rendered
+"root {
+    foo {
+        /*comment*/
+        bar { }
+    }
+}"
+
+let test_render_ephemeral_hidden teset_ctxt =
+    let rendered = CT.render @@
+        toggle_in_config_tree
+            ~how:CT.set_ephemeral ~value:true
+            ~path:foobar
+    in
+    assert_equal rendered
+"root {
+    foo { }
+}"
+
+let test_render_ephemeral_shown teset_ctxt =
+    let rendered = CT.render ~showephemeral:true @@
+        toggle_in_config_tree
+            ~how:CT.set_ephemeral ~value:true
+            ~path:foobar
+    in
+    assert_equal rendered
+"root {
+    foo {
+        #EPHEMERAL bar { }
+    }
+}"
+
+(**** Reftree-based rendering *)
+let test_render_rt_tag_node test_ctxt =
+    let reftree = load_reftree test_ctxt in
+    let path = ["system"; "login"; "user"; "full-name"] in
+    let node = CT.make "root" in
+    let node = CT.set node path (Some "name here") CT.AddValue in
+    let rendered_curly_config = CT.render ~reftree node in
+    let desired_rendered_form =
+"root {
+    system {
+        login {
+             user full-name \"name here\";
+        }
+    }
+}"
+    in
+    assert_equal rendered_curly_config desired_rendered_form
+
+let test_render_rt_unspecified_node test_ctxt =
+    let reftree = load_reftree test_ctxt in
+    let path = ["system"; "login"; "user"; "unspecified_node"] in
+    let node = CT.make "root" in
+    let node = CT.set node path (Some "name here") CT.AddValue in
+    let rendered_curly_config = CT.render ~reftree node in
+    let desired_rendered_form =
+"root {
+    system {
+        login {
+             user unspecified_node \"name here\";
+        }
+    }
+}"
+    in
+    assert_equal rendered_curly_config desired_rendered_form
+
 let suite =
     "VyConf config tree tests" >::: [
         "test_set_create_node" >:: test_set_create_node;
@@ -105,7 +201,12 @@ let suite =
         "test_valueless_node_inactive_ephemeral" >:: test_valueless_node_inactive_ephemeral;
         "test_set_inactive" >:: test_set_inactive;
         "test_set_ephemeral" >:: test_set_ephemeral;
+        "test_render_nested_empty_with_comment" >:: test_render_nested_empty_with_comment;
+        "test_render_ephemeral_hidden " >:: test_render_ephemeral_hidden;
+        "test_render_ephemeral_shown"  >:: test_render_ephemeral_shown;
+        "test_render_rt_tag_node" >:: test_render_rt_tag_node;
+        "test_render_rt_unspecified_node" >:: test_render_rt_unspecified_node
     ]
 
 let () =
-  run_test_tt_main suite 
+    run_test_tt_main suite

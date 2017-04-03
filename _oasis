@@ -59,7 +59,7 @@ Executable "config_tree_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends: oUnit, vyconf
+  BuildDepends: oUnit, vyconf, batteries
 
 Executable "vylist_test"
   Path: test
