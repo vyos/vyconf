@@ -74,12 +74,12 @@ For details of the VyConf architecture, see the architecture.md document.
 
 ## Hacking
 
-VyConf development is discussed in the (VyOS phabricator)[https://phabricator.vyos.net/project/profile/1/]
+VyConf development is discussed in the [VyOS phabricator](https://phabricator.vyos.net/project/profile/1/)
 and the #vyos IRC channel on Freenode.
 
 Don't forget to add unit tests for things you add or change!
 
-If you are new to OCaml, you need to install (opam)[http://opam.ocaml.org/]
+If you are new to OCaml, you need to install [opam](http://opam.ocaml.org/)
 first. Then install the correct version of the compiler, the build tools, and
 the build dependencies:
 
@@ -93,7 +93,7 @@ To build the project and run the unit tests, do this:
 
 ```
 ./build-setup.sh
-./configure --enable-test
+./configure --enable-tests
 make
 make test
 ```
@@ -101,11 +101,11 @@ make test
 If the project gets in a weird state, and isn't building correctly, you can clean it up with
 
 ```
-ocaml setup.ml -dist-clean
+ocaml setup.ml -distclean
 ```
 
 then build as before.
- 
+
 I also recommend that you setup [utop](https://opam.ocaml.org/blog/about-utop/)
 (a great interactive REPL) and setup your editor with
 [merlin](https://github.com/ocaml/merlin) to see the inferred types. For GNU

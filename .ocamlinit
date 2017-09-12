@@ -22,6 +22,7 @@ let () =
 #require "pcre";;
 #require "toml";;
 #require "xml-light";;
+#require "batteries";;
 
 #cd "_build/src";;
 

@@ -35,3 +35,31 @@ val is_inactive : t -> string list -> bool
 val set_ephemeral : t -> string list -> bool -> t
 
 val is_ephemeral : t -> string list -> bool
+
+(** Interface to two rendering routines:
+    1. The stand-alone routine, when [reftree] is not provided
+    2. The reference-tree guided routine, when [reftree] is provided.
+
+    If an {i incomplete} reftree is supplied, then the remaining portion of the
+    config tree will be rendered according to the stand-alone routine.
+
+    If an {i incompatible} reftree is supplied (i.e., the name of the nodes of
+    the reftree do not match the name of the nodes in the config tree), then the
+    exception {! Config_tree.Renderer.Inapt_reftree} is raised.
+
+    @param indent spaces by which each level of nesting should be indented
+    @param reftree optional reference tree used to instruct rendering
+    @param cmp function used to sort the order of children, overruled
+           if [reftree] specifies [keep_order] for a node
+    @param showephemeral boolean determining whether ephemeral nodes are shown
+    @param showinactive boolean determining whether inactive nodes are shown
+*)
+val render :
+    ?indent:int ->
+    ?reftree:Reference_tree.t ->
+    ?cmp:(string -> string -> int) ->
+    ?showephemeral:bool ->
+    ?showinactive:bool ->
+    t ->
+    string
+
