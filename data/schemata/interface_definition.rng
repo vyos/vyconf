@@ -3,7 +3,7 @@
   <!--
        interface_definition.rnc: VyConf reference tree XML grammar
     
-       Copyright (C) 2014 VyOS Development Group <maintainers@vyos.net>
+       Copyright (C) 2014. 2017 VyOS maintainers and contributors <maintainers@vyos.net>
     
        This library is free software; you can redistribute it and/or
        modify it under the terms of the GNU Lesser General Public
@@ -116,6 +116,9 @@
     "valueless" means it can have no values at all.
     "hidden" means node visibility can be toggled, eg 'dangerous' commands,
     "secret" allows a node to hide its value from unprivileged users.
+    
+    "priority" is used to influence node processing order for nodes
+    with exact same dependencies and in compatibility modes.
   -->
   <define name="properties">
     <element name="properties">
@@ -134,6 +137,9 @@
             <text/>
           </element>
         </optional>
+        <zeroOrMore>
+          <ref name="completionHelp"/>
+        </zeroOrMore>
         <optional>
           <!-- These are meaningful only for leaf nodes -->
           <group>
@@ -155,6 +161,11 @@
         <optional>
           <element name="secret">
             <empty/>
+          </element>
+        </optional>
+        <optional>
+          <element name="priority">
+            <text/>
           </element>
         </optional>
         <optional>
@@ -224,6 +235,35 @@
         <element name="description">
           <text/>
         </element>
+      </interleave>
+    </element>
+  </define>
+  <!--
+    completionHelp tags contain information about allowed values of a node that is used for generating
+    tab completion in the CLI frontend and drop-down lists in GUI frontends
+    It is only meaninful for leaf nodes
+    Allowed values can be given as a fixed list of values (e.g. <list>foo bar baz</list>),
+    as a configuration path (e.g. <path>interfaces ethernet</path>),
+    or as a path to a script file that generates the list (e.g. <script>/usr/lib/foo/list-things</script>
+  -->
+  <define name="completionHelp">
+    <element name="completionHelp">
+      <interleave>
+        <zeroOrMore>
+          <element name="list">
+            <text/>
+          </element>
+        </zeroOrMore>
+        <zeroOrMore>
+          <element name="path">
+            <text/>
+          </element>
+        </zeroOrMore>
+        <zeroOrMore>
+          <element name="script">
+            <text/>
+          </element>
+        </zeroOrMore>
       </interleave>
     </element>
   </define>
