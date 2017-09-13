@@ -17,11 +17,16 @@ let validate_value dir value_constraint value =
          *)
         let validator = F.concat dir v in
         let arg = BatOption.default "" c in
-        let result = Unix.system (Printf.sprintf "%s %s %s" validator arg value) in
-        match result with
-        | Unix.WEXITED 0 -> true
-        | Unix.WEXITED 127 -> raise (Bad_validator (Printf.sprintf "Could not execute validator %s" validator))
-        | _ -> false
+        let danger = "[\",\\$,`]" in
+        let allowable = "'.*'" in
+            match Pcre.pmatch ~rex:(Pcre.regexp danger) validator with
+            |true -> false
+            |false ->
+                (match Pcre.pmatch ~rex:(Pcre.regexp danger) arg with
+                |false -> true
+                |true -> (try let _ = Pcre.exec ~pat:allowable arg in true
+                            with Not_found -> false)
+                )
 
 (* If no constraints given, consider it valid.
    Otherwise consider it valid if it satisfies at least
