@@ -32,7 +32,7 @@ start = element interfaceDefinition
 # other nodes and must not have values
 node = element node
 {
-    (ownerAttr? & nodeNameAttr),
+    nodeNameAttr,
     (properties? & children? & command?)
 }
 
@@ -42,7 +42,7 @@ node = element node
 # They must not contain other tag nodes
 tagNode = element tagNode
 {
-    (ownerAttr? & nodeNameAttr),
+    nodeNameAttr,
     (properties? & children & command?)
 }
 
@@ -79,12 +79,7 @@ nodeNameAttr = attribute name
     text
 }
 
-# Ordinary nodes and tag nodes can have "owner" attribute.
-# Owner is the component that is notified when node changes.
-ownerAttr = attribute owner
-{
-    text
-}
+
 
 
 
