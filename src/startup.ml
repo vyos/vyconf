@@ -48,8 +48,7 @@ let create_socket sockfile =
     let open Lwt_unix in
     let backlog = 10 in
     let%lwt sock = socket PF_UNIX SOCK_STREAM 0 |> Lwt.return in
-    (* XXX: replace with just bind after Lwt 3.0.0 release *)
-    let%lwt () = Lwt_unix.Versioned.bind_2 sock @@ ADDR_UNIX(sockfile) in
+    let%lwt () = Lwt_unix.bind sock @@ ADDR_UNIX(sockfile) in
     listen sock backlog;
     Lwt.return sock
 
