@@ -58,3 +58,29 @@ let create_server accept_connection sock =
     let rec serve () =
         Lwt_unix.accept sock >>= accept_connection >>= serve
     in serve
+
+(** Load the appliance configuration file *)
+let load_config file =
+    try
+        let chan = open_in file in
+        let config = Curly_parser.config Curly_lexer.token (Lexing.from_channel chan) in
+        Ok config
+    with
+        | Sys_error msg -> Error msg
+        | Curly_parser.Error -> Error "Parse error"
+
+(** Load the appliance configuration file or the fallback config *)
+let load_config_failsafe main fallback =
+    let res = load_config main in
+    match res with
+    | Ok config -> config
+    | Error msg -> 
+        Lwt_log.error
+          (Printf.sprintf "Failed to load config file %s: %s. Attempting to load fallback config %s" main msg fallback) |>
+          Lwt.ignore_result;
+        let res = load_config fallback in
+        begin
+            match res with
+            | Ok config -> config
+            | Error msg -> panic (Printf.sprintf "Failed to load fallback config %s: %s, exiting" fallback msg)
+        end

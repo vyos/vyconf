@@ -144,10 +144,14 @@ let make_world config dirs =
 let () = 
   let () = Arg.parse args (fun f -> ()) usage in
   let () = config_file := FP.concat !basepath !config_file in
-  let config = Startup.load_daemon_config !config_file in
-  let () = Lwt_log.load_rules ("* -> " ^ config.log_level) in
-  let dirs = Directories.make !basepath config in
+  let vc = Startup.load_daemon_config !config_file in
+  let () = Lwt_log.load_rules ("* -> " ^ vc.log_level) in
+  let dirs = Directories.make !basepath vc in
   Startup.check_dirs dirs;
-  let world = make_world config dirs in
+  let world = make_world vc dirs in
+  let config = Startup.load_config_failsafe
+      (FP.concat vc.config_dir vc.primary_config)
+      (FP.concat vc.config_dir vc.fallback_config) in
+  let world = Session.{world with running_config=config} in
   Lwt_main.run @@ main_loop !basepath world ()
   

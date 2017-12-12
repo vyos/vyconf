@@ -11,3 +11,7 @@ val create_socket : string -> Lwt_unix.file_descr Lwt.t
 val create_server :
     (Lwt_unix.file_descr * Lwt_unix.sockaddr -> unit Lwt.t) ->
     Lwt_unix.file_descr -> unit -> 'a Lwt.t
+
+val load_config : string -> (Config_tree.t, string) result
+
+val load_config_failsafe : string -> string -> Config_tree.t
