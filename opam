@@ -1,0 +1,33 @@
+opam-version: "0.1"
+name: "vyconf"
+version: "0.1"
+maintainer: "Daniil Baturin <daniil@baturin.org>"
+authors: "VyOS maintainers and contributors <maintainers@vyos.net>"
+homepage: "https://github.com/vyos/vyconf"
+bug-reports: "https://phabricator.vyos.net/maniphest"
+license: "LGPL with OCaml linking exception"
+dev-repo: "git+https://github.com/vyos/vyconf"
+build: [
+  ["./configure" "--prefix=%{prefix}%"]
+  [make]
+]
+install: [make "install"]
+remove: ["ocamlfind" "remove" "vyconf"]
+depends: [
+  "ocaml" {build & >="4.03.0"}
+  "ocamlfind" {build}
+  "oasis" {build}
+  "menhir" {build}
+  "ocaml-protoc" {build}
+  "ounit" {build}
+  "batteries" {build}
+  "lwt" {build}
+  "fileutils" {build}
+  "ppx_deriving" {build}
+  "ppx_deriving_yojson" {build}
+  "ocplib-endian" {build}
+  "xml-light" {build}
+  "toml" {build}
+  "sha" {build}
+]
+
