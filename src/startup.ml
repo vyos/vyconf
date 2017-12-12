@@ -29,7 +29,7 @@ let setup_logger daemonize log_file template =
         Lwt_log.default := l; Lwt.return_unit
 
 (** Load the config file or panic if it fails *)
-let load_config path =
+let load_daemon_config path =
     let result = Vyconf_config.load path in
     match result with
     | Ok cfg -> cfg
