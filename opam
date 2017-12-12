@@ -28,5 +28,6 @@ depends: [
   "xml-light" {build}
   "toml" {build}
   "sha" {build}
+  "pcre" {build}
 ]
 available: ocaml-version >= "4.03.0"
