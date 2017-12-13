@@ -89,18 +89,25 @@ let rec handle_connection world ic oc () =
     try%lwt
         let%lwt req_msg = Message.read ic in
         let%lwt req =
-            let envelope = decode_request_envelope (Pbrt.Decoder.of_bytes req_msg) in
-            Lwt.return (envelope.token, envelope.request)
+            try
+                let envelope = decode_request_envelope (Pbrt.Decoder.of_bytes req_msg) in
+                Lwt.return (Ok (envelope.token, envelope.request))
+            with Protobuf.Decoder.Failure e -> Lwt.return (Error (Protobuf.Decoder.error_to_string e))
         in
         let%lwt resp =
             (match req with
-            | _, Status -> response_tmpl
-            | _, Setup_session r -> setup_session world r
-            | None, _ -> {response_tmpl with status=Fail; output=(Some "Operation requires session token")}
-            | Some t, Teardown _ -> teardown_session t
-            | Some t, Configure r -> enter_conf_mode r t
-            | Some t, Exit_configure -> exit_conf_mode world t
-            | _ -> failwith "Unimplemented") |> return
+            | Error msg -> {response_tmpl with status=Fail; error=(Some (Printf.sprintf "Decoding error: %s" msg))}
+            | Ok req ->
+               begin
+                    match req with
+                    | _, Status -> response_tmpl
+                    | _, Setup_session r -> setup_session world r
+                    | None, _ -> {response_tmpl with status=Fail; output=(Some "Operation requires session token")}
+                    | Some t, Teardown _ -> teardown_session t
+                    | Some t, Configure r -> enter_conf_mode r t
+                    | Some t, Exit_configure -> exit_conf_mode world t
+                    | _ -> failwith "Unimplemented"
+                end) |> Lwt.return
         in
         let enc = Pbrt.Encoder.create () in
         let%lwt () = encode_response resp enc |> return in
