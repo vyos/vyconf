@@ -25,4 +25,4 @@ val shutdown : t -> t Lwt.t
 
 val get_status : t -> response Lwt.t
 
-val setup_session : ?on_behalf_of:(int option) -> t -> string -> (string, string) result Lwt.t
+val setup_session : ?on_behalf_of:(int option) -> t -> string -> (t, string) result Lwt.t

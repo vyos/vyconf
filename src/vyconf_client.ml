@@ -33,12 +33,11 @@ let shutdown client =
 
 let do_request client req =
     let enc = Pbrt.Encoder.create () in
-    let () = encode_request req enc in
+    let () = encode_request_envelope {token=client.session; request=req} enc in
     let msg = Pbrt.Encoder.to_bytes enc in
     let%lwt () = Message.write client.oc msg in
     let%lwt resp = Message.read client.ic in
     decode_response (Pbrt.Decoder.of_bytes resp) |> Lwt.return
-    
 
 let get_status client =
     let req = Status in
@@ -46,12 +45,13 @@ let get_status client =
     Lwt.return resp
 
 let setup_session ?(on_behalf_of=None) client client_app =
+    if BatOption.is_some client.session then Lwt.return (Error "Client is already associated with a session") else
     let id = on_behalf_of |> (function None -> None | Some x -> (Some (Int32.of_int x))) in
     let req = Setup_session {client_application=(Some client_app); on_behalf_of=id} in
     let%lwt resp = do_request client req in
     match resp.status with
     | Success ->
         (match resp.output with
-         | Some token -> Lwt.return (Ok token)
-         | None -> failwith "setup_session did not return a token!")
+         | Some token -> Lwt.return (Ok {client with session=(Some token)})
+         | None -> failwith "setup_session did not return a session token!")
     | _ -> Error (substitute_default "Unknown error" resp.error) |> Lwt.return
