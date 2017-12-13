@@ -1,4 +1,4 @@
-(* Unavoidable module for functions that don't fit anywhere else *)
+(** The unavoidable module for functions that don't fit anywhere else *)
 
 let find_xml_child name xml =
     let find_aux e =
@@ -23,3 +23,9 @@ let string_of_path path =
 
 let absolute_path relative_path =
     FilePath.make_absolute (Sys.getcwd ()) relative_path
+
+(** Makes a hex dump of a byte string *)
+let hexdump b =
+    let dump = ref "" in
+    Bytes.iter (fun c -> dump := Char.code c |> Printf.sprintf "%s %02x" !dump) b;
+    !dump

@@ -22,7 +22,7 @@ Library "vyconf-config"
   Modules: Vyconf_config
   InternalModules: Message
   FindlibParent: vyconf
-  BuildDepends: toml, fileutils, ppx_deriving.show, batteries
+  BuildDepends: toml, fileutils, ppx_deriving.show, batteries, vyconf
 
 Library "vyconf-client"
   Path: src
