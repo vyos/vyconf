@@ -150,7 +150,6 @@ let make_world config dirs =
 
 let () = 
   let () = Arg.parse args (fun f -> ()) usage in
-  let () = config_file := FP.concat !basepath !config_file in
   let vc = Startup.load_daemon_config !config_file in
   let () = Lwt_log.load_rules ("* -> " ^ vc.log_level) in
   let dirs = Directories.make !basepath vc in
