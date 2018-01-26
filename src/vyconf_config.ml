@@ -34,10 +34,9 @@ let empty_config = {
 (* XXX: We assume that nesting in TOML config files never goes beyond two levels  *)
 
 let get_field conf tbl_name field_name =
-    (* NB: TomlLenses module uses "table" and "field" names for function names,
-            hence tbl_name and field_name
-     *)
-    TomlLenses.(get conf (key tbl_name |-- table |-- key field_name |-- string))
+    try
+        Some (Toml.get_string (Toml.key field_name) (Toml.get_table (Toml.key tbl_name) conf))
+    with Not_found -> None
 
 let mandatory_field conf table field =
     let value = get_field conf table field in
@@ -52,7 +51,7 @@ let optional_field default conf table field =
 let load filename =
     try
         let open Defaults in
-        let conf_toml = Toml.Parser.from_filename filename |> Toml.Parser.unsafe in
+        let conf_toml = Toml.Parser.from_filename filename  in
         let conf = empty_config in
             (* Mandatory fields *)
             let conf = {conf with app_name = mandatory_field conf_toml "appliance" "name"} in
