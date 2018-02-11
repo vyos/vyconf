@@ -1,4 +1,5 @@
 include Vyconf_pb
+include Vyconf_types
 
 type t = {
     sock: Lwt_unix.file_descr;
@@ -24,7 +25,7 @@ let create sockfile =
     Lwt.return {
       sock=sock; ic=ic; oc=oc;
       enc=(Pbrt.Encoder.create ()); closed=false;
-      session=None; conf_mode=false
+      session=None; conf_mode=false;
     }
 
 let shutdown client =
