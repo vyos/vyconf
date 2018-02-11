@@ -155,7 +155,7 @@ let has_illegal_characters name =
         in the reference tree
  *)
 let rec validate_path validators_dir node path =
-    let show_path p = Printf.sprintf "[%s]" @@ Util.string_of_path (List.rev p) in
+    let show_path p = Printf.sprintf "[%s]" @@ Util.string_of_list (List.rev p) in
     let rec aux node path acc =
         let data = Vytree.data_of_node node in
         match data.node_type with
