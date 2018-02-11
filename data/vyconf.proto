@@ -4,6 +4,11 @@ message Request {
     JSON = 1;
   }
 
+  enum OutputFormat {
+    OutPlain = 0;
+    OutJSON = 1;
+  }
+
   message Status {
   }
 
@@ -74,18 +79,22 @@ message Request {
 
   message GetValue {
     repeated string Path = 1;
+    optional OutputFormat output_format = 2;
   }
 
   message GetValues {
     repeated string Path = 1;
+    optional OutputFormat output_format = 2;
   }
 
   message ListChildren {
     repeated string Path = 1;
+    optional OutputFormat output_format = 2;
   }
 
   message RunOpMode {
     repeated string Path = 1;
+    optional OutputFormat output_format = 2;
   }
 
   message Confirm {
