@@ -17,17 +17,17 @@ Library "vyconf"
   InternalModules: Util, Vylist
   BuildDepends: fileutils, pcre, ppx_deriving.show, ppx_deriving_yojson, xml-light, batteries
 
-Library "vyconf-config"
+Library "vyconfd-config"
   Path: src
   Modules: Vyconf_config
-  InternalModules: Message
   FindlibParent: vyconf
-  BuildDepends: toml, fileutils, ppx_deriving.show, batteries, vyconf
+  Install: false
+  BuildDepends: toml, fileutils, ppx_deriving.show, batteries
 
-Library "vyconf-client"
+Library "client"
   Path: src
   Modules: Vyconf_client
-  InternalModules: Vyconf_pb
+  InternalModules: Vyconf_pb, Message
   FindlibParent: vyconf
   BuildDepends: ocaml-protoc, ocplib-endian
 
@@ -35,7 +35,7 @@ Executable "vyconfd"
   Path: src
   MainIs: vyconfd.ml
   CompiledObject: best
-  BuildDepends: lwt, lwt.unix, lwt.ppx, ocaml-protoc, ocplib-endian, sha, batteries, vyconf, vyconf.vyconf-config
+  BuildDepends: lwt, lwt.unix, lwt.ppx, ocaml-protoc, ocplib-endian, sha, batteries, vyconf, vyconf.vyconfd-config
 
 Executable "vytree_test"
   Path: test
@@ -91,7 +91,7 @@ Executable "vyconf_config_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends:  oUnit, vyconf.vyconf-config
+  BuildDepends:  oUnit, vyconf.vyconfd-config
 
 Executable "curly_parser_test"
   Path: test
@@ -107,7 +107,7 @@ Executable "session_test"
   Build$: flag(tests)
   CompiledObject: best
   Install: false
-  BuildDepends: oUnit, vyconf, vyconf.vyconf-config
+  BuildDepends: oUnit, vyconf, vyconf.vyconfd-config
 
 Executable "vytree_load_test"
   Path: test
