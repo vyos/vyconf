@@ -2,6 +2,7 @@ open Lwt
 open Defaults
 open Vyconf_config
 open Vyconf_pb
+open Vyconf_types
 
 module FP = FilePath
 
@@ -40,11 +41,16 @@ let make_session_token () =
     Sha1.string (string_of_int (Random.bits ())) |> Sha1.to_hex
 
 let setup_session world req =
+    let () = print_endline "Setting up a new session" in
     let token = make_session_token () in
     let user = "unknown user" in
     let client_app = BatOption.default "unknown client" req.client_application in
+    let () = print_endline "Adding session to the list" in
     let () = Hashtbl.add sessions token (Session.make world client_app user) in
+    let () = Printf.printf "New session %s\n" token in
     {response_tmpl with output=(Some token)}
+
+let find_session token = Hashtbl.find sessions token
 
 let enter_conf_mode req token =
     let open Session in
@@ -84,8 +90,45 @@ let teardown_session token =
     with Not_found ->
         {response_tmpl with status=Fail; error=(Some "Session not found")}
 
-let rec handle_connection world ic oc () =
-    let open Vyconf_pb in
+let exists world token (req: request_exists) =
+    if Session.exists world (find_session token) req.path then response_tmpl
+    else {response_tmpl with status=Fail}
+
+let get_value world token (req: request_get_value) =
+    try
+        let value = Session.get_value world (find_session token) req.path in
+        let fmt = BatOption.default Out_plain req.output_format in
+        let value_str =
+         (match fmt with
+          | Out_plain -> value
+          | Out_json -> Yojson.Safe.to_string @@ `String value)
+        in {response_tmpl with output=(Some value_str)}
+    with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
+
+let get_values world token (req: request_get_values) =
+    try
+        let values = Session.get_values world (find_session token) req.path in
+        let fmt = BatOption.default Out_plain req.output_format in
+        let values_str =
+         (match fmt with
+          | Out_plain -> Util.string_of_list values
+          | Out_json -> Util.json_of_list values)
+        in {response_tmpl with output=(Some values_str)}
+    with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
+
+let list_children world token (req: request_list_children) =
+    try
+        let children = Session.list_children world (find_session token) req.path in
+        let fmt = BatOption.default Out_plain req.output_format in
+        let children_str =
+          (match fmt with
+          | Out_plain -> Util.string_of_list children
+          | Out_json -> Util.json_of_list children)
+         in {response_tmpl with output=(Some children_str)}
+    with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
+    
+
+let rec handle_connection world ic oc fd () =
     try%lwt
         let%lwt req_msg = Message.read ic in
         let%lwt req =
@@ -106,6 +149,7 @@ let rec handle_connection world ic oc () =
                     | Some t, Teardown _ -> teardown_session t
                     | Some t, Configure r -> enter_conf_mode r t
                     | Some t, Exit_configure -> exit_conf_mode world t
+                    | Some t, Exists r -> exists world t r
                     | _ -> failwith "Unimplemented"
                 end) |> Lwt.return
         in
@@ -113,16 +157,16 @@ let rec handle_connection world ic oc () =
         let%lwt () = encode_response resp enc |> return in
         let%lwt resp_msg = Pbrt.Encoder.to_bytes enc |> return in
         let%lwt () = Message.write oc resp_msg in
-        handle_connection world ic oc ()
+        handle_connection world ic oc fd ()
     with
-    | Failure e -> Lwt_log.error e >>= handle_connection world ic oc
-    | End_of_file -> Lwt_log.info "Connection closed" >>= return
+    | Failure e -> Lwt_log.error e >>= handle_connection world ic oc fd
+    | End_of_file -> Lwt_log.info "Connection closed" >>= return 
 
 let accept_connection world conn =
     let fd, _ = conn in
     let ic = Lwt_io.of_fd Lwt_io.Input fd in
     let oc = Lwt_io.of_fd Lwt_io.Output fd in
-    Lwt.on_failure (handle_connection world ic oc ()) (fun e -> Lwt_log.ign_error (Printexc.to_string e));
+    Lwt.on_failure (handle_connection world ic oc fd ()) (fun e -> Lwt_log.ign_error (Printexc.to_string e));
     Lwt_log.info "New connection" >>= return
 
 let main_loop basepath world () =
@@ -160,4 +204,3 @@ let () =
       (FP.concat vc.config_dir vc.fallback_config) in
   let world = Session.{world with running_config=config} in
   Lwt_main.run @@ main_loop !basepath world ()
-  
