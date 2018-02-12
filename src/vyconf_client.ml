@@ -8,15 +8,17 @@ type t = {
     enc: Pbrt.Encoder.t;
     session: string option;
     conf_mode: bool;
-    closed: bool
+    closed: bool;
+    out_format: request_output_format;
+    conf_format: request_config_format
 }
 
-let substitute_default d o=
+let unwrap o =
     match o with
-    | None -> d
-    | Some v -> v
+    | Some v -> Ok v
+    | None -> Error "operation returned None when actual value was expected"
 
-let create sockfile =
+let create ?(token=None) sockfile out_format conf_format =
     let open Lwt_unix in
     let sock = socket PF_UNIX SOCK_STREAM 0 in
     let%lwt () = connect sock (ADDR_UNIX sockfile) in
@@ -25,8 +27,15 @@ let create sockfile =
     Lwt.return {
       sock=sock; ic=ic; oc=oc;
       enc=(Pbrt.Encoder.create ()); closed=false;
-      session=None; conf_mode=false;
+      session=token; conf_mode=false; out_format=out_format;
+      conf_format=conf_format
     }
+
+let get_token client = 
+    let token = client.session in
+    match token with
+    | Some t -> Ok t |> Lwt.return
+    | None -> Error "failed to get a session token" |> Lwt.return
 
 let shutdown client =
     let%lwt () = Lwt_unix.close client.sock in
@@ -38,6 +47,7 @@ let do_request client req =
     let msg = Pbrt.Encoder.to_bytes enc in
     let%lwt () = Message.write client.oc msg in
     let%lwt resp = Message.read client.ic in
+    let%lwt () = Printf.printf "Decoding" |> (fun () -> Lwt.return_unit) in
     decode_response (Pbrt.Decoder.of_bytes resp) |> Lwt.return
 
 let get_status client =
@@ -53,6 +63,37 @@ let setup_session ?(on_behalf_of=None) client client_app =
     match resp.status with
     | Success ->
         (match resp.output with
-         | Some token -> Lwt.return (Ok {client with session=(Some token)})
-         | None -> failwith "setup_session did not return a session token!")
-    | _ -> Error (substitute_default "Unknown error" resp.error) |> Lwt.return
+         | Some token -> Ok {client with session=(Some token)}
+         | None -> Error "setup_session did not return a session token!") |> Lwt.return
+    | _ -> Error (BatOption.default "Unknown error" resp.error) |> Lwt.return
+
+let exists client path =
+    let req = Exists {path=path} in
+    let%lwt resp = do_request client req in
+    match resp.status with
+    | Success -> Lwt.return (Ok "")
+    | Fail -> Lwt.return (Error "")
+    | _ -> Error (BatOption.default "" resp.error) |> Lwt.return
+
+let get_value client path =
+    let req = Get_value {path=path; output_format=(Some client.out_format)} in
+    let%lwt resp = do_request client req in
+    match resp.status with
+    | Success -> unwrap resp.output |> Lwt.return
+    | _ -> Error (BatOption.default ""resp.error) |> Lwt.return
+
+let get_values client path =
+    let req = Get_values {path=path; output_format=(Some client.out_format)} in
+    let%lwt resp = do_request client req in
+    match resp.status with
+    | Success -> unwrap resp.output |> Lwt.return
+    | _ -> Error (BatOption.default "" resp.error) |> Lwt.return
+
+let list_children client path =
+    let req = List_children {path=path; output_format=(Some client.out_format)} in
+    let%lwt resp = do_request client req in
+    match resp.status with
+    | Success -> unwrap resp.output |> Lwt.return
+    | _ -> Error (BatOption.default "" resp.error) |> Lwt.return
+
+

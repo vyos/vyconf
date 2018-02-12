@@ -19,10 +19,22 @@ type response = {
 }
 
 
-val create : string -> t Lwt.t
+val create : ?token:(string option) -> string -> Vyconf_types.request_output_format -> Vyconf_types.request_config_format -> t Lwt.t
+
+val get_token : t -> (string, string) result Lwt.t
 
 val shutdown : t -> t Lwt.t
 
 val get_status : t -> response Lwt.t
 
 val setup_session : ?on_behalf_of:(int option) -> t -> string -> (t, string) result Lwt.t
+
+val exists : t -> string list -> (string, string) result Lwt.t
+
+val get_value : t -> string list -> (string, string) result Lwt.t
+
+val get_values : t -> string list -> (string, string) result Lwt.t
+
+val list_children : t -> string list -> (string, string) result Lwt.t
+
+
