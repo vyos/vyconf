@@ -46,9 +46,18 @@ let check_dirs dirs =
     | Ok _ -> ()
     | Error err -> panic err
 
+let delete_socket_if_exists sockfile =
+    try
+        let _ = Unix.stat sockfile in
+        Unix.unlink sockfile
+    with
+    | Unix.Unix_error (Unix.ENOENT, _, _) -> ()
+    | _ -> panic "Could not delete old socket file, exiting"
+
 (** Bind to a UNIX socket *)
 let create_socket sockfile =
     let open Lwt_unix in
+    let () = delete_socket_if_exists sockfile in
     let backlog = 10 in
     let%lwt sock = socket PF_UNIX SOCK_STREAM 0 |> Lwt.return in
     let%lwt () = Lwt_unix.bind sock @@ ADDR_UNIX(sockfile) in
