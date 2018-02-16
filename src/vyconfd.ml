@@ -180,7 +180,7 @@ let main_loop basepath world () =
 
 let load_interface_definitions dir =
     let open Session in
-    let reftree = Reference_tree.load_interface_definitions dir in
+    let reftree = Startup.load_interface_definitions dir in
     match reftree with
     | Ok r -> r
     | Error s -> Startup.panic s

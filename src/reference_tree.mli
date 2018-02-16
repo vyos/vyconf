@@ -14,6 +14,8 @@ type ref_node_data = {
     secret: bool;
 }
 
+exception Bad_interface_definition of string
+
 exception Validation_error of string
 
 type t = ref_node_data Vytree.t
@@ -23,8 +25,6 @@ val default_data : ref_node_data
 val default : t
 
 val load_from_xml : t -> string -> t
-
-val load_interface_definitions : string -> (t, string) result
 
 val validate_path : string -> t -> string list -> string list * string option
 

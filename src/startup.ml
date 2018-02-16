@@ -5,6 +5,9 @@ let panic msg =
     Lwt_log.fatal msg |> Lwt.ignore_result;
     exit 1
 
+let log_info msg = Lwt_log.info msg |> Lwt.ignore_result; ()
+
+
 (** Setup the default logger *)
 let setup_logger daemonize log_file template =
     (** 
@@ -84,3 +87,21 @@ let load_config_failsafe main fallback =
             | Ok config -> config
             | Error msg -> panic (Printf.sprintf "Failed to load fallback config %s: %s, exiting" fallback msg)
         end
+
+(* Load interface definitions from a directory into a reference tree *)
+let load_interface_definitions dir =
+    let open Reference_tree in
+    let relative_paths = FileUtil.ls dir in
+    let absolute_paths =
+        try Ok (List.map Util.absolute_path relative_paths)
+        with Sys_error no_dir_msg -> Error no_dir_msg
+    in
+    let load_aux tree file =
+        log_info @@ Printf.sprintf "Loading interface definitions from %s" file;
+        load_from_xml tree file
+    in
+    try begin match absolute_paths with
+        | Ok paths  -> Ok (List.fold_left load_aux default paths)
+        | Error msg -> Error msg end
+    with Bad_interface_definition msg -> Error msg
+

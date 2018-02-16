@@ -122,17 +122,6 @@ let load_from_xml reftree file =
     | Xml.File_not_found msg -> raise (Bad_interface_definition msg)
     | Xml.Error e -> raise (Bad_interface_definition (Xml.error e))
 
-let load_interface_definitions dir =
-    let relative_paths = FileUtil.ls dir in
-    let absolute_paths =
-        try Ok (List.map Util.absolute_path relative_paths)
-        with Sys_error no_dir_msg -> Error no_dir_msg
-    in
-    try match absolute_paths with
-        | Ok paths  -> Ok (List.fold_left load_from_xml default paths)
-        | Error msg -> Error msg
-    with Bad_interface_definition msg -> Error msg
-
 (* Validation function *)
 
 let has_illegal_characters name =

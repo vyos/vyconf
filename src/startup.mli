@@ -15,3 +15,5 @@ val create_server :
 val load_config : string -> (Config_tree.t, string) result
 
 val load_config_failsafe : string -> string -> Config_tree.t
+
+val load_interface_definitions : string -> (Reference_tree.t, string) result
