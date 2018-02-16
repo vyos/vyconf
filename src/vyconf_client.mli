@@ -37,4 +37,4 @@ val get_values : t -> string list -> (string, string) result Lwt.t
 
 val list_children : t -> string list -> (string, string) result Lwt.t
 
-
+val show_config : t -> string list -> (string, string) result Lwt.t

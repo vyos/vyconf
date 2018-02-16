@@ -27,15 +27,21 @@ Library "vyconfd-config"
 Library "client"
   Path: src
   Modules: Vyconf_client
-  InternalModules: Vyconf_pb, Message
+  InternalModules: Vyconf_pb, Vyconf_types, Message, Util, Vylist
   FindlibParent: vyconf
-  BuildDepends: ocaml-protoc, ocplib-endian
+  BuildDepends: lwt, ocaml-protoc, ocplib-endian, batteries, fileutils, yojson
 
 Executable "vyconfd"
   Path: src
   MainIs: vyconfd.ml
   CompiledObject: best
   BuildDepends: lwt, lwt.unix, lwt.ppx, ocaml-protoc, ocplib-endian, sha, batteries, vyconf, vyconf.vyconfd-config
+
+Executable "vycli"
+  Path: src
+  MainIs: vycli.ml
+  CompiledObject: best
+  BuildDepends: lwt, lwt.unix, lwt.ppx, ocaml-protoc, ocplib-endian, pcre, vyconf.client
 
 Executable "vytree_test"
   Path: test

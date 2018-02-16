@@ -41,13 +41,10 @@ let make_session_token () =
     Sha1.string (string_of_int (Random.bits ())) |> Sha1.to_hex
 
 let setup_session world req =
-    let () = print_endline "Setting up a new session" in
     let token = make_session_token () in
     let user = "unknown user" in
     let client_app = BatOption.default "unknown client" req.client_application in
-    let () = print_endline "Adding session to the list" in
     let () = Hashtbl.add sessions token (Session.make world client_app user) in
-    let () = Printf.printf "New session %s\n" token in
     {response_tmpl with output=(Some token)}
 
 let find_session token = Hashtbl.find sessions token
@@ -96,6 +93,7 @@ let exists world token (req: request_exists) =
 
 let get_value world token (req: request_get_value) =
     try
+        let () = (Lwt_log.debug @@ Printf.sprintf "[%s]\n" (Util.string_of_list req.path)) |> Lwt.ignore_result in
         let value = Session.get_value world (find_session token) req.path in
         let fmt = BatOption.default Out_plain req.output_format in
         let value_str =
@@ -111,7 +109,7 @@ let get_values world token (req: request_get_values) =
         let fmt = BatOption.default Out_plain req.output_format in
         let values_str =
          (match fmt with
-          | Out_plain -> Util.string_of_list values
+          | Out_plain -> Util.string_of_list @@ List.map (Printf.sprintf "\'%s\'") values
           | Out_json -> Util.json_of_list values)
         in {response_tmpl with output=(Some values_str)}
     with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
@@ -122,11 +120,18 @@ let list_children world token (req: request_list_children) =
         let fmt = BatOption.default Out_plain req.output_format in
         let children_str =
           (match fmt with
-          | Out_plain -> Util.string_of_list children
+          | Out_plain -> Util.string_of_list @@ List.map (Printf.sprintf "\'%s\'") children
           | Out_json -> Util.json_of_list children)
          in {response_tmpl with output=(Some children_str)}
     with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
-    
+
+let show_config world token (req: request_show_config) =
+    try
+        let fmt = BatOption.default Curly req.format in
+        let conf_str = Session.show_config world (find_session token) req.path fmt in
+        {response_tmpl with output=(Some conf_str)}
+    with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
+
 
 let rec handle_connection world ic oc fd () =
     try%lwt
@@ -150,6 +155,10 @@ let rec handle_connection world ic oc fd () =
                     | Some t, Configure r -> enter_conf_mode r t
                     | Some t, Exit_configure -> exit_conf_mode world t
                     | Some t, Exists r -> exists world t r
+                    | Some t, Get_value r -> get_value world t r
+                    | Some t, Get_values r -> get_values world t r
+                    | Some t, List_children r -> list_children world t r
+                    | Some t, Show_config r -> show_config world t r
                     | _ -> failwith "Unimplemented"
                 end) |> Lwt.return
         in

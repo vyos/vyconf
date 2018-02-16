@@ -47,7 +47,6 @@ let do_request client req =
     let msg = Pbrt.Encoder.to_bytes enc in
     let%lwt () = Message.write client.oc msg in
     let%lwt resp = Message.read client.ic in
-    let%lwt () = Printf.printf "Decoding" |> (fun () -> Lwt.return_unit) in
     decode_response (Pbrt.Decoder.of_bytes resp) |> Lwt.return
 
 let get_status client =
@@ -96,4 +95,10 @@ let list_children client path =
     | Success -> unwrap resp.output |> Lwt.return
     | _ -> Error (BatOption.default "" resp.error) |> Lwt.return
 
+let show_config client path =
+    let req = Show_config {path=path; format=(Some client.conf_format)} in
+    let%lwt resp = do_request client req in
+    match resp.status with
+    | Success -> unwrap resp.output |> Lwt.return
+    | _ -> Error (BatOption.default "" resp.error) |> Lwt.return
 
