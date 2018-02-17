@@ -56,10 +56,20 @@ val is_ephemeral : t -> string list -> bool
 *)
 val render :
     ?indent:int ->
-    ?reftree:Reference_tree.t ->
+    ?reftree:(Reference_tree.t option)->
     ?cmp:(string -> string -> int) ->
     ?showephemeral:bool ->
     ?showinactive:bool ->
     t ->
+    string
+
+val render_at_level :
+    ?indent:int ->
+    ?reftree:(Reference_tree.t option)->
+    ?cmp:(string -> string -> int) ->
+    ?showephemeral:bool ->
+    ?showinactive:bool ->
+    t ->
+    string list ->
     string
 

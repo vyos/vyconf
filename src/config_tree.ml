@@ -156,7 +156,7 @@ struct
 
     let render
             ?(indent=4)
-            ?(reftree)
+            ?(reftree=None)
             ?(cmp=BatString.numeric_compare)
             ?(showephemeral=false)
             ?(showinactive=false)
@@ -249,3 +249,20 @@ struct
 end (* Renderer *)
 
 let render = Renderer.render
+
+let render_at_level
+  ?(indent=4)
+  ?(reftree=None)
+  ?(cmp=BatString.numeric_compare)
+  ?(showephemeral=false)
+  ?(showinactive=false)
+  node
+  path =
+    let node = 
+        match path with
+        | [] -> node
+        | _ -> Vytree.get node path
+    in
+    let children = Vytree.children_of_node node in
+    let child_configs = List.map (render ~indent:indent ~reftree:reftree  ~cmp:cmp ~showephemeral:showephemeral ~showinactive:showinactive) children in
+    List.fold_left (Printf.sprintf "%s\n%s") "" child_configs

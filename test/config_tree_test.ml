@@ -153,13 +153,38 @@ let test_render_ephemeral_shown teset_ctxt =
     }
 }"
 
+let test_render_at_level test_ctxt =
+    let path = ["foo"; "bar"; "baz"] in
+    let node = CT.make "root" in
+    let node = CT.set node path (Some "quux") CT.AddValue in
+    let rendered = CT.render_at_level node ["foo"] in
+    assert_equal (String.trim rendered)
+"bar {
+    baz \"quux\";
+}"
+
+let test_render_at_level_top test_ctxt =
+    let path1 = ["foo"; "bar"] in
+    let path2 = ["baz"; "quux"] in
+    let node = CT.make "root" in
+    let node = CT.set node path1 (Some "quuux") CT.AddValue in
+    let node = CT.set node path2 (Some "xyzzy") CT.AddValue in
+    let rendered = CT.render_at_level node [] in
+    assert_equal (String.trim rendered)
+"baz {
+    quux \"xyzzy\";
+}
+foo {
+    bar \"quuux\";
+}"
+
 (**** Reftree-based rendering *)
 let test_render_rt_tag_node test_ctxt =
     let reftree = load_reftree test_ctxt in
     let path = ["system"; "login"; "user"; "full-name"] in
     let node = CT.make "root" in
     let node = CT.set node path (Some "name here") CT.AddValue in
-    let rendered_curly_config = CT.render ~reftree node in
+    let rendered_curly_config = CT.render ~reftree:(Some reftree) node in
     let desired_rendered_form =
 "root {
     system {
@@ -176,7 +201,7 @@ let test_render_rt_unspecified_node test_ctxt =
     let path = ["system"; "login"; "user"; "unspecified_node"] in
     let node = CT.make "root" in
     let node = CT.set node path (Some "name here") CT.AddValue in
-    let rendered_curly_config = CT.render ~reftree node in
+    let rendered_curly_config = CT.render ~reftree:(Some reftree) node in
     let desired_rendered_form =
 "root {
     system {
@@ -204,6 +229,8 @@ let suite =
         "test_render_nested_empty_with_comment" >:: test_render_nested_empty_with_comment;
         "test_render_ephemeral_hidden " >:: test_render_ephemeral_hidden;
         "test_render_ephemeral_shown"  >:: test_render_ephemeral_shown;
+        "test_render_at_level" >:: test_render_at_level;
+        "test_render_at_level_top" >:: test_render_at_level_top;
         "test_render_rt_tag_node" >:: test_render_rt_tag_node;
         "test_render_rt_unspecified_node" >:: test_render_rt_unspecified_node
     ]
