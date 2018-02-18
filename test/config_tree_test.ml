@@ -160,7 +160,7 @@ let test_render_at_level test_ctxt =
     let rendered = CT.render_at_level node ["foo"] in
     assert_equal (String.trim rendered)
 "bar {
-    baz \"quux\";
+    baz quux;
 }"
 
 let test_render_at_level_top test_ctxt =
@@ -172,10 +172,10 @@ let test_render_at_level_top test_ctxt =
     let rendered = CT.render_at_level node [] in
     assert_equal (String.trim rendered)
 "baz {
-    quux \"xyzzy\";
+    quux xyzzy;
 }
 foo {
-    bar \"quuux\";
+    bar quuux;
 }"
 
 (**** Reftree-based rendering *)

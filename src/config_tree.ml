@@ -144,9 +144,17 @@ struct
          name]
         |> S.concat ""
 
-    let render_values = function
-        | [v] -> PF.sprintf "\"%s\";" v
-        | vs  -> S.concat "; " vs |> PF.sprintf "[%s];"
+    let render_values values =
+        let quote_if_needed s =
+            try
+                let _ = Pcre.exec ~pat:"[\\s;{}#\\[\\]\"\']" s in
+                Printf.sprintf "\"%s\"" s
+             with Not_found -> s
+        in
+        match values with
+        | [] -> raise (Failure "Internal error: get_values got an empty list")
+        | [v] -> PF.sprintf "%s;" (quote_if_needed v)
+        | _ as vs  -> S.concat "; " (List.map quote_if_needed vs) |> PF.sprintf "[%s];"
 
     let render_inner_and_outer indents inner outer =
         if inner = ""
