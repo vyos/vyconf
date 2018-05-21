@@ -108,10 +108,14 @@ let exists w s path =
 
 let show_config w s path fmt =
     let open Vyconf_types in
-    if not (Vytree.exists s.proposed_config path) then
+    if (path <> []) && not (Vytree.exists s.proposed_config path) then
         raise (Session_error ("Path does not exist")) 
     else
-        let node = Vytree.get s.proposed_config path in
+        let node = s.proposed_config in
         match fmt with
-        | Curly -> CT.render node
-        | Json -> CT.to_yojson node |> Yojson.Safe.pretty_to_string
+        | Curly -> CT.render_at_level node path
+        | Json ->
+            let node =
+                (match path with [] -> s.proposed_config |
+                                 _ as ps -> Vytree.get s.proposed_config ps) in
+            CT.to_yojson node |> Yojson.Safe.pretty_to_string
