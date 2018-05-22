@@ -78,7 +78,7 @@ let main socket op path out_format config_format =
         end
     in match result with
     | Ok s -> let%lwt () = Lwt_io.write Lwt_io.stdout s in Lwt.return 0
-    | Error e -> let%lwt () = Lwt_io.write Lwt_io.stderr e in Lwt.return 1
+    | Error e -> let%lwt () = Lwt_io.write Lwt_io.stderr (Printf.sprintf "%s\n" e) in Lwt.return 1
 
 let _ =
     let () = Arg.parse args (fun f -> ()) usage in

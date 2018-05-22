@@ -128,7 +128,6 @@ let list_children world token (req: request_list_children) =
 let show_config world token (req: request_show_config) =
     try
         let fmt = BatOption.default Curly req.format in
-        print_endline (Util.string_of_list req.path);
         let conf_str = Session.show_config world (find_session token) req.path fmt in
         {response_tmpl with output=(Some conf_str)}
     with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
