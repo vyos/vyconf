@@ -128,10 +128,17 @@ let list_children world token (req: request_list_children) =
 let show_config world token (req: request_show_config) =
     try
         let fmt = BatOption.default Curly req.format in
+        print_endline (Util.string_of_list req.path);
         let conf_str = Session.show_config world (find_session token) req.path fmt in
         {response_tmpl with output=(Some conf_str)}
     with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
 
+let send_response oc resp =
+    let enc = Pbrt.Encoder.create () in
+    let%lwt () = encode_response resp enc |> return in
+    let%lwt resp_msg = Pbrt.Encoder.to_bytes enc |> return in
+    let%lwt () = Message.write oc resp_msg in
+    Lwt.return ()
 
 let rec handle_connection world ic oc fd () =
     try%lwt
@@ -162,13 +169,13 @@ let rec handle_connection world ic oc fd () =
                     | _ -> failwith "Unimplemented"
                 end) |> Lwt.return
         in
-        let enc = Pbrt.Encoder.create () in
-        let%lwt () = encode_response resp enc |> return in
-        let%lwt resp_msg = Pbrt.Encoder.to_bytes enc |> return in
-        let%lwt () = Message.write oc resp_msg in
+        let%lwt () = send_response oc resp in
         handle_connection world ic oc fd ()
     with
-    | Failure e -> Lwt_log.error e >>= handle_connection world ic oc fd
+    | Failure e -> 
+        let%lwt () = Lwt_log.error e in
+        let%lwt () = send_response oc ({response_tmpl with status=Fail; error=(Some e)}) in
+        handle_connection world ic oc fd ()
     | End_of_file -> Lwt_log.info "Connection closed" >>= return 
 
 let accept_connection world conn =
@@ -212,4 +219,5 @@ let () =
       (FP.concat vc.config_dir vc.primary_config)
       (FP.concat vc.config_dir vc.fallback_config) in
   let world = Session.{world with running_config=config} in
+  let () = print_endline (Config_tree.render world.running_config) in
   Lwt_main.run @@ main_loop !basepath world ()
