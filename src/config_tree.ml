@@ -144,7 +144,7 @@ struct
          name]
         |> S.concat ""
 
-    let render_values values =
+    let render_values ?(valueless=false) values =
         let quote_if_needed s =
             try
                 let _ = Pcre.exec ~pat:"[\\s;{}#\\[\\]\"\']" s in
@@ -152,7 +152,7 @@ struct
              with Not_found -> s
         in
         match values with
-        | [] -> raise (Failure "Internal error: get_values got an empty list")
+        | [] -> if valueless then ";" else "{ }"
         | [v] -> PF.sprintf "%s;" (quote_if_needed v)
         | _ as vs  -> S.concat "; " (List.map quote_if_needed vs) |> PF.sprintf "[%s];"
 
@@ -218,11 +218,13 @@ struct
                     | Other ->
                         (name, level, render_children_rt level None ordered rt children)
                     | Leaf  ->
-                        (name, level, render_values data.values)
+                        (name, level, render_values ~valueless:rt_data.valueless data.values)
                 in
                 let indents = indentation indent level' in
                 let outer = render_outer indents data outer_name tag in
-                PF.sprintf "%s%s %s" indents outer inner
+                (* Do not insert a space before ; for valueless nodes *)
+                if rt_data.valueless then PF.sprintf "%s%s%s" indents outer inner
+                else PF.sprintf "%s%s %s" indents outer inner
         and render_children_rt level tag ordered rt = function
             | [] -> "{ }"
             | children ->
