@@ -2,6 +2,8 @@ type value_behaviour = AddValue | ReplaceValue
 
 exception Duplicate_value
 exception Node_has_no_value
+exception No_such_value
+exception Useless_set
 
 type config_node_data = {
   values : string list;
