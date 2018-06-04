@@ -256,6 +256,60 @@ struct
         | None    -> render_node 0 config_tree
         | Some rt -> render_node_rt 0 None rt config_tree
 
+
+    (* Rendering configs as set commands *)
+    let render_set_path path value =
+        let v = Printf.sprintf "\'%s\'" value in
+        List.append path [v] |> String.concat " " |> Printf.sprintf "set %s"
+
+    let rec render_commands ?(reftree=None) ?(alwayssort=false) path ct =
+        let new_path = List.append path [Vytree.name_of_node ct] in
+        let new_path_str = String.concat " " new_path in
+        let data = Vytree.data_of_node ct in
+        (* Get the node comment, if any *)
+        let comment = BatOption.default "" data.comment in 
+        let comment_cmd = (if comment = "" then "" else Printf.sprintf "comment %s \'%s\'" new_path_str comment) in
+        (* Sort child names, if required *)
+        let child_names = Vytree.list_children ct in
+        let child_names =
+        begin
+            match reftree with
+            | Some rt ->
+                if ((RT.get_keep_order rt path) && (not alwayssort)) then child_names
+                else (List.sort BatString.numeric_compare child_names)
+            | None ->
+                if alwayssort then (List.sort BatString.numeric_compare child_names)
+                else child_names
+        end
+        in
+        (* Now handle the different cases for nodes with and without children *)
+        match child_names with
+        | [] ->
+             (* This is a leaf node *)
+             let values = data.values in
+             let cmds =
+                 begin
+                 match values with
+                 | [] ->
+                      (* Valueless leaf node *)
+                      String.concat " " new_path |> Printf.sprintf "set %s"
+                 | [v] ->
+                      (* Single value, just one command *)
+                      render_set_path new_path v
+                 | vs ->
+                      (* A leaf node with multiple values *)
+                      List.map (render_set_path new_path) vs |> String.concat "\n"
+                  end
+              in
+              if comment_cmd = "" then cmds else Printf.sprintf "%s\n%s" cmds comment_cmd
+        | children ->
+            (* A node with children *)
+            let children = List.map (fun n -> Vytree.get ct [n]) child_names in
+            let rendered_children = List.map (render_commands ~reftree:reftree ~alwayssort:alwayssort new_path) children in
+            let cmds = String.concat "\n" rendered_children in
+            if comment_cmd = "" then cmds else Printf.sprintf "%s\n%s" cmds comment_cmd
+                
+
 end (* Renderer *)
 
 let render = Renderer.render
@@ -276,3 +330,13 @@ let render_at_level
     let children = Vytree.children_of_node node in
     let child_configs = List.map (render ~indent:indent ~reftree:reftree  ~cmp:cmp ~showephemeral:showephemeral ~showinactive:showinactive) children in
     List.fold_left (Printf.sprintf "%s\n%s") "" child_configs
+
+let render_commands ?(reftree=None) ?(alwayssort=false) node path =
+    let node =
+	match path with
+        | [] -> node
+        | _ -> Vytree.get node path
+    in
+    let children = Vytree.children_of_node node in
+    let commands = List.map (Renderer.render_commands ~reftree:reftree ~alwayssort:alwayssort path) children in
+    String.concat "\n" commands
