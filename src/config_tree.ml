@@ -329,7 +329,7 @@ let render_at_level
     in
     let children = Vytree.children_of_node node in
     let child_configs = List.map (render ~indent:indent ~reftree:reftree  ~cmp:cmp ~showephemeral:showephemeral ~showinactive:showinactive) children in
-    List.fold_left (Printf.sprintf "%s\n%s") "" child_configs
+    String.concat "\n" child_configs
 
 let render_commands ?(reftree=None) ?(alwayssort=false) ?(sortchildren=false) node path =
     let node =
