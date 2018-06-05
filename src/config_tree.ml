@@ -331,12 +331,15 @@ let render_at_level
     let child_configs = List.map (render ~indent:indent ~reftree:reftree  ~cmp:cmp ~showephemeral:showephemeral ~showinactive:showinactive) children in
     List.fold_left (Printf.sprintf "%s\n%s") "" child_configs
 
-let render_commands ?(reftree=None) ?(alwayssort=false) node path =
+let render_commands ?(reftree=None) ?(alwayssort=false) ?(sortchildren=false) node path =
     let node =
 	match path with
         | [] -> node
         | _ -> Vytree.get node path
     in
-    let children = Vytree.children_of_node node in
+    let children =
+        if sortchildren then Vytree.sorted_children_of_node (BatString.numeric_compare) node
+        else Vytree.children_of_node node
+    in
     let commands = List.map (Renderer.render_commands ~reftree:reftree ~alwayssort:alwayssort path) children in
     String.concat "\n" commands

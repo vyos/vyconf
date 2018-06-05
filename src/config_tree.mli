@@ -75,4 +75,4 @@ val render_at_level :
     string list ->
     string
 
-val render_commands: ?reftree:(Reference_tree.t option) -> ?alwayssort:bool -> t -> string list -> string
+val render_commands: ?reftree:(Reference_tree.t option) -> ?alwayssort:bool -> ?sortchildren:bool -> t -> string list -> string

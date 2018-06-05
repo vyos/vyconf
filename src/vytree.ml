@@ -164,3 +164,8 @@ let get_existent_path node path =
 let children_of_path node path =
     let node' = get node path in
     list_children node'
+
+let sorted_children_of_node cmp node =
+    let names = list_children node in
+    let names = List.sort cmp names in
+    List.map (find_or_fail node) names
