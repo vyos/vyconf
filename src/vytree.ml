@@ -43,6 +43,11 @@ let replace node child =
     let children' = Vylist.replace (fun x -> x.name = name) child children in
     { node with children = children' }
 
+let replace_full node child name =
+    let children = node.children in
+    let children' = Vylist.replace (fun x -> x.name = name) child children in
+    { node with children = children' }
+
 let find node name =
     Vylist.find (fun x -> x.name = name) node.children
 
@@ -130,6 +135,13 @@ let rec insert_multi_level default_data node path_done path_remaining data =
 
 let delete node path =
     do_with_child delete_immediate node path
+
+let rename node path newname =
+    let rename_immediate newname' node' name' =
+        let child = find_or_fail node' name' in
+        let child = { child with name=newname' } in
+        replace_full node' child name'
+    in do_with_child (rename_immediate newname) node path
 
 let update node path data =
     let update_data data' node' name =

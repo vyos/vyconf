@@ -107,6 +107,15 @@ let test_update test_ctxt =
     let node = insert node ["foo"] 1 in
     assert_equal (data_of_node (get (update node ["foo"] 9) ["foo"])) 9
 
+(* rename works *)
+let test_rename test_ctxt =
+    let node = make 0 "root" in
+    let node = insert node ["foo"] 1 in
+    let node = insert node ["bar"] 2 in
+    let node' = rename node ["bar"] "quux" in
+    let child_quux = get node' ["quux"] in
+    assert_equal (data_of_node child_quux) 2
+
 (* get_existent_path works *)
 let test_get_existent_path test_ctxt =
     let node = make () "root" in
@@ -171,6 +180,7 @@ let suite =
         "test_get_child_multilevel" >:: test_get_child_multilevel;
         "test_get_child_nonexistent" >:: test_get_child_nonexistent;
         "test_update" >:: test_update;
+        "test_rename" >:: test_rename;
         "test_get_existent_path" >:: test_get_existent_path;
         "test_exists_existent" >:: test_exists_existent;
         "test_exists_nonexistent" >:: test_exists_nonexistent;

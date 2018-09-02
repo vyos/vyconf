@@ -29,6 +29,8 @@ val delete : 'a t -> string list -> 'a t
 
 val update : 'a t -> string list -> 'a -> 'a t
 
+val rename : 'a t -> string list -> string -> 'a t
+
 val list_children : 'a t -> string list
 
 val get : 'a t -> string list -> 'a t
