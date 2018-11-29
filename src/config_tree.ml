@@ -286,7 +286,7 @@ struct
         match child_names with
         | [] ->
              (* This is a leaf node *)
-             let values = data.values in
+             let values = List.map String.escaped data.values in
              let cmds =
                  begin
                  match values with
