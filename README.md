@@ -84,9 +84,9 @@ first. Then install the correct version of the compiler, the build tools, and
 the build dependencies:
 
 ```
-opam switch 4.03.0
+opam switch 4.07.0
 opam install oasis
-opam install fileutils lwt ocplib-endian ounit pcre ppx_deriving_yojson sha toml xml-light batteries
+opam install fileutils lwt lwt_ppx lwt_log ocplib-endian ounit pcre ppx_deriving_yojson sha toml xml-light batteries
 ```
 
 To build the project and run the unit tests, do this:
