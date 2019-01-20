@@ -83,24 +83,30 @@ If you are new to OCaml, you need to install [opam](http://opam.ocaml.org/)
 first. Then install the correct version of the compiler, the build tools, and
 the build dependencies:
 
-```
-opam switch 4.07.0
-opam install oasis
-opam install fileutils lwt lwt_ppx lwt_log ocplib-endian ounit pcre ppx_deriving_yojson sha toml xml-light batteries
+```bash
+sh <(curl -sL https://raw.githubusercontent.com/ocaml/opam/2.0.2/shell/install.sh)
+opam init  --disable-sandboxing
+eval $(opam env)
+opam switch create 4.07.0
+eval $(opam env)
+opam install oasis -y
+eval $(opam env)
+opam install fileutils lwt lwt_ppx lwt_log ocplib-endian ounit pcre ppx_deriving_yojson sha toml xml-light batteries ocaml-protoc ctypes-foreign -y
 ```
 
 To build the project and run the unit tests, do this:
 
-```
+```bash
 ./build-setup.sh
 ./configure --enable-tests
 make
 make test
+make install
 ```
 
 If the project gets in a weird state, and isn't building correctly, you can clean it up with
 
-```
+```bash
 ocaml setup.ml -distclean
 ```
 
