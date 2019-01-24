@@ -10,8 +10,8 @@ The maintainer pronounces it as "vyeconf", but it's up to you how to pronounce i
 We define software appliance as a set of an operating system, one or more applications,
 and a high level interface for configuring and managing the system and applications.
 
-Typical examples of software appliances in this sense are (VyOS)[http://vyos.io],
-(OPNSense)[https://opnsense.org/], (Zentyal)[http://www.zentyal.org/] and others.
+Typical examples of software appliances in this sense are [VyOS](http://vyos.io),
+[OPNSense](https://opnsense.org), [Zentyal](http://www.zentyal.org) and others.
 
 Typically they are seen as a way to improve ease of use, by providing a management interface
 more convenient than editing the config files, and integrating different applications together.
@@ -44,14 +44,14 @@ To give you some idea what making an appliance is supposed to be like:
 
 First, you define the interface you will expose. The system-wide config is represented as
 a multi-way tree, you define what nodes are allowed and what values can be attached to them.
-This is done declaratively in XML files (for which we provide a RelaxNG schema in data/schemata/interface_definition.rnc).
-See test/data/interface_definition_sample.xml for an example.
+This is done declaratively in XML files (for which we provide a RelaxNG schema in `data/schemata/interface_definition.rnc`).
+See `test/data/interface_definition_sample.xml` for an example.
 
 In the interface definition, you define which component owns which node. When a change is made, the component
 responsible for the node is called. A component includes programs or options for three functions: verify (check
 consistency of the abstract config), generate (produce configs for applications), and apply (restart services etc.).
 The verify stage of every component is called first and if any of those fail, the commit fails. Since every component
-can read the entire configuration in a uniform way (as in Vyconf_session.get_value ["interfaces"; "ethernet"; "eth0"; "address"]),
+can read the entire configuration in a uniform way (as in `Vyconf_session.get_value ["interfaces"; "ethernet"; "eth0"; "address"]`),
 they can run cross-checks to verify that the configuration as a whole is consistent.
 
 What you get automatically from VyConf:
@@ -64,7 +64,7 @@ What you get automatically from VyConf:
 
 ## VyConf operation
 
-VyConf runs as a daemon (vyconfd) that listens on a UNIX domain socket and communicates with
+VyConf runs as a daemon (`vyconfd`) that listens on a UNIX domain socket and communicates with
 its clients. Clients provided with VyConf are a non-interactive CLI client, an interactive shell,
 and an HTTP bridge.
 
@@ -79,7 +79,7 @@ and the #vyos IRC channel on Freenode.
 
 Don't forget to add unit tests for things you add or change!
 
-If you are new to OCaml, you need to install [opam](http://opam.ocaml.org/)
+If you are new to OCaml, you need to install [opam](http://opam.ocaml.org)
 first. Then install the correct version of the compiler, the build tools, and
 the build dependencies:
 
@@ -112,7 +112,7 @@ ocaml setup.ml -distclean
 
 then build as before.
 
-I also recommend that you setup [utop](https://opam.ocaml.org/blog/about-utop/)
+I also recommend that you setup [utop](https://opam.ocaml.org/blog/about-utop)
 (a great interactive REPL) and setup your editor with
 [merlin](https://github.com/ocaml/merlin) to see the inferred types. For GNU
 Emacs, consider installing [tuareg-mode](https://github.com/ocaml/tuareg).
