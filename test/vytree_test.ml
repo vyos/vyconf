@@ -164,6 +164,32 @@ let test_merge_children_has_duplicates test_ctxt =
     assert_equal (list_children node') ["foo"; "quux"];
     assert_equal (get node' ["foo"] |> list_children) ["bar"; "baz"]
 
+let test_copy test_ctxt =
+    let node = make 0 "root" in
+    let node = insert node ["foo"] 1 in
+    let node = insert node ["foo"; "bar"] 1 in
+    let node = copy node ["foo"] ["quux"] in
+    assert_equal (list_children node) ["foo"; "quux"];
+    assert_equal (get node ["quux"] |> list_children) ["bar"]
+
+let test_move_before test_ctxt =
+    let node = make 0 "root" in
+    let node = insert node ["foo"] 1 in
+    let node = insert ~position:End node ["bar"] 1 in
+    let node = insert node ["bar"; "quux"] 1 in
+    let node = move node ["bar"] (Before "foo") in
+    assert_equal (list_children node) ["bar"; "foo"];
+    assert_equal (get node ["bar"] |> list_children) ["quux"]
+
+let test_move_after test_ctxt =
+    let node = make 0 "root" in
+    let node = insert node ["bar"] 1 in
+    let node = insert node ["bar"; "quux"] 1 in
+    let node = insert ~position:End node ["foo"] 1 in
+    let node = move node ["bar"] (After "foo") in
+    assert_equal (list_children node) ["foo"; "bar"];
+    assert_equal (get node ["bar"] |> list_children) ["quux"]
+
 let suite =
     "VyConf tree tests" >::: [
         "test_make_node" >:: test_make_node;
@@ -187,6 +213,9 @@ let suite =
         "test_get_data" >:: test_get_data;
         "test_merge_children_has_duplicates" >:: test_merge_children_has_duplicates;
         "test_merge_children_no_duplicates" >:: test_merge_children_no_duplicates;
+        "test_copy" >:: test_copy;
+        "test_move_before" >:: test_move_before;
+        "test_move_after" >:: test_move_after;
     ]
 
 let () =

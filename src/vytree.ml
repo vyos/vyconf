@@ -11,7 +11,6 @@ exception Duplicate_child
 exception Nonexistent_path
 exception Insert_error of string
 
-
 let make data name = { name = name; data = data; children = [] }
 
 let make_full data name children = { name = name; data = data; children = children }
@@ -20,8 +19,8 @@ let name_of_node node = node.name
 let data_of_node node = node.data
 let children_of_node node = node.children
 
-let insert_immediate ?(position=Default) node name data =
-    let new_node = make data name in
+let insert_immediate ?(position=Default) node name data children =
+    let new_node = make_full data name children in
     let children' =
         match position with
         | Default -> new_node :: node.children
@@ -69,19 +68,19 @@ let rec do_with_child fn node path =
         let new_node = do_with_child fn next_child names in
         replace node new_node
 
-let rec insert ?(position=Default) node path data =
+let rec insert ?(position=Default) ?(children=[]) node path data =
     match path with
     | [] -> raise Empty_path
     | [name] ->
        (let last_child = find node name in
         match last_child with
-        | None -> insert_immediate ~position:position node name data
+        | None -> insert_immediate ~position:position node name data children
         | (Some _) -> raise Duplicate_child)
     | name :: names ->
         let next_child = find node name in
         match next_child with
         | Some next_child' ->
-            let new_node = insert ~position:position next_child' names data in
+            let new_node = insert ~position:position ~children:children next_child' names data in
             replace node new_node
         | None ->
             raise (Insert_error "Path does not exist")
@@ -181,3 +180,13 @@ let sorted_children_of_node cmp node =
     let names = list_children node in
     let names = List.sort cmp names in
     List.map (find_or_fail node) names
+
+let copy node old_path new_path =
+    if exists node new_path then raise Duplicate_child else
+    let child = get node old_path in
+    insert ~position:End ~children:child.children node new_path child.data
+
+let move node path position =
+    let child = get node path in
+    let node = delete node path in
+    insert ~position:position ~children:child.children node path child.data

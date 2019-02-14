@@ -19,7 +19,7 @@ val find_or_fail : 'a t -> string -> 'a t
 
 val adopt : 'a t -> 'a t -> 'a t
 
-val insert : ?position:position -> 'a t -> string list -> 'a -> 'a t
+val insert : ?position:position -> ?children:('a t list) -> 'a t -> string list -> 'a -> 'a t
 
 val insert_multi_level : 'a -> 'a t -> string list -> string list -> 'a -> 'a t
 
@@ -44,3 +44,7 @@ val exists : 'a t -> string list -> bool
 val children_of_path : 'a t -> string list -> string list
 
 val sorted_children_of_node : (string -> string -> int) -> 'a t -> ('a t) list
+
+val copy : 'a t -> string list -> string list -> 'a t
+
+val move : 'a t -> string list -> position -> 'a t
