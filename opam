@@ -6,6 +6,7 @@ authors: "VyOS maintainers and contributors <maintainers@vyos.net>"
 homepage: "https://github.com/vyos/vyconf"
 bug-reports: "https://phabricator.vyos.net/maniphest"
 license: "LGPL with OCaml linking exception"
+description: "An appliance configuration framework"
 dev-repo: "git+https://github.com/vyos/vyconf"
 build: [
   ["./configure" "--prefix=%{prefix}%"]
@@ -20,7 +21,9 @@ depends: [
   "ocaml-protoc" {build}
   "ounit" {build}
   "batteries" {build}
-  "lwt" {build}
+  "lwt" {build & >= "4.1.0"}
+  "lwt_ppx" {build}
+  "lwt_log" {build}
   "fileutils" {build}
   "ppx_deriving" {build}
   "ppx_deriving_yojson" {build}
