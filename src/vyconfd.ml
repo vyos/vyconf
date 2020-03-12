@@ -146,7 +146,7 @@ let rec handle_connection world ic oc fd () =
             try
                 let envelope = decode_request_envelope (Pbrt.Decoder.of_bytes req_msg) in
                 Lwt.return (Ok (envelope.token, envelope.request))
-            with Protobuf.Decoder.Failure e -> Lwt.return (Error (Protobuf.Decoder.error_to_string e))
+            with Pbrt.Decoder.Failure e -> Lwt.return (Error (Pbrt.Decoder.error_to_string e))
         in
         let%lwt resp =
             (match req with
