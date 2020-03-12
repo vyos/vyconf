@@ -1,7 +1,8 @@
 vyconf
 =======
 
-**Note:** VyConf is an early stage of development and need your contributions!
+**Note:** VyConf is an early stage of development. It's incomplete and cannot be used yet.
+Contributions are welcome!
 
 VyConf is a software appliance configuration framework.
 
