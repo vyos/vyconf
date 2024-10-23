@@ -84,10 +84,10 @@ let exit_conf_mode world token =
     in Hashtbl.replace sessions token session;
     response_tmpl
 
-let teardown_session token =
+let teardown token =
     try
         Hashtbl.remove sessions token;
-        response_tmpl
+        {response_tmpl with status=Success}
     with Not_found ->
         {response_tmpl with status=Fail; error=(Some "Session not found")}
 
@@ -168,7 +168,7 @@ let rec handle_connection world ic oc fd () =
                     | _, Status -> response_tmpl
                     | _, Setup_session r -> setup_session world r
                     | None, _ -> {response_tmpl with status=Fail; output=(Some "Operation requires session token")}
-                    | Some t, Teardown _ -> teardown_session t
+                    | Some t, Teardown _ -> teardown t
                     | Some t, Configure r -> enter_conf_mode r t
                     | Some t, Exit_configure -> exit_conf_mode world t
                     | Some t, Exists r -> exists world t r

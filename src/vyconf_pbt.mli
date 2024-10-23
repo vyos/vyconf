@@ -22,6 +22,10 @@ type request_setup_session = {
   on_behalf_of : int32 option;
 }
 
+type request_teardown = {
+  on_behalf_of : int32 option;
+}
+
 type request_validate = {
   path : string list;
   output_format : request_output_format option;
@@ -138,7 +142,7 @@ type request =
   | Configure of request_enter_configuration_mode
   | Exit_configure
   | Validate of request_validate
-  | Teardown of string
+  | Teardown of request_teardown
 
 type request_envelope = {
   token : string option;
@@ -181,6 +185,12 @@ val default_request_setup_session :
   unit ->
   request_setup_session
 (** [default_request_setup_session ()] is the default value for type [request_setup_session] *)
+
+val default_request_teardown : 
+  ?on_behalf_of:int32 option ->
+  unit ->
+  request_teardown
+(** [default_request_teardown ()] is the default value for type [request_teardown] *)
 
 val default_request_validate : 
   ?path:string list ->
@@ -351,6 +361,9 @@ val pp_request_status : Format.formatter -> request_status -> unit
 val pp_request_setup_session : Format.formatter -> request_setup_session -> unit 
 (** [pp_request_setup_session v] formats v *)
 
+val pp_request_teardown : Format.formatter -> request_teardown -> unit 
+(** [pp_request_teardown v] formats v *)
+
 val pp_request_validate : Format.formatter -> request_validate -> unit 
 (** [pp_request_validate v] formats v *)
 
@@ -438,6 +451,9 @@ val encode_pb_request_status : request_status -> Pbrt.Encoder.t -> unit
 val encode_pb_request_setup_session : request_setup_session -> Pbrt.Encoder.t -> unit
 (** [encode_pb_request_setup_session v encoder] encodes [v] with the given [encoder] *)
 
+val encode_pb_request_teardown : request_teardown -> Pbrt.Encoder.t -> unit
+(** [encode_pb_request_teardown v encoder] encodes [v] with the given [encoder] *)
+
 val encode_pb_request_validate : request_validate -> Pbrt.Encoder.t -> unit
 (** [encode_pb_request_validate v encoder] encodes [v] with the given [encoder] *)
 
@@ -524,6 +540,9 @@ val decode_pb_request_status : Pbrt.Decoder.t -> request_status
 
 val decode_pb_request_setup_session : Pbrt.Decoder.t -> request_setup_session
 (** [decode_pb_request_setup_session decoder] decodes a [request_setup_session] binary value from [decoder] *)
+
+val decode_pb_request_teardown : Pbrt.Decoder.t -> request_teardown
+(** [decode_pb_request_teardown decoder] decodes a [request_teardown] binary value from [decoder] *)
 
 val decode_pb_request_validate : Pbrt.Decoder.t -> request_validate
 (** [decode_pb_request_validate decoder] decodes a [request_validate] binary value from [decoder] *)

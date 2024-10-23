@@ -17,6 +17,10 @@ message Request {
     optional int32 OnBehalfOf = 2;
   }
 
+  message Teardown {
+    optional int32 OnBehalfOf = 1;
+  }
+
   message Validate {
     repeated string Path = 1;
     optional OutputFormat output_format = 2;
@@ -135,7 +139,7 @@ message Request {
     EnterConfigurationMode configure = 19;
     ExitConfigurationMode exit_configure = 20;
     Validate validate = 21;
-    string teardown = 22;
+    Teardown teardown = 22;
   }
 }
 
