@@ -187,7 +187,7 @@ let rec handle_connection world ic oc () =
         let%lwt () = Lwt_log.error e in
         let%lwt () = send_response oc ({response_tmpl with status=Fail; error=(Some e)}) in
         handle_connection world ic oc ()
-    | End_of_file -> Lwt_log.info "Connection closed" >>= return 
+    | End_of_file -> Lwt_log.info "Connection closed" >>= (fun () -> Lwt_io.close ic) >>= return
 
 let accept_connection world conn =
     let fd, _ = conn in
