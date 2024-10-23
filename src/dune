@@ -26,6 +26,13 @@
  (libraries vyos1x-config vyconfd_config vyconf_connect)
  (preprocess (pps lwt_ppx)))
 
+(executable
+ (name vycli)
+ (public_name vycli)
+ (modules vycli)
+ (libraries client)
+ (preprocess (pps lwt_ppx)))
+
 (rule
  (alias protoc)
  (mode promote)
