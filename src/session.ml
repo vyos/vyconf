@@ -67,7 +67,8 @@ let rec apply_changes changeset config =
 let set w s path =
     let path, value = RT.validate_path D.(w.dirs.validators)
       w.reference_tree path in
-    let value_behaviour = if RT.is_multi w.reference_tree path then CT.AddValue else CT.ReplaceValue in
+    let refpath = RT.refpath w.reference_tree path in
+    let value_behaviour = if RT.is_multi w.reference_tree refpath then CT.AddValue else CT.ReplaceValue in
     let op = CfgSet (path, value, value_behaviour) in
     let config = apply_cfg_op op s.proposed_config in
     {s with proposed_config=config; changeset=(op :: s.changeset)}
@@ -81,28 +82,31 @@ let delete w s path =
 
 let get_value w s path =
     if not (VT.exists s.proposed_config path) then
-        raise (Session_error ("Path does not exist"))
-    else if not (RT.is_leaf w.reference_tree path) then
+        raise (Session_error ("Config path does not exist"))
+    else let refpath = RT.refpath w.reference_tree path in
+    if not (RT.is_leaf w.reference_tree refpath) then
         raise (Session_error "Cannot get a value of a non-leaf node")
-    else if (RT.is_multi w.reference_tree path) then
+    else if (RT.is_multi w.reference_tree refpath) then
         raise (Session_error "This node can have more than one value")
-    else if (RT.is_valueless w.reference_tree path) then
+    else if (RT.is_valueless w.reference_tree refpath) then
         raise (Session_error "This node can have more than one value")
     else CT.get_value s.proposed_config path
 
 let get_values w s path =
     if not (VT.exists s.proposed_config path) then
-        raise (Session_error ("Path does not exist"))
-    else if not (RT.is_leaf w.reference_tree path) then
+        raise (Session_error ("Config path does not exist"))
+    else let refpath = RT.refpath w.reference_tree path in
+    if not (RT.is_leaf w.reference_tree refpath) then
         raise (Session_error "Cannot get a value of a non-leaf node")
-    else if not (RT.is_multi w.reference_tree path) then
+    else if not (RT.is_multi w.reference_tree refpath) then
         raise (Session_error "This node can have only one value")
-    else  CT.get_values s.proposed_config path
+    else CT.get_values s.proposed_config path
 
 let list_children w s path =
     if not (VT.exists s.proposed_config path) then
-        raise (Session_error ("Path does not exist"))
-    else if (RT.is_leaf w.reference_tree path) then
+        raise (Session_error ("Config path does not exist"))
+    else let refpath = RT.refpath w.reference_tree path in
+    if (RT.is_leaf w.reference_tree refpath) then
         raise (Session_error "Cannot list children of a leaf node")
     else VT.children_of_path s.proposed_config path
 
