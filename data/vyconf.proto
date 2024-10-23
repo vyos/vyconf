@@ -17,6 +17,11 @@ message Request {
     optional int32 OnBehalfOf = 2;
   }
 
+  message Validate {
+    repeated string Path = 1;
+    optional OutputFormat output_format = 2;
+  }
+
   message Set {
     repeated string Path = 1;
     optional bool Ephemeral = 3; 
@@ -129,8 +134,9 @@ message Request {
     Confirm confirm = 18;
     EnterConfigurationMode configure = 19;
     ExitConfigurationMode exit_configure = 20;
-    string teardown = 21;
-  }  
+    Validate validate = 21;
+    string teardown = 22;
+  }
 }
 
 message RequestEnvelope {

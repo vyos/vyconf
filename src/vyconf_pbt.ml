@@ -15,6 +15,11 @@ type request_setup_session = {
   on_behalf_of : int32 option;
 }
 
+type request_validate = {
+  path : string list;
+  output_format : request_output_format option;
+}
+
 type request_set = {
   path : string list;
   ephemeral : bool option;
@@ -125,6 +130,7 @@ type request =
   | Confirm
   | Configure of request_enter_configuration_mode
   | Exit_configure
+  | Validate of request_validate
   | Teardown of string
 
 type request_envelope = {
@@ -162,6 +168,14 @@ let rec default_request_setup_session
   () : request_setup_session  = {
   client_application;
   on_behalf_of;
+}
+
+let rec default_request_validate 
+  ?path:((path:string list) = [])
+  ?output_format:((output_format:request_output_format option) = None)
+  () : request_validate  = {
+  path;
+  output_format;
 }
 
 let rec default_request_set 
@@ -336,6 +350,16 @@ type request_setup_session_mutable = {
 let default_request_setup_session_mutable () : request_setup_session_mutable = {
   client_application = None;
   on_behalf_of = None;
+}
+
+type request_validate_mutable = {
+  mutable path : string list;
+  mutable output_format : request_output_format option;
+}
+
+let default_request_validate_mutable () : request_validate_mutable = {
+  path = [];
+  output_format = None;
 }
 
 type request_set_mutable = {
@@ -559,6 +583,13 @@ let rec pp_request_setup_session fmt (v:request_setup_session) =
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
 
+let rec pp_request_validate fmt (v:request_validate) = 
+  let pp_i fmt () =
+    Pbrt.Pp.pp_record_field ~first:true "path" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.path;
+    Pbrt.Pp.pp_record_field ~first:false "output_format" (Pbrt.Pp.pp_option pp_request_output_format) fmt v.output_format;
+  in
+  Pbrt.Pp.pp_brk pp_i fmt ()
+
 let rec pp_request_set fmt (v:request_set) = 
   let pp_i fmt () =
     Pbrt.Pp.pp_record_field ~first:true "path" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.path;
@@ -712,6 +743,7 @@ let rec pp_request fmt (v:request) =
   | Confirm  -> Format.fprintf fmt "Confirm"
   | Configure x -> Format.fprintf fmt "@[<hv2>Configure(@,%a)@]" pp_request_enter_configuration_mode x
   | Exit_configure  -> Format.fprintf fmt "Exit_configure"
+  | Validate x -> Format.fprintf fmt "@[<hv2>Validate(@,%a)@]" pp_request_validate x
   | Teardown x -> Format.fprintf fmt "@[<hv2>Teardown(@,%a)@]" Pbrt.Pp.pp_string x
 
 let rec pp_request_envelope fmt (v:request_envelope) = 
@@ -769,6 +801,19 @@ let rec encode_pb_request_setup_session (v:request_setup_session) encoder =
   begin match v.on_behalf_of with
   | Some x -> 
     Pbrt.Encoder.int32_as_varint x encoder;
+    Pbrt.Encoder.key 2 Pbrt.Varint encoder; 
+  | None -> ();
+  end;
+  ()
+
+let rec encode_pb_request_validate (v:request_validate) encoder = 
+  Pbrt.List_util.rev_iter_with (fun x encoder -> 
+    Pbrt.Encoder.string x encoder;
+    Pbrt.Encoder.key 1 Pbrt.Bytes encoder; 
+  ) v.path encoder;
+  begin match v.output_format with
+  | Some x -> 
+    encode_pb_request_output_format x encoder;
     Pbrt.Encoder.key 2 Pbrt.Varint encoder; 
   | None -> ();
   end;
@@ -1031,9 +1076,12 @@ let rec encode_pb_request (v:request) encoder =
   | Exit_configure ->
     Pbrt.Encoder.key 20 Pbrt.Bytes encoder; 
     Pbrt.Encoder.empty_nested encoder
+  | Validate x ->
+    Pbrt.Encoder.nested encode_pb_request_validate x encoder;
+    Pbrt.Encoder.key 21 Pbrt.Bytes encoder; 
   | Teardown x ->
     Pbrt.Encoder.string x encoder;
-    Pbrt.Encoder.key 21 Pbrt.Bytes encoder; 
+    Pbrt.Encoder.key 22 Pbrt.Bytes encoder; 
   end
 
 let rec encode_pb_request_envelope (v:request_envelope) encoder = 
@@ -1127,6 +1175,31 @@ let rec decode_pb_request_setup_session d =
     client_application = v.client_application;
     on_behalf_of = v.on_behalf_of;
   } : request_setup_session)
+
+let rec decode_pb_request_validate d =
+  let v = default_request_validate_mutable () in
+  let continue__= ref true in
+  while !continue__ do
+    match Pbrt.Decoder.key d with
+    | None -> (
+      v.path <- List.rev v.path;
+    ); continue__ := false
+    | Some (1, Pbrt.Bytes) -> begin
+      v.path <- (Pbrt.Decoder.string d) :: v.path;
+    end
+    | Some (1, pk) -> 
+      Pbrt.Decoder.unexpected_payload "Message(request_validate), field(1)" pk
+    | Some (2, Pbrt.Varint) -> begin
+      v.output_format <- Some (decode_pb_request_output_format d);
+    end
+    | Some (2, pk) -> 
+      Pbrt.Decoder.unexpected_payload "Message(request_validate), field(2)" pk
+    | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
+  done;
+  ({
+    path = v.path;
+    output_format = v.output_format;
+  } : request_validate)
 
 let rec decode_pb_request_set d =
   let v = default_request_set_mutable () in
@@ -1614,7 +1687,8 @@ let rec decode_pb_request d =
         Pbrt.Decoder.empty_nested d ;
         (Exit_configure : request)
       end
-      | Some (21, _) -> (Teardown (Pbrt.Decoder.string d) : request) 
+      | Some (21, _) -> (Validate (decode_pb_request_validate (Pbrt.Decoder.nested d)) : request) 
+      | Some (22, _) -> (Teardown (Pbrt.Decoder.string d) : request) 
       | Some (n, payload_kind) -> (
         Pbrt.Decoder.skip d payload_kind; 
         loop () 

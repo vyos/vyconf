@@ -22,6 +22,11 @@ type request_setup_session = {
   on_behalf_of : int32 option;
 }
 
+type request_validate = {
+  path : string list;
+  output_format : request_output_format option;
+}
+
 type request_set = {
   path : string list;
   ephemeral : bool option;
@@ -132,6 +137,7 @@ type request =
   | Confirm
   | Configure of request_enter_configuration_mode
   | Exit_configure
+  | Validate of request_validate
   | Teardown of string
 
 type request_envelope = {
@@ -175,6 +181,13 @@ val default_request_setup_session :
   unit ->
   request_setup_session
 (** [default_request_setup_session ()] is the default value for type [request_setup_session] *)
+
+val default_request_validate : 
+  ?path:string list ->
+  ?output_format:request_output_format option ->
+  unit ->
+  request_validate
+(** [default_request_validate ()] is the default value for type [request_validate] *)
 
 val default_request_set : 
   ?path:string list ->
@@ -338,6 +351,9 @@ val pp_request_status : Format.formatter -> request_status -> unit
 val pp_request_setup_session : Format.formatter -> request_setup_session -> unit 
 (** [pp_request_setup_session v] formats v *)
 
+val pp_request_validate : Format.formatter -> request_validate -> unit 
+(** [pp_request_validate v] formats v *)
+
 val pp_request_set : Format.formatter -> request_set -> unit 
 (** [pp_request_set v] formats v *)
 
@@ -422,6 +438,9 @@ val encode_pb_request_status : request_status -> Pbrt.Encoder.t -> unit
 val encode_pb_request_setup_session : request_setup_session -> Pbrt.Encoder.t -> unit
 (** [encode_pb_request_setup_session v encoder] encodes [v] with the given [encoder] *)
 
+val encode_pb_request_validate : request_validate -> Pbrt.Encoder.t -> unit
+(** [encode_pb_request_validate v encoder] encodes [v] with the given [encoder] *)
+
 val encode_pb_request_set : request_set -> Pbrt.Encoder.t -> unit
 (** [encode_pb_request_set v encoder] encodes [v] with the given [encoder] *)
 
@@ -505,6 +524,9 @@ val decode_pb_request_status : Pbrt.Decoder.t -> request_status
 
 val decode_pb_request_setup_session : Pbrt.Decoder.t -> request_setup_session
 (** [decode_pb_request_setup_session decoder] decodes a [request_setup_session] binary value from [decoder] *)
+
+val decode_pb_request_validate : Pbrt.Decoder.t -> request_validate
+(** [decode_pb_request_validate decoder] decodes a [request_validate] binary value from [decoder] *)
 
 val decode_pb_request_set : Pbrt.Decoder.t -> request_set
 (** [decode_pb_request_set decoder] decodes a [request_set] binary value from [decoder] *)
