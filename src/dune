@@ -1,3 +1,5 @@
+(include_subdirs unqualified)
+
 (library
  (name vyconf_connect)
  (public_name vyconf.vyconf-connect)
@@ -50,3 +52,28 @@
     (run ocaml-protoc --ml_out src data/vyconf.proto)
     (run mv src/vyconf.ml src/vyconf_pbt.ml)
     (run mv src/vyconf.mli src/vyconf_pbt.mli)))))
+
+(library
+ (name vyos1x_adapter)
+ (public_name vyconf.vyos1x-adapter)
+ (libraries vyos1x-config vyconf.vyconf-client ctypes ctypes-foreign lwt lwt.unix lwt_log lwt_ppx)
+ (modules vyos1x_adapter)
+ (preprocess (pps lwt_ppx ppx_deriving_yojson)))
+
+(executable
+ (name vy_set)
+ (public_name vy_set)
+ (libraries vyos1x_adapter vyconf.vyconf-client)
+ (modules vy_set))
+
+(executable
+ (name vy_delete)
+ (public_name vy_delete)
+ (libraries vyos1x_adapter vyconf.vyconf-client)
+ (modules vy_delete))
+
+(executable
+ (name vy_load_config)
+ (public_name vy_load_config)
+ (libraries vyos1x_adapter vyos1x-config)
+ (modules vy_load_config))
