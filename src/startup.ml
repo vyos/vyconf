@@ -33,7 +33,7 @@ let setup_logger daemonize log_file template =
 
 (** Load the config file or panic if it fails *)
 let load_daemon_config path =
-    let result = Vyconf_config.load path in
+    let result = Vyconfd_config.Vyconf_config.load path in
     match result with
     | Ok cfg -> cfg
     | Error err ->
@@ -41,7 +41,7 @@ let load_daemon_config path =
 
 (** Check if appliance directories exist and panic if they don't *)
 let check_dirs dirs =
-    let res = Directories.test dirs in
+    let res = Vyconfd_config.Directories.test dirs in
     match res with
     | Ok _ -> ()
     | Error err -> panic err
@@ -112,7 +112,7 @@ let load_interface_definitions dir =
     let open Vyos1x.Reference_tree in
     let relative_paths = FileUtil.ls dir in
     let absolute_paths =
-        try Ok (List.map Util.absolute_path relative_paths)
+        try Ok (List.map Vyos1x.Util.absolute_path relative_paths)
         with Sys_error no_dir_msg -> Error no_dir_msg
     in
     let load_aux tree file =

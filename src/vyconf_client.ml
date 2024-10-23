@@ -1,5 +1,5 @@
-include Vyconf_pb
-include Vyconf_types
+include Vyconf_connect.Vyconf_pb
+include Vyconf_connect.Vyconf_types
 
 type t = {
     sock: Lwt_unix.file_descr;
@@ -45,8 +45,8 @@ let do_request client req =
     let enc = Pbrt.Encoder.create () in
     let () = encode_request_envelope {token=client.session; request=req} enc in
     let msg = Pbrt.Encoder.to_bytes enc in
-    let%lwt () = Message.write client.oc msg in
-    let%lwt resp = Message.read client.ic in
+    let%lwt () = Vyconf_connect.Message.write client.oc msg in
+    let%lwt resp = Vyconf_connect.Message.read client.ic in
     decode_response (Pbrt.Decoder.of_bytes resp) |> Lwt.return
 
 let get_status client =

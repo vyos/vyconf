@@ -2,9 +2,9 @@ val panic : string -> 'a
 
 val setup_logger : bool -> string option -> Lwt_log.template -> unit Lwt.t
 
-val load_daemon_config : string -> Vyconf_config.t
+val load_daemon_config : string -> Vyconfd_config.Vyconf_config.t
 
-val check_dirs : Directories.t -> unit
+val check_dirs : Vyconfd_config.Directories.t -> unit
 
 val create_socket : string -> Lwt_unix.file_descr Lwt.t
 

@@ -1,12 +1,13 @@
 opam-version: "2.0"
 name: "vyconf"
 version: "0.1"
+synopsis: "VyOS 2.x config file control library"
+description: "An appliance configuration framework"
 maintainer: "Daniil Baturin <daniil@baturin.org>"
 authors: "VyOS maintainers and contributors <maintainers@vyos.net>"
 homepage: "https://github.com/vyos/vyconf"
 bug-reports: "https://phabricator.vyos.net"
-license: "LGPL with OCaml linking exception"
-description: "An appliance configuration framework"
+license: "LGPL-2.1-or-later WITH OCaml-LGPL-linking-exception"
 dev-repo: "git+https://github.com/vyos/vyconf/"
 build: [
   ["dune" "subst"] {pinned}
@@ -29,4 +30,3 @@ depends: [
   "sha" {build}
   "pcre" {build}
 ]
-available: ocaml-version >= "4.14.2"

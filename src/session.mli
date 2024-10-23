@@ -40,4 +40,4 @@ val list_children : world -> session_data -> string list -> string list
 
 val string_of_op : cfg_op -> string
 
-val show_config : world -> session_data -> string list -> Vyconf_types.request_config_format -> string
+val show_config : world -> session_data -> string list -> Vyconf_connect.Vyconf_types.request_config_format -> string
