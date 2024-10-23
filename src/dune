@@ -22,7 +22,7 @@
 (executable
  (name vyconfd)
  (public_name vyconfd)
- (modules vyconfd startup version util)
+ (modules vyconfd startup version)
  (libraries vyos1x-config vyconfd_config vyconf_connect)
  (preprocess (pps lwt_ppx)))
 
