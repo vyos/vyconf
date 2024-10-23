@@ -150,7 +150,7 @@ let send_response oc resp =
     let%lwt () = Vyconf_connect.Message.write oc resp_msg in
     Lwt.return ()
 
-let rec handle_connection world ic oc fd () =
+let rec handle_connection world ic oc () =
     try%lwt
         let%lwt req_msg = Vyconf_connect.Message.read ic in
         let%lwt req =
@@ -181,19 +181,19 @@ let rec handle_connection world ic oc fd () =
                 end) |> Lwt.return
         in
         let%lwt () = send_response oc resp in
-        handle_connection world ic oc fd ()
+        handle_connection world ic oc ()
     with
     | Failure e -> 
         let%lwt () = Lwt_log.error e in
         let%lwt () = send_response oc ({response_tmpl with status=Fail; error=(Some e)}) in
-        handle_connection world ic oc fd ()
+        handle_connection world ic oc ()
     | End_of_file -> Lwt_log.info "Connection closed" >>= return 
 
 let accept_connection world conn =
     let fd, _ = conn in
     let ic = Lwt_io.of_fd ~mode:Lwt_io.Input fd in
     let oc = Lwt_io.of_fd ~mode:Lwt_io.Output fd in
-    Lwt.on_failure (handle_connection world ic oc fd ()) (fun e -> Lwt_log.ign_error (Printexc.to_string e));
+    Lwt.on_failure (handle_connection world ic oc ()) (fun e -> Lwt_log.ign_error (Printexc.to_string e));
     Lwt_log.info "New connection" >>= return
 
 let main_loop basepath world () =
