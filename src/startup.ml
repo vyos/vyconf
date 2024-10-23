@@ -67,6 +67,7 @@ let create_socket sockfile =
     let backlog = 10 in
     let%lwt sock = socket PF_UNIX SOCK_STREAM 0 |> Lwt.return in
     let%lwt () = Lwt_unix.bind sock @@ ADDR_UNIX(sockfile) in
+    let%lwt () = Lwt_unix.chmod sockfile 0o775 in
     listen sock backlog;
     Lwt.return sock
 
