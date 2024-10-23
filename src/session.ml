@@ -1,5 +1,6 @@
-module CT = Config_tree
-module RT = Reference_tree
+module CT = Vyos1x.Config_tree
+module VT = Vyos1x.Vytree
+module RT = Vyos1x.Reference_tree
 module D = Directories
 
 exception Session_error of string
@@ -16,7 +17,7 @@ type world = {
 }
 
 type session_data = {
-    proposed_config : Config_tree.t;
+    proposed_config : CT.t;
     modified: bool;
     conf_mode: bool;
     changeset: cfg_op list;
@@ -64,20 +65,22 @@ let rec apply_changes changeset config =
     | c :: cs -> apply_changes cs (apply_cfg_op c config)
 
 let set w s path =
-    let path, value = RT.validate_path D.(w.dirs.validators) w.reference_tree path in
+    let path, value = RT.validate_path D.(w.dirs.validators)
+      w.reference_tree path in
     let value_behaviour = if RT.is_multi w.reference_tree path then CT.AddValue else CT.ReplaceValue in
     let op = CfgSet (path, value, value_behaviour) in
     let config = apply_cfg_op op s.proposed_config in
     {s with proposed_config=config; changeset=(op :: s.changeset)}
 
 let delete w s path =
-    let path, value = RT.validate_path D.(w.dirs.validators) w.reference_tree path in
+    let path, value = RT.validate_path D.(w.dirs.validators)
+      w.reference_tree path in
     let op = CfgDelete (path, value) in
     let config = apply_cfg_op op s.proposed_config in
     {s with proposed_config=config; changeset=(op :: s.changeset)}
 
 let get_value w s path =
-    if not (Vytree.exists s.proposed_config path) then
+    if not (VT.exists s.proposed_config path) then
         raise (Session_error ("Path does not exist"))
     else if not (RT.is_leaf w.reference_tree path) then
         raise (Session_error "Cannot get a value of a non-leaf node")
@@ -88,7 +91,7 @@ let get_value w s path =
     else CT.get_value s.proposed_config path
 
 let get_values w s path =
-    if not (Vytree.exists s.proposed_config path) then
+    if not (VT.exists s.proposed_config path) then
         raise (Session_error ("Path does not exist"))
     else if not (RT.is_leaf w.reference_tree path) then
         raise (Session_error "Cannot get a value of a non-leaf node")
@@ -97,18 +100,18 @@ let get_values w s path =
     else  CT.get_values s.proposed_config path
 
 let list_children w s path =
-    if not (Vytree.exists s.proposed_config path) then
+    if not (VT.exists s.proposed_config path) then
         raise (Session_error ("Path does not exist"))
     else if (RT.is_leaf w.reference_tree path) then
         raise (Session_error "Cannot list children of a leaf node")
-    else Vytree.children_of_path s.proposed_config path
+    else VT.children_of_path s.proposed_config path
 
-let exists w s path =
-    Vytree.exists s.proposed_config path
+let exists _w s path =
+    VT.exists s.proposed_config path
 
-let show_config w s path fmt =
+let show_config _w s path fmt =
     let open Vyconf_types in
-    if (path <> []) && not (Vytree.exists s.proposed_config path) then
+    if (path <> []) && not (VT.exists s.proposed_config path) then
         raise (Session_error ("Path does not exist")) 
     else
         let node = s.proposed_config in
@@ -117,5 +120,5 @@ let show_config w s path fmt =
         | Json ->
             let node =
                 (match path with [] -> s.proposed_config |
-                                 _ as ps -> Vytree.get s.proposed_config ps) in
+                                 _ as ps -> VT.get s.proposed_config ps) in
             CT.to_yojson node |> Yojson.Safe.pretty_to_string

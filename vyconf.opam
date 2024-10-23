@@ -1,26 +1,22 @@
-opam-version: "1.2"
+opam-version: "2.0"
 name: "vyconf"
 version: "0.1"
 maintainer: "Daniil Baturin <daniil@baturin.org>"
 authors: "VyOS maintainers and contributors <maintainers@vyos.net>"
 homepage: "https://github.com/vyos/vyconf"
-bug-reports: "https://phabricator.vyos.net/maniphest"
+bug-reports: "https://phabricator.vyos.net"
 license: "LGPL with OCaml linking exception"
 description: "An appliance configuration framework"
-dev-repo: "git+https://github.com/vyos/vyconf"
+dev-repo: "git+https://github.com/vyos/vyconf/"
 build: [
-  ["./configure" "--prefix=%{prefix}%"]
-  [make]
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name]
 ]
-install: [make "install"]
-remove: ["ocamlfind" "remove" "vyconf"]
 depends: [
-  "ocamlfind" {build}
-  "oasis" {build}
   "menhir" {build}
+  "dune" {build & >= "1.4.0"}
   "ocaml-protoc" {build}
   "ounit" {build}
-  "batteries" {build}
   "lwt" {build & >= "4.1.0"}
   "lwt_ppx" {build}
   "lwt_log" {build}
@@ -33,4 +29,4 @@ depends: [
   "sha" {build}
   "pcre" {build}
 ]
-available: ocaml-version >= "4.03.0"
+available: ocaml-version >= "4.14.2"

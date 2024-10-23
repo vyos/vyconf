@@ -1,9 +1,0 @@
-S src
-S test
-B _build/src
-B _build/test
-PKG lwt lwt.unix
-PKG ppx_deriving.runtime ppx_deriving.show
-PKG fileutils pcre toml xml-light batteries
-PKG oUnit
-EXT lwt oUnit

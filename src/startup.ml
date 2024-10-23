@@ -75,11 +75,21 @@ let create_server accept_connection sock =
 let load_config file =
     try
         let chan = open_in file in
-        let config = Curly_parser.config Curly_lexer.token (Lexing.from_channel chan) in
+        let s = really_input_string chan (in_channel_length chan) in
+        let config = Vyos1x.Parser.from_string s in
         Ok config
     with
         | Sys_error msg -> Error msg
-        | Curly_parser.Error -> Error "Parse error"
+        | Vyos1x.Util.Syntax_error (opt, msg) ->
+            begin
+                match opt with
+                | None ->
+                    let out = Printf.sprintf "Parse error: %s\n" msg
+                    in Error out
+                | Some (line, pos) ->
+                    let out = Printf.sprintf "Parse error: %s line %d pos %d\n" msg line pos
+                    in Error out
+            end
 
 (** Load the appliance configuration file or the fallback config *)
 let load_config_failsafe main fallback =
@@ -99,7 +109,7 @@ let load_config_failsafe main fallback =
 
 (* Load interface definitions from a directory into a reference tree *)
 let load_interface_definitions dir =
-    let open Reference_tree in
+    let open Vyos1x.Reference_tree in
     let relative_paths = FileUtil.ls dir in
     let absolute_paths =
         try Ok (List.map Util.absolute_path relative_paths)

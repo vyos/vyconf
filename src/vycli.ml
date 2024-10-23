@@ -60,7 +60,7 @@ let main socket op path out_format config_format =
                 begin
                     match resp.status with
                     | Success -> Ok "" |> Lwt.return
-                    | _ -> Error (BatOption.default "" resp.error) |> Lwt.return
+                    | _ -> Error (Option.value resp.error ~default:"") |> Lwt.return
                 end
             | OpSetupSession ->
                 let%lwt resp = setup_session client "vycli" in
@@ -81,7 +81,7 @@ let main socket op path out_format config_format =
     | Error e -> let%lwt () = Lwt_io.write Lwt_io.stderr (Printf.sprintf "%s\n" e) in Lwt.return 1
 
 let _ =
-    let () = Arg.parse args (fun f -> ()) usage in
+    let () = Arg.parse args (fun _ -> ()) usage in
     let path = String.trim !path_opt |> Pcre.split ~pat:"\\s+" in
     let out_format = output_format_of_string !out_format_opt in
     let config_format = config_format_of_string !conf_format_opt in

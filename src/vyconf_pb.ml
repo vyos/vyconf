@@ -806,13 +806,13 @@ let rec encode_request_output_format (v:Vyconf_types.request_output_format) enco
 let rec encode_request_setup_session (v:Vyconf_types.request_setup_session) encoder = 
   begin match v.Vyconf_types.client_application with
   | Some x -> 
-    Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 1 Pbrt.Bytes encoder;
     Pbrt.Encoder.string x encoder;
   | None -> ();
   end;
   begin match v.Vyconf_types.on_behalf_of with
   | Some x -> 
-    Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
+    Pbrt.Encoder.key 2 Pbrt.Varint encoder;
     Pbrt.Encoder.int32_as_varint x encoder;
   | None -> ();
   end;
@@ -820,12 +820,12 @@ let rec encode_request_setup_session (v:Vyconf_types.request_setup_session) enco
 
 let rec encode_request_set (v:Vyconf_types.request_set) encoder = 
   List.iter (fun x -> 
-    Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 1 Pbrt.Bytes encoder;
     Pbrt.Encoder.string x encoder;
   ) v.Vyconf_types.path;
   begin match v.Vyconf_types.ephemeral with
   | Some x -> 
-    Pbrt.Encoder.key (3, Pbrt.Varint) encoder; 
+    Pbrt.Encoder.key 3 Pbrt.Varint encoder;
     Pbrt.Encoder.bool x encoder;
   | None -> ();
   end;
@@ -833,96 +833,96 @@ let rec encode_request_set (v:Vyconf_types.request_set) encoder =
 
 let rec encode_request_delete (v:Vyconf_types.request_delete) encoder = 
   List.iter (fun x -> 
-    Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 1 Pbrt.Bytes encoder;
     Pbrt.Encoder.string x encoder;
   ) v.Vyconf_types.path;
   ()
 
 let rec encode_request_rename (v:Vyconf_types.request_rename) encoder = 
   List.iter (fun x -> 
-    Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 1 Pbrt.Bytes encoder;
     Pbrt.Encoder.string x encoder;
   ) v.Vyconf_types.edit_level;
-  Pbrt.Encoder.key (2, Pbrt.Bytes) encoder; 
+  Pbrt.Encoder.key 2 Pbrt.Bytes encoder;
   Pbrt.Encoder.string v.Vyconf_types.from encoder;
-  Pbrt.Encoder.key (3, Pbrt.Bytes) encoder; 
+  Pbrt.Encoder.key 3 Pbrt.Bytes encoder;
   Pbrt.Encoder.string v.Vyconf_types.to_ encoder;
   ()
 
 let rec encode_request_copy (v:Vyconf_types.request_copy) encoder = 
   List.iter (fun x -> 
-    Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 1 Pbrt.Bytes encoder;
     Pbrt.Encoder.string x encoder;
   ) v.Vyconf_types.edit_level;
-  Pbrt.Encoder.key (2, Pbrt.Bytes) encoder; 
+  Pbrt.Encoder.key 2 Pbrt.Bytes encoder;
   Pbrt.Encoder.string v.Vyconf_types.from encoder;
-  Pbrt.Encoder.key (3, Pbrt.Bytes) encoder; 
+  Pbrt.Encoder.key 3 Pbrt.Bytes encoder;
   Pbrt.Encoder.string v.Vyconf_types.to_ encoder;
   ()
 
 let rec encode_request_comment (v:Vyconf_types.request_comment) encoder = 
   List.iter (fun x -> 
-    Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 1 Pbrt.Bytes encoder;
     Pbrt.Encoder.string x encoder;
   ) v.Vyconf_types.path;
-  Pbrt.Encoder.key (2, Pbrt.Bytes) encoder; 
+  Pbrt.Encoder.key 2 Pbrt.Bytes encoder;
   Pbrt.Encoder.string v.Vyconf_types.comment encoder;
   ()
 
 let rec encode_request_commit (v:Vyconf_types.request_commit) encoder = 
   begin match v.Vyconf_types.confirm with
   | Some x -> 
-    Pbrt.Encoder.key (1, Pbrt.Varint) encoder; 
+    Pbrt.Encoder.key 1 Pbrt.Varint encoder;
     Pbrt.Encoder.bool x encoder;
   | None -> ();
   end;
   begin match v.Vyconf_types.confirm_timeout with
   | Some x -> 
-    Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
+    Pbrt.Encoder.key 2 Pbrt.Varint encoder;
     Pbrt.Encoder.int32_as_varint x encoder;
   | None -> ();
   end;
   begin match v.Vyconf_types.comment with
   | Some x -> 
-    Pbrt.Encoder.key (3, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 3 Pbrt.Bytes encoder;
     Pbrt.Encoder.string x encoder;
   | None -> ();
   end;
   ()
 
 let rec encode_request_rollback (v:Vyconf_types.request_rollback) encoder = 
-  Pbrt.Encoder.key (1, Pbrt.Varint) encoder; 
+  Pbrt.Encoder.key 1 Pbrt.Varint encoder;
   Pbrt.Encoder.int32_as_varint v.Vyconf_types.revision encoder;
   ()
 
 let rec encode_request_load (v:Vyconf_types.request_load) encoder = 
-  Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
+  Pbrt.Encoder.key 1 Pbrt.Bytes encoder;
   Pbrt.Encoder.string v.Vyconf_types.location encoder;
   begin match v.Vyconf_types.format with
   | Some x -> 
-    Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
+    Pbrt.Encoder.key 2 Pbrt.Varint encoder;
     encode_request_config_format x encoder;
   | None -> ();
   end;
   ()
 
 let rec encode_request_merge (v:Vyconf_types.request_merge) encoder = 
-  Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
+  Pbrt.Encoder.key 1 Pbrt.Bytes encoder;
   Pbrt.Encoder.string v.Vyconf_types.location encoder;
   begin match v.Vyconf_types.format with
   | Some x -> 
-    Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
+    Pbrt.Encoder.key 2 Pbrt.Varint encoder;
     encode_request_config_format x encoder;
   | None -> ();
   end;
   ()
 
 let rec encode_request_save (v:Vyconf_types.request_save) encoder = 
-  Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
+  Pbrt.Encoder.key 1 Pbrt.Bytes encoder;
   Pbrt.Encoder.string v.Vyconf_types.location encoder;
   begin match v.Vyconf_types.format with
   | Some x -> 
-    Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
+    Pbrt.Encoder.key 2 Pbrt.Varint encoder;
     encode_request_config_format x encoder;
   | None -> ();
   end;
@@ -930,12 +930,12 @@ let rec encode_request_save (v:Vyconf_types.request_save) encoder =
 
 let rec encode_request_show_config (v:Vyconf_types.request_show_config) encoder = 
   List.iter (fun x -> 
-    Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 1 Pbrt.Bytes encoder;
     Pbrt.Encoder.string x encoder;
   ) v.Vyconf_types.path;
   begin match v.Vyconf_types.format with
   | Some x -> 
-    Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
+    Pbrt.Encoder.key 2 Pbrt.Varint encoder;
     encode_request_config_format x encoder;
   | None -> ();
   end;
@@ -943,19 +943,19 @@ let rec encode_request_show_config (v:Vyconf_types.request_show_config) encoder 
 
 let rec encode_request_exists (v:Vyconf_types.request_exists) encoder = 
   List.iter (fun x -> 
-    Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 1 Pbrt.Bytes encoder;
     Pbrt.Encoder.string x encoder;
   ) v.Vyconf_types.path;
   ()
 
 let rec encode_request_get_value (v:Vyconf_types.request_get_value) encoder = 
   List.iter (fun x -> 
-    Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 1 Pbrt.Bytes encoder;
     Pbrt.Encoder.string x encoder;
   ) v.Vyconf_types.path;
   begin match v.Vyconf_types.output_format with
   | Some x -> 
-    Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
+    Pbrt.Encoder.key 2 Pbrt.Varint encoder;
     encode_request_output_format x encoder;
   | None -> ();
   end;
@@ -963,12 +963,12 @@ let rec encode_request_get_value (v:Vyconf_types.request_get_value) encoder =
 
 let rec encode_request_get_values (v:Vyconf_types.request_get_values) encoder = 
   List.iter (fun x -> 
-    Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 1 Pbrt.Bytes encoder;
     Pbrt.Encoder.string x encoder;
   ) v.Vyconf_types.path;
   begin match v.Vyconf_types.output_format with
   | Some x -> 
-    Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
+    Pbrt.Encoder.key 2 Pbrt.Varint encoder;
     encode_request_output_format x encoder;
   | None -> ();
   end;
@@ -976,12 +976,12 @@ let rec encode_request_get_values (v:Vyconf_types.request_get_values) encoder =
 
 let rec encode_request_list_children (v:Vyconf_types.request_list_children) encoder = 
   List.iter (fun x -> 
-    Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 1 Pbrt.Bytes encoder;
     Pbrt.Encoder.string x encoder;
   ) v.Vyconf_types.path;
   begin match v.Vyconf_types.output_format with
   | Some x -> 
-    Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
+    Pbrt.Encoder.key 2 Pbrt.Varint encoder;
     encode_request_output_format x encoder;
   | None -> ();
   end;
@@ -989,100 +989,100 @@ let rec encode_request_list_children (v:Vyconf_types.request_list_children) enco
 
 let rec encode_request_run_op_mode (v:Vyconf_types.request_run_op_mode) encoder = 
   List.iter (fun x -> 
-    Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 1 Pbrt.Bytes encoder;
     Pbrt.Encoder.string x encoder;
   ) v.Vyconf_types.path;
   begin match v.Vyconf_types.output_format with
   | Some x -> 
-    Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
+    Pbrt.Encoder.key 2 Pbrt.Varint encoder;
     encode_request_output_format x encoder;
   | None -> ();
   end;
   ()
 
 let rec encode_request_enter_configuration_mode (v:Vyconf_types.request_enter_configuration_mode) encoder = 
-  Pbrt.Encoder.key (1, Pbrt.Varint) encoder; 
+  Pbrt.Encoder.key 1 Pbrt.Varint encoder;
   Pbrt.Encoder.bool v.Vyconf_types.exclusive encoder;
-  Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
+  Pbrt.Encoder.key 2 Pbrt.Varint encoder;
   Pbrt.Encoder.bool v.Vyconf_types.override_exclusive encoder;
   ()
 
 let rec encode_request (v:Vyconf_types.request) encoder = 
   begin match v with
   | Vyconf_types.Status ->
-    Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 1 Pbrt.Bytes encoder;
     Pbrt.Encoder.empty_nested encoder
   | Vyconf_types.Setup_session x ->
-    Pbrt.Encoder.key (2, Pbrt.Bytes) encoder; 
-    Pbrt.Encoder.nested (encode_request_setup_session x) encoder;
+    Pbrt.Encoder.key 2 Pbrt.Bytes encoder;
+    Pbrt.Encoder.nested encode_request_setup_session x encoder;
   | Vyconf_types.Set x ->
-    Pbrt.Encoder.key (3, Pbrt.Bytes) encoder; 
-    Pbrt.Encoder.nested (encode_request_set x) encoder;
+    Pbrt.Encoder.key 3 Pbrt.Bytes encoder;
+    Pbrt.Encoder.nested encode_request_set x encoder;
   | Vyconf_types.Delete x ->
-    Pbrt.Encoder.key (4, Pbrt.Bytes) encoder; 
-    Pbrt.Encoder.nested (encode_request_delete x) encoder;
+    Pbrt.Encoder.key 4 Pbrt.Bytes encoder;
+    Pbrt.Encoder.nested encode_request_delete x encoder;
   | Vyconf_types.Rename x ->
-    Pbrt.Encoder.key (5, Pbrt.Bytes) encoder; 
-    Pbrt.Encoder.nested (encode_request_rename x) encoder;
+    Pbrt.Encoder.key 5 Pbrt.Bytes encoder;
+    Pbrt.Encoder.nested encode_request_rename x encoder;
   | Vyconf_types.Copy x ->
-    Pbrt.Encoder.key (6, Pbrt.Bytes) encoder; 
-    Pbrt.Encoder.nested (encode_request_copy x) encoder;
+    Pbrt.Encoder.key 6 Pbrt.Bytes encoder;
+    Pbrt.Encoder.nested encode_request_copy x encoder;
   | Vyconf_types.Comment x ->
-    Pbrt.Encoder.key (7, Pbrt.Bytes) encoder; 
-    Pbrt.Encoder.nested (encode_request_comment x) encoder;
+    Pbrt.Encoder.key 7 Pbrt.Bytes encoder;
+    Pbrt.Encoder.nested encode_request_comment x encoder;
   | Vyconf_types.Commit x ->
-    Pbrt.Encoder.key (8, Pbrt.Bytes) encoder; 
-    Pbrt.Encoder.nested (encode_request_commit x) encoder;
+    Pbrt.Encoder.key 8 Pbrt.Bytes encoder;
+    Pbrt.Encoder.nested encode_request_commit x encoder;
   | Vyconf_types.Rollback x ->
-    Pbrt.Encoder.key (9, Pbrt.Bytes) encoder; 
-    Pbrt.Encoder.nested (encode_request_rollback x) encoder;
+    Pbrt.Encoder.key 9 Pbrt.Bytes encoder;
+    Pbrt.Encoder.nested encode_request_rollback x encoder;
   | Vyconf_types.Merge x ->
-    Pbrt.Encoder.key (10, Pbrt.Bytes) encoder; 
-    Pbrt.Encoder.nested (encode_request_merge x) encoder;
+    Pbrt.Encoder.key 10 Pbrt.Bytes encoder;
+    Pbrt.Encoder.nested encode_request_merge x encoder;
   | Vyconf_types.Save x ->
-    Pbrt.Encoder.key (11, Pbrt.Bytes) encoder; 
-    Pbrt.Encoder.nested (encode_request_save x) encoder;
+    Pbrt.Encoder.key 11 Pbrt.Bytes encoder;
+    Pbrt.Encoder.nested encode_request_save x encoder;
   | Vyconf_types.Show_config x ->
-    Pbrt.Encoder.key (12, Pbrt.Bytes) encoder; 
-    Pbrt.Encoder.nested (encode_request_show_config x) encoder;
+    Pbrt.Encoder.key 12 Pbrt.Bytes encoder;
+    Pbrt.Encoder.nested encode_request_show_config x encoder;
   | Vyconf_types.Exists x ->
-    Pbrt.Encoder.key (13, Pbrt.Bytes) encoder; 
-    Pbrt.Encoder.nested (encode_request_exists x) encoder;
+    Pbrt.Encoder.key 13 Pbrt.Bytes encoder;
+    Pbrt.Encoder.nested encode_request_exists x encoder;
   | Vyconf_types.Get_value x ->
-    Pbrt.Encoder.key (14, Pbrt.Bytes) encoder; 
-    Pbrt.Encoder.nested (encode_request_get_value x) encoder;
+    Pbrt.Encoder.key 14 Pbrt.Bytes encoder;
+    Pbrt.Encoder.nested encode_request_get_value x encoder;
   | Vyconf_types.Get_values x ->
-    Pbrt.Encoder.key (15, Pbrt.Bytes) encoder; 
-    Pbrt.Encoder.nested (encode_request_get_values x) encoder;
+    Pbrt.Encoder.key 15 Pbrt.Bytes encoder;
+    Pbrt.Encoder.nested encode_request_get_values x encoder;
   | Vyconf_types.List_children x ->
-    Pbrt.Encoder.key (16, Pbrt.Bytes) encoder; 
-    Pbrt.Encoder.nested (encode_request_list_children x) encoder;
+    Pbrt.Encoder.key 16 Pbrt.Bytes encoder;
+    Pbrt.Encoder.nested encode_request_list_children x encoder;
   | Vyconf_types.Run_op_mode x ->
-    Pbrt.Encoder.key (17, Pbrt.Bytes) encoder; 
-    Pbrt.Encoder.nested (encode_request_run_op_mode x) encoder;
+    Pbrt.Encoder.key 17 Pbrt.Bytes encoder;
+    Pbrt.Encoder.nested encode_request_run_op_mode x encoder;
   | Vyconf_types.Confirm ->
-    Pbrt.Encoder.key (18, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 18 Pbrt.Bytes encoder;
     Pbrt.Encoder.empty_nested encoder
   | Vyconf_types.Configure x ->
-    Pbrt.Encoder.key (19, Pbrt.Bytes) encoder; 
-    Pbrt.Encoder.nested (encode_request_enter_configuration_mode x) encoder;
+    Pbrt.Encoder.key 19 Pbrt.Bytes encoder;
+    Pbrt.Encoder.nested encode_request_enter_configuration_mode x encoder;
   | Vyconf_types.Exit_configure ->
-    Pbrt.Encoder.key (20, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 20 Pbrt.Bytes encoder;
     Pbrt.Encoder.empty_nested encoder
   | Vyconf_types.Teardown x ->
-    Pbrt.Encoder.key (21, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 21 Pbrt.Bytes encoder;
     Pbrt.Encoder.string x encoder;
   end
 
 let rec encode_request_envelope (v:Vyconf_types.request_envelope) encoder = 
   begin match v.Vyconf_types.token with
   | Some x -> 
-    Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 1 Pbrt.Bytes encoder;
     Pbrt.Encoder.string x encoder;
   | None -> ();
   end;
-  Pbrt.Encoder.key (2, Pbrt.Bytes) encoder; 
-  Pbrt.Encoder.nested (encode_request v.Vyconf_types.request) encoder;
+  Pbrt.Encoder.key 2 Pbrt.Bytes encoder;
+  Pbrt.Encoder.nested encode_request v.Vyconf_types.request encoder;
   ()
 
 let rec encode_status (v:Vyconf_types.status) encoder =
@@ -1098,23 +1098,23 @@ let rec encode_status (v:Vyconf_types.status) encoder =
   | Vyconf_types.Path_already_exists -> Pbrt.Encoder.int_as_varint 8 encoder
 
 let rec encode_response (v:Vyconf_types.response) encoder = 
-  Pbrt.Encoder.key (1, Pbrt.Varint) encoder; 
+  Pbrt.Encoder.key 1 Pbrt.Varint encoder;
   encode_status v.Vyconf_types.status encoder;
   begin match v.Vyconf_types.output with
   | Some x -> 
-    Pbrt.Encoder.key (2, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 2 Pbrt.Bytes encoder;
     Pbrt.Encoder.string x encoder;
   | None -> ();
   end;
   begin match v.Vyconf_types.error with
   | Some x -> 
-    Pbrt.Encoder.key (3, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 3 Pbrt.Bytes encoder;
     Pbrt.Encoder.string x encoder;
   | None -> ();
   end;
   begin match v.Vyconf_types.warning with
   | Some x -> 
-    Pbrt.Encoder.key (4, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key 4 Pbrt.Bytes encoder;
     Pbrt.Encoder.string x encoder;
   | None -> ();
   end;

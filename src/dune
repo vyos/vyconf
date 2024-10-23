@@ -1,0 +1,5 @@
+(library
+ (name vyconf)
+ (public_name vyconf)
+ (libraries vyos1x-config lwt lwt.unix lwt_log lwt_ppx ocaml-protoc toml sha yojson ppx_deriving.show ppx_deriving_yojson)
+ (preprocess (pps lwt_ppx ppx_deriving.show ppx_deriving_yojson)))

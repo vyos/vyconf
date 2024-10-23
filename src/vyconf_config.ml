@@ -37,7 +37,7 @@ let get_field conf tbl_name field_name =
     (* NB: TomlLenses module uses "table" and "field" names for function names,
             hence tbl_name and field_name
      *)
-    TomlLenses.(get conf (key tbl_name |-- table |-- key field_name |-- string))
+    Toml.Lenses.(get conf (key tbl_name |-- table |-- key field_name |-- string))
 
 let mandatory_field conf table field =
     let value = get_field conf table field in
@@ -47,7 +47,7 @@ let mandatory_field conf table field =
 
 let optional_field default conf table field =
     let value = get_field conf table field in
-    BatOption.default default value
+    Option.value value ~default:default
 
 let load filename =
     try

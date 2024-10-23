@@ -5,6 +5,7 @@ open Vyconf_pb
 open Vyconf_types
 
 module FP = FilePath
+module CT = Vyos1x.Config_tree
 
 (* On UNIX, self_init uses /dev/random for seed *)
 let () = Random.self_init ()
@@ -43,7 +44,7 @@ let make_session_token () =
 let setup_session world req =
     let token = make_session_token () in
     let user = "unknown user" in
-    let client_app = BatOption.default "unknown client" req.client_application in
+    let client_app = Option.value req.client_application ~default:"unknown client" in
     let () = Hashtbl.add sessions token (Session.make world client_app user) in
     {response_tmpl with output=(Some token)}
 
@@ -95,7 +96,7 @@ let get_value world token (req: request_get_value) =
     try
         let () = (Lwt_log.debug @@ Printf.sprintf "[%s]\n" (Util.string_of_list req.path)) |> Lwt.ignore_result in
         let value = Session.get_value world (find_session token) req.path in
-        let fmt = BatOption.default Out_plain req.output_format in
+        let fmt = Option.value req.output_format ~default:Out_plain in
         let value_str =
          (match fmt with
           | Out_plain -> value
@@ -106,7 +107,7 @@ let get_value world token (req: request_get_value) =
 let get_values world token (req: request_get_values) =
     try
         let values = Session.get_values world (find_session token) req.path in
-        let fmt = BatOption.default Out_plain req.output_format in
+        let fmt = Option.value req.output_format ~default:Out_plain in
         let values_str =
          (match fmt with
           | Out_plain -> Util.string_of_list @@ List.map (Printf.sprintf "\'%s\'") values
@@ -117,7 +118,7 @@ let get_values world token (req: request_get_values) =
 let list_children world token (req: request_list_children) =
     try
         let children = Session.list_children world (find_session token) req.path in
-        let fmt = BatOption.default Out_plain req.output_format in
+        let fmt = Option.value req.output_format ~default:Out_plain in
         let children_str =
           (match fmt with
           | Out_plain -> Util.string_of_list @@ List.map (Printf.sprintf "\'%s\'") children
@@ -127,7 +128,7 @@ let list_children world token (req: request_list_children) =
 
 let show_config world token (req: request_show_config) =
     try
-        let fmt = BatOption.default Curly req.format in
+        let fmt = Option.value req.format ~default:Curly in
         let conf_str = Session.show_config world (find_session token) req.path fmt in
         {response_tmpl with output=(Some conf_str)}
     with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
@@ -179,14 +180,14 @@ let rec handle_connection world ic oc fd () =
 
 let accept_connection world conn =
     let fd, _ = conn in
-    let ic = Lwt_io.of_fd Lwt_io.Input fd in
-    let oc = Lwt_io.of_fd Lwt_io.Output fd in
+    let ic = Lwt_io.of_fd ~mode:Lwt_io.Input fd in
+    let oc = Lwt_io.of_fd ~mode:Lwt_io.Output fd in
     Lwt.on_failure (handle_connection world ic oc fd ()) (fun e -> Lwt_log.ign_error (Printexc.to_string e));
     Lwt_log.info "New connection" >>= return
 
 let main_loop basepath world () =
     let open Session in
-    let log_file = BatOption.bind !log_file (fun s -> Some (FP.concat basepath s)) in
+    let log_file = Option.bind !log_file (fun s -> Some (FP.concat basepath s)) in
     let%lwt () = Startup.setup_logger !daemonize log_file world.vyconf_config.log_template in
     let%lwt () = Lwt_log.notice @@ Printf.sprintf "Starting VyConf for %s" world.vyconf_config.app_name in
     let%lwt sock = Startup.create_socket (FP.concat basepath world.vyconf_config.socket) in
@@ -194,7 +195,7 @@ let main_loop basepath world () =
     serve ()
 
 let load_interface_definitions dir =
-    let open Session in
+(*    let open Session in *)
     let reftree = Startup.load_interface_definitions dir in
     match reftree with
     | Ok r -> r
@@ -204,11 +205,11 @@ let make_world config dirs =
     let open Directories in
     let open Session in
     let reftree = load_interface_definitions dirs.interface_definitions in
-    let running_config = Config_tree.make "root" in
+    let running_config = CT.make "root" in
     {running_config=running_config; reference_tree=reftree; vyconf_config=config; dirs=dirs}
 
 let () = 
-  let () = Arg.parse args (fun f -> ()) usage in
+  let () = Arg.parse args (fun _ -> ()) usage in
   let vc = Startup.load_daemon_config !config_file in
   let () = Lwt_log.load_rules ("* -> " ^ vc.log_level) in
   let dirs = Directories.make !basepath vc in
@@ -218,5 +219,5 @@ let () =
       (FP.concat vc.config_dir vc.primary_config)
       (FP.concat vc.config_dir vc.fallback_config) in
   let world = Session.{world with running_config=config} in
-  let () = print_endline (Config_tree.render world.running_config) in
+  let () = print_endline (CT.render_config world.running_config) in
   Lwt_main.run @@ main_loop !basepath world ()

@@ -7,13 +7,10 @@
 *.cmx
 *.cmxs
 *.cmxa
-*.native
-*.byte
 *.mllib
 *.mldylib
 *.rej
-setup.log
-setup.data
 .ocp-indent
-_build
-META
+_build/*
+*.merlin
+*.install

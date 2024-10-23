@@ -8,7 +8,7 @@ let find_xml_child name xml =
         | _ -> false
     in
     match xml with
-    | Xml.Element (_, _, children) -> Vylist.find find_aux children
+    | Xml.Element (_, _, children) -> Vyos1x.Vylist.find find_aux children
     | Xml.PCData _ -> None
 
 (** Convert a list of strings to a string of unquoted, space separated words *)
