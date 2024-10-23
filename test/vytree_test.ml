@@ -1,5 +1,7 @@
+[@@@ocaml.warning "-27"]
+
 open OUnit2
-open Vytree
+open Vyos1x.Vytree
 
 (* Destructuting a freshly made node gives us what
    we made it from *)
@@ -148,7 +150,7 @@ let test_merge_children_no_duplicates test_ctxt =
       [make_full () "foo" [make () "bar"];
        make () "bar";
        make_full () "baz" [make () "quuz"]] in
-    let node' = merge_children (fun x y -> x) node in
+    let node' = merge_children (fun x y -> x) (fun x y -> compare x y) node in
     assert_equal (list_children node') ["foo"; "bar"; "baz"]
 
 
@@ -160,7 +162,7 @@ let test_merge_children_has_duplicates test_ctxt =
       [make_full () "foo" [make () "bar"];
        make () "quux";
        make_full () "foo" [make () "baz"]] in
-    let node' = merge_children (fun x y -> x) node in
+    let node' = merge_children (fun x y -> x) (fun x y -> compare x y) node in
     assert_equal (list_children node') ["foo"; "quux"];
     assert_equal (get node' ["foo"] |> list_children) ["bar"; "baz"]
 

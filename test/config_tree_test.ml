@@ -1,7 +1,10 @@
+[@@@ocaml.warning "-27"]
+
 open OUnit2
 
-module VT = Vytree
-module CT = Config_tree
+module VT = Vyos1x.Vytree
+module CT = Vyos1x.Config_tree
+module RT = Vyos1x.Reference_tree
 
 (* Setting a value of a node that doesn't exist should create the node *)
 let test_set_create_node test_ctxt =
@@ -69,6 +72,8 @@ let test_set_comment test_ctxt =
     let node = CT.set_comment node path (Some "comment") in
     assert_equal (CT.get_comment node path) (Some "comment")
 
+(**** Properties ephemeral and inactive: not yet implemented *)
+(*
 (* Creating a node without a value should default inactive and ephemeral to false *)
 let test_valueless_node_inactive_ephemeral test_ctxt =
     let path = ["foo"; "bar"] in
@@ -77,7 +82,7 @@ let test_valueless_node_inactive_ephemeral test_ctxt =
     assert_equal ((not (CT.is_inactive node path)) && (not (CT.is_ephemeral node path))) true
 
 (* Setting a node inactive should work *)
-let test_set_inactive test_ctxt = 
+let test_set_inactive test_ctxt =
     let path = ["foo"; "bar"] in
     let node = CT.make "root" in
     let node = CT.set node path None CT.AddValue in
@@ -85,12 +90,14 @@ let test_set_inactive test_ctxt =
     assert_equal (CT.is_inactive node path) true
 
 (* Setting a node ephemeral should work *)
-let test_set_ephemeral test_ctxt = 
+let test_set_ephemeral test_ctxt =
     let path = ["foo"; "bar"] in
     let node = CT.make "root" in
     let node = CT.set node path None CT.AddValue in
     let node = CT.set_ephemeral node path (true) in
     assert_equal (CT.is_ephemeral node path) true
+*)
+
 
 (*** Refactoring test setup *)
 let set ?(how=CT.AddValue) path value node = CT.set node path value how
@@ -107,8 +114,8 @@ let toggle_in_config_tree ~how ?(path=[]) ?(value=false) =
 
 let load_reftree test_ctxt =
     let file_name = "interface_definition_sample.xml" in
-    let r = Vytree.make Reference_tree.default_data "root" in
-    Reference_tree.load_from_xml r (in_testdata_dir test_ctxt [file_name])
+    let r = VT.make RT.default_data "root" in
+    RT.load_from_xml r (in_testdata_dir test_ctxt [file_name])
 
 let foobar = ["foo"; "bar"]
 
@@ -116,41 +123,15 @@ let foobar = ["foo"; "bar"]
 
 (**** Standalone rendering *)
 let test_render_nested_empty_with_comment test_ctxt =
-    let rendered = CT.render @@
+    let rendered = CT.render_config @@
         set_in_config_tree
             ~how:CT.set_comment ~value:"comment"
             ~path:foobar
     in
-    assert_equal rendered
-"root {
-    foo {
-        /*comment*/
-        bar { }
-    }
-}"
-
-let test_render_ephemeral_hidden teset_ctxt =
-    let rendered = CT.render @@
-        toggle_in_config_tree
-            ~how:CT.set_ephemeral ~value:true
-            ~path:foobar
-    in
-    assert_equal rendered
-"root {
-    foo { }
-}"
-
-let test_render_ephemeral_shown teset_ctxt =
-    let rendered = CT.render ~showephemeral:true @@
-        toggle_in_config_tree
-            ~how:CT.set_ephemeral ~value:true
-            ~path:foobar
-    in
-    assert_equal rendered
-"root {
-    foo {
-        #EPHEMERAL bar { }
-    }
+    assert_equal (String.trim rendered)
+"foo {
+    /* comment */
+    bar
 }"
 
 let test_render_at_level test_ctxt =
@@ -160,7 +141,7 @@ let test_render_at_level test_ctxt =
     let rendered = CT.render_at_level node ["foo"] in
     assert_equal (String.trim rendered)
 "bar {
-    baz quux;
+    baz \"quux\"
 }"
 
 let test_render_at_level_top test_ctxt =
@@ -172,19 +153,20 @@ let test_render_at_level_top test_ctxt =
     let rendered = CT.render_at_level node [] in
     assert_equal (String.trim rendered)
 "baz {
-    quux xyzzy;
+    quux \"xyzzy\"
 }
 foo {
-    bar quuux;
+    bar \"quuux\"
 }"
 
-(**** Reftree-based rendering *)
+(**** Reftree-based rendering: not yet implemented *)
+(*
 let test_render_rt_tag_node test_ctxt =
     let reftree = load_reftree test_ctxt in
     let path = ["system"; "login"; "user"; "full-name"] in
     let node = CT.make "root" in
     let node = CT.set node path (Some "name here") CT.AddValue in
-    let rendered_curly_config = CT.render ~reftree:(Some reftree) node in
+    let rendered_curly_config = CT.render_config ~reftree:(Some reftree) node in
     let desired_rendered_form =
 "root {
     system {
@@ -212,7 +194,7 @@ let test_render_rt_unspecified_node test_ctxt =
 }"
     in
     assert_equal rendered_curly_config desired_rendered_form
-
+*)
 let suite =
     "VyConf config tree tests" >::: [
         "test_set_create_node" >:: test_set_create_node;
@@ -223,16 +205,9 @@ let suite =
         "test_delete_last_value" >:: test_delete_last_value;
         "test_delete_subtree" >:: test_delete_subtree;
         "test_set_comment" >:: test_set_comment;
-        "test_valueless_node_inactive_ephemeral" >:: test_valueless_node_inactive_ephemeral;
-        "test_set_inactive" >:: test_set_inactive;
-        "test_set_ephemeral" >:: test_set_ephemeral;
         "test_render_nested_empty_with_comment" >:: test_render_nested_empty_with_comment;
-        "test_render_ephemeral_hidden " >:: test_render_ephemeral_hidden;
-        "test_render_ephemeral_shown"  >:: test_render_ephemeral_shown;
         "test_render_at_level" >:: test_render_at_level;
         "test_render_at_level_top" >:: test_render_at_level_top;
-        "test_render_rt_tag_node" >:: test_render_rt_tag_node;
-        "test_render_rt_unspecified_node" >:: test_render_rt_unspecified_node
     ]
 
 let () =

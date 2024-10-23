@@ -1,5 +1,7 @@
+[@@@ocaml.warning "-27"]
+
 open OUnit2
-open Vylist
+open Vyos1x.Vylist
 
 (* Searching for an element that is in the list gives Some that_element *)
 let test_find_existent test_ctxt =

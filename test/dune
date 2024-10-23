@@ -1,0 +1,3 @@
+(tests
+ (names config_tree_test reference_tree_test session_test util_test value_checker_test vyconf_config_test vylist_test vytree_load_test vytree_test)
+ (libraries ounit2 vyos1x-config vyconfd_config))

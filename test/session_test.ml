@@ -1,8 +1,10 @@
-open OUnit2
-open Session
+[@@@ocaml.warning "-27"]
 
-module CT = Config_tree
-module RT = Reference_tree
+open OUnit2
+open Vyconfd_config.Session
+
+module CT = Vyos1x.Config_tree
+module RT = Vyos1x.Reference_tree
 
 
 (* I'm not sure if we want to account for superfluous spaces inside the strings,
