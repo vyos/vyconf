@@ -19,7 +19,7 @@ type response = {
 }
 
 
-val create : ?token:(string option) -> string -> Vyconf_connect.Vyconf_types.request_output_format -> Vyconf_connect.Vyconf_types.request_config_format -> t Lwt.t
+val create : ?token:(string option) -> string -> Vyconf_connect.Vyconf_pbt.request_output_format -> Vyconf_connect.Vyconf_pbt.request_config_format -> t Lwt.t
 
 val get_token : t -> (string, string) result Lwt.t
 

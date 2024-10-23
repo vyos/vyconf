@@ -110,7 +110,7 @@ let exists _w s path =
     VT.exists s.proposed_config path
 
 let show_config _w s path fmt =
-    let open Vyconf_connect.Vyconf_types in
+    let open Vyconf_connect.Vyconf_pbt in
     if (path <> []) && not (VT.exists s.proposed_config path) then
         raise (Session_error ("Path does not exist")) 
     else

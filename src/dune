@@ -1,7 +1,7 @@
 (library
  (name vyconf_connect)
  (public_name vyconf.vyconf-connect)
- (modules vyconf_types vyconf_pb message)
+ (modules vyconf_pbt message)
  (libraries lwt lwt.unix lwt_log lwt_ppx ocaml-protoc fileutils ppx_deriving_yojson)
  (preprocess (pps lwt_ppx ppx_deriving_yojson)))
 
@@ -25,3 +25,15 @@
  (modules vyconfd startup version util)
  (libraries vyos1x-config vyconfd_config vyconf_connect)
  (preprocess (pps lwt_ppx)))
+
+(rule
+ (alias protoc)
+ (mode promote)
+ (targets vyconf_pbt.ml vyconf_pbt.mli)
+ (action
+  (chdir
+   %{project_root}
+   (progn
+    (run ocaml-protoc --ml_out src data/vyconf.proto)
+    (run mv src/vyconf.ml src/vyconf_pbt.ml)
+    (run mv src/vyconf.mli src/vyconf_pbt.mli)))))

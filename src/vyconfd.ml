@@ -1,7 +1,6 @@
 open Lwt
 
-open Vyconf_connect.Vyconf_types
-open Vyconf_connect.Vyconf_pb
+open Vyconf_connect.Vyconf_pbt
 open Vyconfd_config.Defaults
 
 module FP = FilePath
@@ -138,7 +137,7 @@ let show_config world token (req: request_show_config) =
 
 let send_response oc resp =
     let enc = Pbrt.Encoder.create () in
-    let%lwt () = encode_response resp enc |> return in
+    let%lwt () = encode_pb_response resp enc |> return in
     let%lwt resp_msg = Pbrt.Encoder.to_bytes enc |> return in
     let%lwt () = Vyconf_connect.Message.write oc resp_msg in
     Lwt.return ()
@@ -148,7 +147,7 @@ let rec handle_connection world ic oc fd () =
         let%lwt req_msg = Vyconf_connect.Message.read ic in
         let%lwt req =
             try
-                let envelope = decode_request_envelope (Pbrt.Decoder.of_bytes req_msg) in
+                let envelope = decode_pb_request_envelope (Pbrt.Decoder.of_bytes req_msg) in
                 Lwt.return (Ok (envelope.token, envelope.request))
             with Pbrt.Decoder.Failure e -> Lwt.return (Error (Pbrt.Decoder.error_to_string e))
         in
