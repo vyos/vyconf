@@ -6,6 +6,8 @@ val load_daemon_config : string -> Vyconfd_config.Vyconf_config.t
 
 val check_dirs : Vyconfd_config.Directories.t -> unit
 
+val check_validators_dir : Vyconfd_config.Directories.t -> unit
+
 val create_socket : string -> Lwt_unix.file_descr Lwt.t
 
 val create_server :

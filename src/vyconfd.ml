@@ -221,7 +221,7 @@ let () =
   let vc = Startup.load_daemon_config !config_file in
   let () = Lwt_log.load_rules ("* -> " ^ vc.log_level) in
   let dirs = Directories.make !basepath vc in
-  Startup.check_dirs dirs;
+  Startup.check_validators_dir dirs;
   let world = make_world vc dirs in
   let config = Startup.load_config_failsafe
       (FP.concat vc.config_dir vc.primary_config)

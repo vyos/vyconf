@@ -33,12 +33,19 @@ let make basepath conf =
     We do not try to check if they are readable at this point, it's just to fail early
     if they don't even exist and we shouldn't bother trying
  *)
+
+let check_dir d =
+    if FU.test FU.Is_dir d then ()
+    else raise (Failure (Printf.sprintf "%s does not exist or is not a directory" d))
+
 let test dirs =
-     let check_dir d =
-         if FU.test FU.Is_dir d then ()
-         else raise (Failure (Printf.sprintf "%s does not exist or is not a directory" d)) in
      let l = [dirs.components; dirs.validators; dirs.migrators;
               dirs.component_definitions; dirs.interface_definitions] in
      try
          List.iter check_dir l; Ok ()
      with Failure msg -> Error msg
+
+let test_validators_dir dirs =
+    try
+        check_dir dirs.validators; Ok ()
+    with Failure msg -> Error msg

@@ -46,6 +46,12 @@ let check_dirs dirs =
     | Ok _ -> ()
     | Error err -> panic err
 
+let check_validators_dir dirs =
+    let res = Vyconfd_config.Directories.test_validators_dir dirs in
+    match res with
+    | Ok _ -> ()
+    | Error err -> panic err
+
 let delete_socket_if_exists sockfile =
     try
         let _ = Unix.stat sockfile in
