@@ -2,6 +2,7 @@ open Lwt
 
 open Vyconf_connect.Vyconf_pbt
 open Vyconfd_config.Defaults
+open Vyconfd_config.Vyconf_config
 
 module FP = FilePath
 module CT = Vyos1x.Config_tree
@@ -197,16 +198,21 @@ let main_loop basepath world () =
     serve ()
 
 let load_interface_definitions dir =
-(*    let open Session in *)
     let reftree = Gen.load_interface_definitions dir in
     match reftree with
     | Ok r -> r
     | Error s -> Startup.panic s
 
+let read_reference_tree file =
+    let reftree = Startup.read_reference_tree file in
+    match reftree with
+    | Ok r -> r
+    | Error s -> Startup.panic s
+
 let make_world config dirs =
-    let open Directories in
     let open Session in
-    let reftree = load_interface_definitions dirs.interface_definitions in
+    (* the reference_tree json file is generated at vyos-1x build time *)
+    let reftree = read_reference_tree (FP.concat config.config_dir config.reference_tree) in
     let running_config = CT.make "root" in
     {running_config=running_config; reference_tree=reftree; vyconf_config=config; dirs=dirs}
 

@@ -7,6 +7,7 @@ type t = {
     config_dir: string;
     primary_config: string;
     fallback_config: string;
+    reference_tree: string;
     socket: string;
     pid_file: string;
     log_file: string option;
@@ -23,6 +24,7 @@ let empty_config = {
     config_dir = "";
     primary_config = "";
     fallback_config = "";
+    reference_tree = "";
     socket = "";
     pid_file = "";
     log_file = None;
@@ -61,6 +63,7 @@ let load filename =
             let conf = {conf with program_dir = mandatory_field conf_toml "appliance" "program_dir"} in
             let conf = {conf with primary_config = mandatory_field conf_toml "appliance" "primary_config"} in
             let conf = {conf with fallback_config = mandatory_field conf_toml "appliance" "fallback_config"} in
+            let conf = {conf with reference_tree = mandatory_field conf_toml "appliance" "reference_tree"} in
             (* Optional fields *)
             let conf = {conf with pid_file = optional_field defaults.pid_file conf_toml "vyconf" "pid_file"} in
             let conf = {conf with socket = optional_field defaults.socket conf_toml "vyconf" "socket"} in
