@@ -85,7 +85,7 @@ let main socket op path out_format config_format =
 
 let _ =
     let () = Arg.parse args (fun _ -> ()) usage in
-    let path = String.trim !path_opt |> Pcre.split ~pat:"\\s+" in
+    let path = Vyos1x.Util.list_of_path !path_opt in
     let out_format = output_format_of_string !out_format_opt in
     let config_format = config_format_of_string !conf_format_opt in
     let result = Lwt_main.run (main !socket !op path out_format config_format) in exit result
