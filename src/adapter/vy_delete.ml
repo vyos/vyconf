@@ -1,16 +1,6 @@
-let path_opt = ref []
-
-let usage = "Usage: " ^ Sys.argv.(0) ^ " [options]"
-
-let read_path p =
-    path_opt := p::!path_opt
-
-let speclist = [
-   ]
-
 let () =
-    let () = Arg.parse speclist read_path usage in
-    let path_list = List.rev !path_opt in
+    let path_list = Array.to_list (Array.sub Sys.argv 1 (Array.length Sys.argv - 1))
+    in
     let () =
         if List.length path_list = 0 then
             (Printf.printf "no path specified\n"; exit 1)
