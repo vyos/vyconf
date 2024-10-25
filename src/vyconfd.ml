@@ -235,5 +235,4 @@ let () =
       (FP.concat vc.config_dir vc.primary_config)
       (FP.concat vc.config_dir vc.fallback_config) in
   let world = Session.{world with running_config=config} in
-  let () = print_endline (CT.render_config world.running_config) in
   Lwt_main.run @@ main_loop !basepath world ()
