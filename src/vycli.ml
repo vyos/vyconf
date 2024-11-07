@@ -1,5 +1,5 @@
-open Vyconf_client
-open Vyconf_types
+open Client.Vyconf_client
+open Vyconf_connect.Vyconf_pbt
 
 type op_t =
     | OpStatus
@@ -10,6 +10,7 @@ type op_t =
     | OpGetValue
     | OpGetValues
     | OpListChildren
+    | OpValidate
 
 let token : string option ref = ref None
 let conf_format_opt = ref "curly"
@@ -34,6 +35,7 @@ let args = [
     ("--list-children", Arg.Unit (fun () -> op := Some OpListChildren), "List children of the node at the specified path");
     ("--show-config", Arg.Unit (fun () -> op := Some OpShowConfig), "Show the configuration at the specified path");
     ("--status", Arg.Unit (fun () -> op := Some OpStatus), "Send a status/keepalive message");
+    ("--validate", Arg.Unit (fun () -> op := Some OpValidate), "Validate path");
    ]
 
 let config_format_of_string s =
@@ -49,7 +51,7 @@ let output_format_of_string s =
     | _	-> failwith (Printf.sprintf "Unknown output format %s, should be plain or json" s)
 
 let main socket op path out_format config_format =
-    let%lwt client = Vyconf_client.create ~token:!token socket out_format config_format in
+    let%lwt client = Client.Vyconf_client.create ~token:!token socket out_format config_format in
     let%lwt result = match op with
     | None -> Error "Operation required" |> Lwt.return
     | Some o ->
@@ -60,7 +62,7 @@ let main socket op path out_format config_format =
                 begin
                     match resp.status with
                     | Success -> Ok "" |> Lwt.return
-                    | _ -> Error (BatOption.default "" resp.error) |> Lwt.return
+                    | _ -> Error (Option.value resp.error ~default:"") |> Lwt.return
                 end
             | OpSetupSession ->
                 let%lwt resp = setup_session client "vycli" in
@@ -74,6 +76,7 @@ let main socket op path out_format config_format =
             | OpGetValues -> get_values client path
             | OpListChildren -> list_children client path
             | OpShowConfig -> show_config client path
+            | OpValidate -> validate client path
             | _ -> Error "Unimplemented" |> Lwt.return
         end
     in match result with
@@ -81,8 +84,8 @@ let main socket op path out_format config_format =
     | Error e -> let%lwt () = Lwt_io.write Lwt_io.stderr (Printf.sprintf "%s\n" e) in Lwt.return 1
 
 let _ =
-    let () = Arg.parse args (fun f -> ()) usage in
-    let path = String.trim !path_opt |> Pcre.split ~pat:"\\s+" in
+    let () = Arg.parse args (fun _ -> ()) usage in
+    let path = Vyos1x.Util.list_of_path !path_opt in
     let out_format = output_format_of_string !out_format_opt in
     let config_format = config_format_of_string !conf_format_opt in
     let result = Lwt_main.run (main !socket !op path out_format config_format) in exit result

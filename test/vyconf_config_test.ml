@@ -1,5 +1,5 @@
 open OUnit2
-open Vyconf_config
+open Vyconfd_config.Vyconf_config
 
 let try_load file =
     let conf = load file in
@@ -11,8 +11,7 @@ let try_load_fail file err =
     let conf = load file in
     match conf with
     | Ok _ -> assert_failure err
-    | Error msg -> ()
-
+    | Error _ -> ()
 
 let test_load_nonexistent_file test_ctxt =
     (* Please don't create this file there! *)

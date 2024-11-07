@@ -5,6 +5,7 @@ type t = {
     config_dir: string;
     primary_config: string;
     fallback_config: string;
+    reference_tree: string;
     socket: string;
     pid_file: string;
     log_file: string option;

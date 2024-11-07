@@ -7,7 +7,7 @@ type vyconf_defaults = {
 }
 
 let defaults = {
-    config_file = "/etc/vyconfd.conf";
+    config_file = "/etc/vyos/vyconfd.conf";
     pid_file = "/var/run/vyconfd.pid";
     socket = "/var/run/vyconfd.sock";
     log_template = "$(date) $(name)[$(pid)]: $(message)";

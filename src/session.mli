@@ -1,16 +1,16 @@
 type cfg_op =
-    | CfgSet of string list * string option * Config_tree.value_behaviour
+    | CfgSet of string list * string option * Vyos1x.Config_tree.value_behaviour
     | CfgDelete of string list * string option
 
 type world = {
-    running_config: Config_tree.t;
-    reference_tree: Reference_tree.t;
+    running_config: Vyos1x.Config_tree.t;
+    reference_tree: Vyos1x.Reference_tree.t;
     vyconf_config: Vyconf_config.t;
     dirs: Directories.t
 }
 
 type session_data = {
-    proposed_config : Config_tree.t;
+    proposed_config : Vyos1x.Config_tree.t;
     modified: bool;
     conf_mode: bool;
     changeset: cfg_op list;
@@ -21,6 +21,12 @@ type session_data = {
 exception Session_error of string
 
 val make : world -> string -> string -> session_data
+
+val set_modified : session_data -> session_data
+
+val apply_changes : cfg_op list -> Vyos1x.Config_tree.t -> Vyos1x.Config_tree.t
+
+val validate : world -> session_data -> string list -> unit
 
 val set : world -> session_data -> string list -> session_data
 
@@ -36,4 +42,4 @@ val list_children : world -> session_data -> string list -> string list
 
 val string_of_op : cfg_op -> string
 
-val show_config : world -> session_data -> string list -> Vyconf_types.request_config_format -> string
+val show_config : world -> session_data -> string list -> Vyconf_connect.Vyconf_pbt.request_config_format -> string

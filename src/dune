@@ -1,0 +1,79 @@
+(include_subdirs unqualified)
+
+(library
+ (name vyconf_connect)
+ (public_name vyconf.vyconf-connect)
+ (modules vyconf_pbt message)
+ (libraries lwt lwt.unix lwt_log lwt_ppx ocaml-protoc fileutils ppx_deriving_yojson)
+ (preprocess (pps lwt_ppx ppx_deriving_yojson)))
+
+(library
+ (name vyconfd_config)
+ (modules vyconf_config session directories defaults)
+ (libraries vyos1x-config vyconf_connect toml sha ppx_deriving.show)
+ (preprocess (pps ppx_deriving.show ppx_deriving_yojson)))
+
+(library
+ (name client)
+ (public_name vyconf.vyconf-client)
+ (modules vyconf_client vyconf_client_session)
+ (libraries vyos1x-config vyconf_connect lwt lwt.unix lwt_log lwt_ppx ocaml-protoc toml sha
+            yojson ppx_deriving.show ppx_deriving_yojson)
+ (preprocess (pps lwt_ppx ppx_deriving.show ppx_deriving_yojson)))
+
+(executable
+ (name vyconfd)
+ (public_name vyconfd)
+ (modules vyconfd startup version)
+ (libraries vyos1x-config vyconfd_config vyconf_connect)
+ (preprocess (pps lwt_ppx)))
+
+(executable
+ (name vycli)
+ (public_name vycli)
+ (modules vycli)
+ (libraries client)
+ (preprocess (pps lwt_ppx)))
+
+(executable
+ (name validate)
+ (public_name validate)
+ (modules validate)
+ (libraries client))
+
+(rule
+ (alias protoc)
+ (mode promote)
+ (targets vyconf_pbt.ml vyconf_pbt.mli)
+ (action
+  (chdir
+   %{project_root}
+   (progn
+    (run ocaml-protoc --ml_out src data/vyconf.proto)
+    (run mv src/vyconf.ml src/vyconf_pbt.ml)
+    (run mv src/vyconf.mli src/vyconf_pbt.mli)))))
+
+(library
+ (name vyos1x_adapter)
+ (public_name vyconf.vyos1x-adapter)
+ (libraries vyos1x-config vyconf.vyconf-client ctypes ctypes-foreign lwt lwt.unix lwt_log lwt_ppx)
+ (modules vyos1x_adapter)
+ (preprocess (pps lwt_ppx ppx_deriving_yojson)))
+
+(executable
+ (name vy_set)
+ (public_name vy_set)
+ (libraries vyos1x_adapter vyconf.vyconf-client)
+ (modules vy_set))
+
+(executable
+ (name vy_delete)
+ (public_name vy_delete)
+ (libraries vyos1x_adapter vyconf.vyconf-client)
+ (modules vy_delete))
+
+(executable
+ (name vy_load_config)
+ (public_name vy_load_config)
+ (libraries vyos1x_adapter vyos1x-config)
+ (modules vy_load_config))

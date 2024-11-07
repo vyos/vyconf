@@ -7,6 +7,7 @@ type t = {
     config_dir: string;
     primary_config: string;
     fallback_config: string;
+    reference_tree: string;
     socket: string;
     pid_file: string;
     log_file: string option;
@@ -23,6 +24,7 @@ let empty_config = {
     config_dir = "";
     primary_config = "";
     fallback_config = "";
+    reference_tree = "";
     socket = "";
     pid_file = "";
     log_file = None;
@@ -37,7 +39,7 @@ let get_field conf tbl_name field_name =
     (* NB: TomlLenses module uses "table" and "field" names for function names,
             hence tbl_name and field_name
      *)
-    TomlLenses.(get conf (key tbl_name |-- table |-- key field_name |-- string))
+    Toml.Lenses.(get conf (key tbl_name |-- table |-- key field_name |-- string))
 
 let mandatory_field conf table field =
     let value = get_field conf table field in
@@ -47,7 +49,7 @@ let mandatory_field conf table field =
 
 let optional_field default conf table field =
     let value = get_field conf table field in
-    BatOption.default default value
+    Option.value value ~default:default
 
 let load filename =
     try
@@ -61,6 +63,7 @@ let load filename =
             let conf = {conf with program_dir = mandatory_field conf_toml "appliance" "program_dir"} in
             let conf = {conf with primary_config = mandatory_field conf_toml "appliance" "primary_config"} in
             let conf = {conf with fallback_config = mandatory_field conf_toml "appliance" "fallback_config"} in
+            let conf = {conf with reference_tree = mandatory_field conf_toml "appliance" "reference_tree"} in
             (* Optional fields *)
             let conf = {conf with pid_file = optional_field defaults.pid_file conf_toml "vyconf" "pid_file"} in
             let conf = {conf with socket = optional_field defaults.socket conf_toml "vyconf" "socket"} in

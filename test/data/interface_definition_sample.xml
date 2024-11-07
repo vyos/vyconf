@@ -6,7 +6,6 @@
         <children>
           <tagNode name="user">
             <properties>
-              <keepChildOrder/>
               <help>User name</help>
               <constraint>
                 <regex>[a-zA-Z][a-zA-Z0-9\-]+</regex>

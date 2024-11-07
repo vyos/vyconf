@@ -1,0 +1,3 @@
+(install
+ (files vyconfd.conf vyconf.proto)
+ (section share))

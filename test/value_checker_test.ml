@@ -1,49 +1,52 @@
 open OUnit2
-open Value_checker
+
+module VC = Vyos1x.Value_checker
 
 let get_dir test_ctxt = in_testdata_dir test_ctxt ["validators"]
 
+let buf = Buffer.create 4096
+
 let raises_bad_validator f =
     try ignore @@ f (); false
-    with Bad_validator _ -> true
+    with VC.Bad_validator _ -> true
 
 let test_check_regex_valid test_ctxt =
-    let c = Regex "[a-z]+" in
+    let c = VC.Regex "[a-z]+" in
     let v = "fgsfds" in
-    assert_equal (validate_value (get_dir test_ctxt) c v) true
+    assert_equal (VC.validate_value (get_dir test_ctxt) buf c v) true
 
 let test_check_regex_invalid test_ctxt =
-    let c = Regex "[a-z]+" in
+    let c = VC.Regex "[a-z]+" in
     let v = "FGSFDS" in
-    assert_equal (validate_value (get_dir test_ctxt) c v) false
+    assert_equal (VC.validate_value (get_dir test_ctxt) buf c v) false
 
 let test_check_external_valid test_ctxt =
-    let c = External ("anything", None) in
+    let c = VC.External ("anything", None) in
     let v = "fgsfds" in
-    assert_equal (validate_value (get_dir test_ctxt) c v) true
+    assert_equal (VC.validate_value (get_dir test_ctxt) buf c v) true
 
 let test_check_external_invalid test_ctxt =
-    let	c = External ("nothing", None) in
+    let	c = VC.External ("nothing", None) in
     let	v = "fgsfds" in
-    assert_equal (validate_value (get_dir test_ctxt) c v) false
+    assert_equal (VC.validate_value (get_dir test_ctxt) buf c v) false
 
 let test_check_external_bad_validator test_ctxt =
-    let c = External ("invalid", None) in
+    let c = VC.External ("invalid", None) in
     let v = "fgsfds" in
     assert_bool "Invalid validator was executed successfully"
-      (raises_bad_validator (fun () -> validate_value (get_dir test_ctxt) c v))
+      (raises_bad_validator (fun () -> VC.validate_value (get_dir test_ctxt) buf c v))
 
 let test_validate_any_valid test_ctxt =
-    let cs = [Regex "\\d+"; Regex "[a-z]+"; External ("anything", None)] in
-    assert_equal (validate_any (get_dir test_ctxt) cs "AAAA") true
+    let cs = [VC.Regex "\\d+"; VC.Regex "[a-z]+"; VC.External ("anything", None)] in
+    assert_equal (VC.validate_any (get_dir test_ctxt) cs "AAAA") None
 
 let test_validate_any_invalid test_ctxt =
-    let cs = [Regex "\\d+"; Regex "[a-z]+"] in
-    assert_equal (validate_any (get_dir test_ctxt) cs "AAAA") false
+    let cs = [VC.Regex "\\d+"; VC.Regex "[a-z]+"] in
+    assert_equal (VC.validate_any (get_dir test_ctxt) cs "AAAA") None
 
 let test_validate_any_no_constraints test_ctxt =
     let cs = [] in
-    assert_equal (validate_any (get_dir test_ctxt) cs "foo") true
+    assert_equal (VC.validate_any (get_dir test_ctxt) cs "foo") None
 
 let suite =
     "VyConf value checker tests" >::: [
