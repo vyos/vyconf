@@ -1,7 +1,7 @@
 open Ctypes
 open Foreign
 
-let libvyatta = Dl.dlopen ~flags:[Dl.RTLD_LAZY] ~filename:"libvyatta-cfg.so"
+let libvyatta = Dl.dlopen ~flags:[Dl.RTLD_LAZY] ~filename:"libvyatta-cfg.so.1"
 
 let cstore_init = foreign ~from:libvyatta "vy_cstore_init" (void @-> returning uint64_t)
 let cstore_free = foreign ~from:libvyatta "vy_cstore_free" (uint64_t @-> returning void)
