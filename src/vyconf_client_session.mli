@@ -4,6 +4,7 @@ type op_t =
     | OpTeardownSession
     | OpShowConfig
     | OpValidate
+    | OpReloadReftree
 
 val session_init : ?out_format:string -> ?config_format:string -> string -> (string, string) result
 
@@ -14,3 +15,5 @@ val session_validate_path : string -> string -> string list -> (string, string) 
 val session_show_config : string -> string -> string list -> (string, string) result
 
 val session_path_exists : string -> string -> string list -> (string, string) result
+
+val reload_reference_tree : string -> (string, string) result

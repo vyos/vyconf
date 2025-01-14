@@ -117,3 +117,12 @@ let validate client path =
     | Success -> Lwt.return (Ok "")
     | Fail -> Error (Option.value resp.error ~default:"") |> Lwt.return
     | _ -> Error (Option.value resp.error ~default:"") |> Lwt.return
+
+let reload_reftree ?(on_behalf_of=None) client =
+    let id = on_behalf_of |> (function None -> None | Some x -> (Some (Int32.of_int x))) in
+    let req = Reload_reftree {on_behalf_of=id} in
+    let%lwt resp = do_request client req in
+    match resp.status with
+    | Success -> Ok "" |> Lwt.return
+    | Fail -> Error (Option.value resp.error ~default:"") |> Lwt.return
+    | _ -> Error (Option.value resp.error ~default:"") |> Lwt.return

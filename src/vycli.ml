@@ -11,6 +11,7 @@ type op_t =
     | OpGetValues
     | OpListChildren
     | OpValidate
+    | OpReloadReftree
 
 let token : string option ref = ref None
 let conf_format_opt = ref "curly"
@@ -36,6 +37,7 @@ let args = [
     ("--show-config", Arg.Unit (fun () -> op := Some OpShowConfig), "Show the configuration at the specified path");
     ("--status", Arg.Unit (fun () -> op := Some OpStatus), "Send a status/keepalive message");
     ("--validate", Arg.Unit (fun () -> op := Some OpValidate), "Validate path");
+    ("--reload-reftree", Arg.Unit (fun () -> op := Some OpReloadReftree), "Reload reference tree");
    ]
 
 let config_format_of_string s =
@@ -77,6 +79,7 @@ let main socket op path out_format config_format =
             | OpListChildren -> list_children client path
             | OpShowConfig -> show_config client path
             | OpValidate -> validate client path
+            | OpReloadReftree -> reload_reftree client
             | _ -> Error "Unimplemented" |> Lwt.return
         end
     in match result with

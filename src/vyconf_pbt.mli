@@ -120,6 +120,10 @@ type request_enter_configuration_mode = {
 
 type request_exit_configuration_mode = unit
 
+type request_reload_reftree = {
+  on_behalf_of : int32 option;
+}
+
 type request =
   | Status
   | Setup_session of request_setup_session
@@ -143,6 +147,7 @@ type request =
   | Exit_configure
   | Validate of request_validate
   | Teardown of request_teardown
+  | Reload_reftree of request_reload_reftree
 
 type request_envelope = {
   token : string option;
@@ -324,6 +329,12 @@ val default_request_enter_configuration_mode :
 val default_request_exit_configuration_mode : unit
 (** [default_request_exit_configuration_mode ()] is the default value for type [request_exit_configuration_mode] *)
 
+val default_request_reload_reftree : 
+  ?on_behalf_of:int32 option ->
+  unit ->
+  request_reload_reftree
+(** [default_request_reload_reftree ()] is the default value for type [request_reload_reftree] *)
+
 val default_request : unit -> request
 (** [default_request ()] is the default value for type [request] *)
 
@@ -424,6 +435,9 @@ val pp_request_enter_configuration_mode : Format.formatter -> request_enter_conf
 val pp_request_exit_configuration_mode : Format.formatter -> request_exit_configuration_mode -> unit 
 (** [pp_request_exit_configuration_mode v] formats v *)
 
+val pp_request_reload_reftree : Format.formatter -> request_reload_reftree -> unit 
+(** [pp_request_reload_reftree v] formats v *)
+
 val pp_request : Format.formatter -> request -> unit 
 (** [pp_request v] formats v *)
 
@@ -514,6 +528,9 @@ val encode_pb_request_enter_configuration_mode : request_enter_configuration_mod
 val encode_pb_request_exit_configuration_mode : request_exit_configuration_mode -> Pbrt.Encoder.t -> unit
 (** [encode_pb_request_exit_configuration_mode v encoder] encodes [v] with the given [encoder] *)
 
+val encode_pb_request_reload_reftree : request_reload_reftree -> Pbrt.Encoder.t -> unit
+(** [encode_pb_request_reload_reftree v encoder] encodes [v] with the given [encoder] *)
+
 val encode_pb_request : request -> Pbrt.Encoder.t -> unit
 (** [encode_pb_request v encoder] encodes [v] with the given [encoder] *)
 
@@ -603,6 +620,9 @@ val decode_pb_request_enter_configuration_mode : Pbrt.Decoder.t -> request_enter
 
 val decode_pb_request_exit_configuration_mode : Pbrt.Decoder.t -> request_exit_configuration_mode
 (** [decode_pb_request_exit_configuration_mode decoder] decodes a [request_exit_configuration_mode] binary value from [decoder] *)
+
+val decode_pb_request_reload_reftree : Pbrt.Decoder.t -> request_reload_reftree
+(** [decode_pb_request_reload_reftree decoder] decodes a [request_reload_reftree] binary value from [decoder] *)
 
 val decode_pb_request : Pbrt.Decoder.t -> request
 (** [decode_pb_request decoder] decodes a [request] binary value from [decoder] *)

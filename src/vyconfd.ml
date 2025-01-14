@@ -143,6 +143,17 @@ let validate world token (req: request_validate) =
         response_tmpl
     with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
 
+let reload_reftree world (_req: request_reload_reftree) =
+    let config = world.Session.vyconf_config in
+    let reftree =
+        Startup.read_reference_tree (FP.concat config.reftree_dir config.reference_tree)
+    in
+    match reftree with
+    | Ok reftree ->
+        world.reference_tree <- reftree;
+        {response_tmpl with status=Success}
+    | Error s -> {response_tmpl with status=Fail; error=(Some s)}
+
 let send_response oc resp =
     let enc = Pbrt.Encoder.create () in
     let%lwt () = encode_pb_response resp enc |> return in
@@ -167,6 +178,7 @@ let rec handle_connection world ic oc () =
                     match req with
                     | _, Status -> response_tmpl
                     | _, Setup_session r -> setup_session world r
+                    | _, Reload_reftree r -> reload_reftree world r
                     | None, _ -> {response_tmpl with status=Fail; output=(Some "Operation requires session token")}
                     | Some t, Teardown _ -> teardown t
                     | Some t, Configure r -> enter_conf_mode r t

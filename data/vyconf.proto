@@ -117,6 +117,13 @@ message Request {
   message ExitConfigurationMode {
   }
 
+  message ReloadReftree {
+    // this is a temporary workaround for a bug with empty messages, and
+    // will be removed when the issue is resolved
+    optional int32 OnBehalfOf = 1;
+  }
+
+
   oneof msg {
     Status status = 1;
     SetupSession setup_session = 2;
@@ -140,6 +147,7 @@ message Request {
     ExitConfigurationMode exit_configure = 20;
     Validate validate = 21;
     Teardown teardown = 22;
+    ReloadReftree reload_reftree = 23;
   }
 }
 
