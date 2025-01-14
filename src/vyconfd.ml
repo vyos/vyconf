@@ -220,7 +220,7 @@ let read_reference_tree file =
 let make_world config dirs =
     let open Session in
     (* the reference_tree json file is generated at vyos-1x build time *)
-    let reftree = read_reference_tree (FP.concat config.config_dir config.reference_tree) in
+    let reftree = read_reference_tree (FP.concat config.reftree_dir config.reference_tree) in
     let running_config = CT.make "" in
     {running_config=running_config; reference_tree=reftree; vyconf_config=config; dirs=dirs}
 
