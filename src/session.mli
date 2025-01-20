@@ -3,8 +3,8 @@ type cfg_op =
     | CfgDelete of string list * string option
 
 type world = {
-    running_config: Vyos1x.Config_tree.t;
-    reference_tree: Vyos1x.Reference_tree.t;
+    mutable running_config: Vyos1x.Config_tree.t;
+    mutable reference_tree: Vyos1x.Reference_tree.t;
     vyconf_config: Vyconf_config.t;
     dirs: Directories.t
 }

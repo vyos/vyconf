@@ -5,6 +5,7 @@ type t = {
     data_dir: string;
     program_dir: string;
     config_dir: string;
+    reftree_dir: string;
     primary_config: string;
     fallback_config: string;
     reference_tree: string;
@@ -22,6 +23,7 @@ let empty_config = {
     data_dir = "";
     program_dir = "";
     config_dir = "";
+    reftree_dir = "";
     primary_config = "";
     fallback_config = "";
     reference_tree = "";
@@ -60,6 +62,7 @@ let load filename =
             let conf = {conf with app_name = mandatory_field conf_toml "appliance" "name"} in
             let conf = {conf with data_dir = mandatory_field conf_toml "appliance" "data_dir"} in
             let conf = {conf with config_dir = mandatory_field conf_toml "appliance" "config_dir"} in
+            let conf = {conf with reftree_dir = mandatory_field conf_toml "appliance" "reftree_dir"} in
             let conf = {conf with program_dir = mandatory_field conf_toml "appliance" "program_dir"} in
             let conf = {conf with primary_config = mandatory_field conf_toml "appliance" "primary_config"} in
             let conf = {conf with fallback_config = mandatory_field conf_toml "appliance" "fallback_config"} in

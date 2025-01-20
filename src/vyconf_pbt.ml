@@ -113,6 +113,10 @@ type request_enter_configuration_mode = {
 
 type request_exit_configuration_mode = unit
 
+type request_reload_reftree = {
+  on_behalf_of : int32 option;
+}
+
 type request =
   | Status
   | Setup_session of request_setup_session
@@ -136,6 +140,7 @@ type request =
   | Exit_configure
   | Validate of request_validate
   | Teardown of request_teardown
+  | Reload_reftree of request_reload_reftree
 
 type request_envelope = {
   token : string option;
@@ -327,6 +332,12 @@ let rec default_request_enter_configuration_mode
 }
 
 let rec default_request_exit_configuration_mode = ()
+
+let rec default_request_reload_reftree 
+  ?on_behalf_of:((on_behalf_of:int32 option) = None)
+  () : request_reload_reftree  = {
+  on_behalf_of;
+}
 
 let rec default_request (): request = Status
 
@@ -550,6 +561,14 @@ let default_request_enter_configuration_mode_mutable () : request_enter_configur
   override_exclusive = false;
 }
 
+type request_reload_reftree_mutable = {
+  mutable on_behalf_of : int32 option;
+}
+
+let default_request_reload_reftree_mutable () : request_reload_reftree_mutable = {
+  on_behalf_of = None;
+}
+
 type request_envelope_mutable = {
   mutable token : string option;
   mutable request : request;
@@ -745,6 +764,12 @@ let rec pp_request_exit_configuration_mode fmt (v:request_exit_configuration_mod
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
 
+let rec pp_request_reload_reftree fmt (v:request_reload_reftree) = 
+  let pp_i fmt () =
+    Pbrt.Pp.pp_record_field ~first:true "on_behalf_of" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.on_behalf_of;
+  in
+  Pbrt.Pp.pp_brk pp_i fmt ()
+
 let rec pp_request fmt (v:request) =
   match v with
   | Status  -> Format.fprintf fmt "Status"
@@ -769,6 +794,7 @@ let rec pp_request fmt (v:request) =
   | Exit_configure  -> Format.fprintf fmt "Exit_configure"
   | Validate x -> Format.fprintf fmt "@[<hv2>Validate(@,%a)@]" pp_request_validate x
   | Teardown x -> Format.fprintf fmt "@[<hv2>Teardown(@,%a)@]" pp_request_teardown x
+  | Reload_reftree x -> Format.fprintf fmt "@[<hv2>Reload_reftree(@,%a)@]" pp_request_reload_reftree x
 
 let rec pp_request_envelope fmt (v:request_envelope) = 
   let pp_i fmt () =
@@ -1047,6 +1073,15 @@ let rec encode_pb_request_enter_configuration_mode (v:request_enter_configuratio
 let rec encode_pb_request_exit_configuration_mode (v:request_exit_configuration_mode) encoder = 
 ()
 
+let rec encode_pb_request_reload_reftree (v:request_reload_reftree) encoder = 
+  begin match v.on_behalf_of with
+  | Some x -> 
+    Pbrt.Encoder.int32_as_varint x encoder;
+    Pbrt.Encoder.key 1 Pbrt.Varint encoder; 
+  | None -> ();
+  end;
+  ()
+
 let rec encode_pb_request (v:request) encoder = 
   begin match v with
   | Status ->
@@ -1115,6 +1150,9 @@ let rec encode_pb_request (v:request) encoder =
   | Teardown x ->
     Pbrt.Encoder.nested encode_pb_request_teardown x encoder;
     Pbrt.Encoder.key 22 Pbrt.Bytes encoder; 
+  | Reload_reftree x ->
+    Pbrt.Encoder.nested encode_pb_request_reload_reftree x encoder;
+    Pbrt.Encoder.key 23 Pbrt.Bytes encoder; 
   end
 
 let rec encode_pb_request_envelope (v:request_envelope) encoder = 
@@ -1705,6 +1743,24 @@ let rec decode_pb_request_exit_configuration_mode d =
   | Some (_, pk) -> 
     Pbrt.Decoder.unexpected_payload "Unexpected fields in empty message(request_exit_configuration_mode)" pk
 
+let rec decode_pb_request_reload_reftree d =
+  let v = default_request_reload_reftree_mutable () in
+  let continue__= ref true in
+  while !continue__ do
+    match Pbrt.Decoder.key d with
+    | None -> (
+    ); continue__ := false
+    | Some (1, Pbrt.Varint) -> begin
+      v.on_behalf_of <- Some (Pbrt.Decoder.int32_as_varint d);
+    end
+    | Some (1, pk) -> 
+      Pbrt.Decoder.unexpected_payload "Message(request_reload_reftree), field(1)" pk
+    | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
+  done;
+  ({
+    on_behalf_of = v.on_behalf_of;
+  } : request_reload_reftree)
+
 let rec decode_pb_request d = 
   let rec loop () = 
     let ret:request = match Pbrt.Decoder.key d with
@@ -1740,6 +1796,7 @@ let rec decode_pb_request d =
       end
       | Some (21, _) -> (Validate (decode_pb_request_validate (Pbrt.Decoder.nested d)) : request) 
       | Some (22, _) -> (Teardown (decode_pb_request_teardown (Pbrt.Decoder.nested d)) : request) 
+      | Some (23, _) -> (Reload_reftree (decode_pb_request_reload_reftree (Pbrt.Decoder.nested d)) : request) 
       | Some (n, payload_kind) -> (
         Pbrt.Decoder.skip d payload_kind; 
         loop () 

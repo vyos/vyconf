@@ -6,6 +6,7 @@ type op_t =
     | OpTeardownSession
     | OpShowConfig
     | OpValidate
+    | OpReloadReftree
 
 let config_format_of_string s =
     match s with
@@ -42,6 +43,7 @@ let call_op ?(out_format="plain") ?(config_format="curly") socket token op path 
             | OpTeardownSession -> Vyconf_client.teardown_session client
             | OpShowConfig -> Vyconf_client.show_config client path
             | OpValidate -> Vyconf_client.validate client path
+            | OpReloadReftree -> Vyconf_client.reload_reftree client
             end
         in
         Lwt.return result
@@ -62,3 +64,6 @@ let session_show_config socket token path =
 
 let session_path_exists socket token path =
     call_op socket (Some token) (Some OpExists) path
+
+let reload_reference_tree socket =
+    call_op socket None (Some OpReloadReftree) []

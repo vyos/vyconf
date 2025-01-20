@@ -10,8 +10,8 @@ type cfg_op =
     | CfgDelete of string list * string	option
 
 type world = {
-    running_config: CT.t;
-    reference_tree: RT.t;
+    mutable running_config: CT.t;
+    mutable reference_tree: RT.t;
     vyconf_config: Vyconf_config.t;
     dirs: Directories.t
 }
