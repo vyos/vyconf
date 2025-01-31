@@ -1,5 +1,6 @@
 module VT = Vyos1x.Vytree
 module CT = Vyos1x.Config_tree
+module CD = Vyos1x.Config_diff
 module RT = Vyos1x.Reference_tree
 
 type commit_data = {
@@ -95,3 +96,33 @@ let get_commit_data rt ct (path, cs') t =
         | [] -> CS.add c_data cs'
         | _ -> List.fold_left (add_tag_instance c_data) cs' tag_values
     in (path, cs)
+
+let get_commit_set rt ct =
+    snd (VT.fold_tree_with_path (get_commit_data rt ct) ([], CS.empty) ct)
+
+(* for initial consistency with the legacy ordering of delete and add
+   queues, enforce the following subtlety: if a path in the delete tree is
+   an owner node, or the tag value thereof, insert in the delete queue; if
+   the path is in a subtree, however, insert in the add queue - cf. T5492
+*)
+let legacy_order del_t a b =
+    let shift c_data (c_del, c_add) =
+        let path =
+            match c_data.tag_value with
+            | None -> c_data.path
+            | Some v -> c_data.path @ [v]
+        in
+        match VT.is_terminal_path del_t path with
+        | false -> CS.remove c_data c_del, CS.add c_data c_add
+        | true -> c_del, c_add
+    in
+    CS.fold shift a (a, b)
+
+let calculate_priority_lists rt at wt =
+    let diff = CD.diff_tree [] at wt in
+    let del_tree = CD.get_tagged_delete_tree diff in
+    let add_tree = CT.get_subtree diff ["add"] in
+    let cs_del' = get_commit_set rt del_tree in
+    let cs_add' = get_commit_set rt add_tree in
+    let cs_del, cs_add = legacy_order del_tree cs_del' cs_add' in
+    List.rev (CS.elements cs_del), CS.elements cs_add
