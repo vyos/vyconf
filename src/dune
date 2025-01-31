@@ -9,7 +9,8 @@
 
 (library
  (name vyconfd_config)
- (modules vyconf_config session directories defaults)
+ (public_name vyconf.vyconfd-config)
+ (modules vyconf_config session directories defaults commit)
  (libraries vyos1x-config vyconf_connect toml sha ppx_deriving.show)
  (preprocess (pps ppx_deriving.show ppx_deriving_yojson)))
 
