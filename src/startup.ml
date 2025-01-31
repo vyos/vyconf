@@ -136,5 +136,6 @@ module I = Vyos1x.Internal.Make(Vyos1x.Reference_tree)
 let read_reference_tree file =
     try
         let reftree = I.read_internal file in
+        log_info @@ Printf.sprintf "Reading interface definitions from %s" file;
         Ok reftree
     with Sys_error msg -> Error msg
