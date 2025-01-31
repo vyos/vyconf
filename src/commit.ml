@@ -2,6 +2,7 @@ module VT = Vyos1x.Vytree
 module CT = Vyos1x.Config_tree
 module CD = Vyos1x.Config_diff
 module RT = Vyos1x.Reference_tree
+module FP = FilePath
 
 type commit_data = {
     script: string option;
@@ -126,3 +127,22 @@ let calculate_priority_lists rt at wt =
     let cs_add' = get_commit_set rt add_tree in
     let cs_del, cs_add = legacy_order del_tree cs_del' cs_add' in
     List.rev (CS.elements cs_del), CS.elements cs_add
+
+let show_commit_data at wt =
+    let vc =
+        Startup.load_daemon_config Defaults.defaults.config_file in
+    let rt_opt =
+        Startup.read_reference_tree (FP.concat vc.reftree_dir vc.reference_tree)
+    in
+    match rt_opt with
+    | Error msg -> msg
+    | Ok rt ->
+        let del_list, add_list =
+            calculate_priority_lists rt at wt
+        in
+        let sprint_commit_data acc s =
+            acc ^ "\n" ^ (commit_data_to_yojson s |> Yojson.Safe.to_string)
+        in
+        let del_out = List.fold_left sprint_commit_data "" del_list in
+        let add_out = List.fold_left sprint_commit_data "" add_list in
+        del_out ^ "\n" ^ add_out

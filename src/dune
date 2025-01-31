@@ -10,9 +10,9 @@
 (library
  (name vyconfd_config)
  (public_name vyconf.vyconfd-config)
- (modules vyconf_config session directories defaults commit)
+ (modules vyconf_config startup session directories defaults commit)
  (libraries vyos1x-config vyconf_connect toml sha ppx_deriving.show)
- (preprocess (pps ppx_deriving.show ppx_deriving_yojson)))
+ (preprocess (pps lwt_ppx ppx_deriving.show ppx_deriving_yojson)))
 
 (library
  (name client)
@@ -25,7 +25,7 @@
 (executable
  (name vyconfd)
  (public_name vyconfd)
- (modules vyconfd startup version)
+ (modules vyconfd version)
  (libraries vyos1x-config vyconfd_config vyconf_connect)
  (preprocess (pps lwt_ppx)))
 
@@ -41,6 +41,13 @@
  (public_name validate)
  (modules validate)
  (libraries client))
+
+(executable
+ (name test_commit_data)
+ (public_name test-commit-data)
+ (modules test_commit_data)
+ (libraries vyos1x-config vyconfd_config)
+ (preprocess (pps lwt_ppx)))
 
 (rule
  (alias protoc)
