@@ -9,6 +9,7 @@ module CT = Vyos1x.Config_tree
 module Gen = Vyos1x.Generate
 module Session = Vyconfd_config.Session
 module Directories = Vyconfd_config.Directories
+module Startup = Vyconfd_config.Startup
 
 (* On UNIX, self_init uses /dev/random for seed *)
 let () = Random.self_init ()

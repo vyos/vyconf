@@ -17,7 +17,7 @@ depends: [
   "menhir" {build}
   "dune" {build & >= "1.4.0"}
   "ocaml-protoc" {build}
-  "ounit" {build}
+  "ounit2" {build}
   "lwt" {build & >= "4.1.0"}
   "lwt_ppx" {build}
   "lwt_log" {build}
@@ -29,4 +29,5 @@ depends: [
   "toml" {build}
   "sha" {build}
   "pcre" {build}
+  "toml" {build}
 ]
