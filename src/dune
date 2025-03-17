@@ -50,7 +50,6 @@
  (preprocess (pps lwt_ppx)))
 
 (rule
- (alias protoc)
  (mode promote)
  (targets vyconf_pbt.ml vyconf_pbt.mli)
  (action
@@ -60,6 +59,17 @@
     (run ocaml-protoc --ml_out src data/vyconf.proto)
     (run mv src/vyconf.ml src/vyconf_pbt.ml)
     (run mv src/vyconf.mli src/vyconf_pbt.mli)))))
+
+(rule
+ (mode promote)
+ (targets vycall_pbt.ml vycall_pbt.mli)
+ (action
+  (chdir
+   %{project_root}
+   (progn
+    (run ocaml-protoc --ml_out src data/vycall.proto)
+    (run mv src/vycall.ml src/vycall_pbt.ml)
+    (run mv src/vycall.mli src/vycall_pbt.mli)))))
 
 (library
  (name vyos1x_adapter)

@@ -1,0 +1,27 @@
+message Status {
+    required bool success = 1;
+    required string out = 2;
+}
+
+message Call {
+    required string script_name = 1;
+    optional string tag_value = 2;
+    optional string arg_value = 3;
+    optional Status reply = 4;
+}
+
+message Commit {
+    required string session_id = 1;
+    // optional explicit load;
+    // otherwise, session configs are loaded from cached internal
+    // representation, specified by session id value
+    optional string named_active = 2;
+    optional string named_proposed = 3;
+    //
+    required bool dry_run = 4;
+    required bool atomic = 5;
+    required bool background = 6;
+
+    optional Status init = 7;
+    repeated Call calls = 8;
+}
