@@ -4,21 +4,50 @@ module CD = Vyos1x.Config_diff
 module RT = Vyos1x.Reference_tree
 module FP = FilePath
 
-type commit_data = {
-    script: string option;
+type status = {
+  success : bool;
+  out : string;
+} [@@deriving yojson]
+
+type node_data = {
+    script_name: string option;
     priority: int;
     tag_value: string option;
     arg_value: string option;
     path: string list;
+    reply: status option;
 } [@@deriving yojson]
 
 
-let default_commit_data = {
-    script = None;
+let default_node_data = {
+    script_name = Some "";
     priority = 0;
     tag_value = None;
     arg_value = None;
     path = [];
+    reply = Some { success = false; out = ""; };
+}
+
+type commit_data = {
+    session_id: string;
+    named_active : string option;
+    named_proposed : string option;
+    dry_run: bool;
+    atomic: bool;
+    background: bool;
+    init: status option;
+    node_list: node_data list;
+} [@@deriving yojson]
+
+let default_commit_data = {
+    session_id = "";
+    named_active = None;
+    named_proposed = None;
+    dry_run = false;
+    atomic = false;
+    background = false;
+    init = Some { success = false; out = ""; };
+    node_list = [];
 }
 
 let lex_order c1 c2 =
@@ -33,7 +62,7 @@ let lex_order c1 c2 =
     | _ as a -> a
 
 module CI = struct
-    type t = commit_data
+    type t = node_data
     let compare a b =
         match compare a.priority b.priority with
         | 0 -> lex_order a b
@@ -58,7 +87,7 @@ let owner_args_from_data p s =
 let add_tag_instance cd cs tv =
     CS.add { cd with tag_value = Some tv; } cs
 
-let get_commit_data rt ct (path, cs') t =
+let get_node_data rt ct (path, cs') t =
     if Vyos1x.Util.is_empty path then
         (path, cs')
     else
@@ -81,8 +110,8 @@ let get_commit_data rt ct (path, cs') t =
     if  owner = None then (path, cs')
     else
     let (own, arg) = owner_args_from_data rpath owner in
-    let c_data = { default_commit_data with
-                   script = own;
+    let c_data = { default_node_data with
+                   script_name = own;
                    priority = priority;
                    arg_value = arg;
                    path = rpath; }
@@ -99,7 +128,7 @@ let get_commit_data rt ct (path, cs') t =
     in (path, cs)
 
 let get_commit_set rt ct =
-    snd (VT.fold_tree_with_path (get_commit_data rt ct) ([], CS.empty) ct)
+    snd (VT.fold_tree_with_path (get_node_data rt ct) ([], CS.empty) ct)
 
 (* for initial consistency with the legacy ordering of delete and add
    queues, enforce the following subtlety: if a path in the delete tree is
@@ -140,9 +169,9 @@ let show_commit_data at wt =
         let del_list, add_list =
             calculate_priority_lists rt at wt
         in
-        let sprint_commit_data acc s =
-            acc ^ "\n" ^ (commit_data_to_yojson s |> Yojson.Safe.to_string)
+        let sprint_node_data acc s =
+            acc ^ "\n" ^ (node_data_to_yojson s |> Yojson.Safe.to_string)
         in
-        let del_out = List.fold_left sprint_commit_data "" del_list in
-        let add_out = List.fold_left sprint_commit_data "" add_list in
+        let del_out = List.fold_left sprint_node_data "" del_list in
+        let add_out = List.fold_left sprint_node_data "" add_list in
         del_out ^ "\n" ^ add_out
