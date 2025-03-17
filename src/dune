@@ -22,6 +22,19 @@
             yojson ppx_deriving.show ppx_deriving_yojson)
  (preprocess (pps lwt_ppx ppx_deriving.show ppx_deriving_yojson)))
 
+(library
+ (name vycall_message)
+ (public_name vyconf.vycall-message)
+ (modules vycall_pbt)
+ (libraries ocaml-protoc))
+
+(library
+ (name commitd_client)
+ (public_name vyconf.vycall-client)
+ (modules vycall_client)
+ (libraries vyos1x-config vyconfd_config vycall_message lwt lwt.unix lwt_log lwt_ppx ocplib-endian)
+ (preprocess (pps lwt_ppx)))
+
 (executable
  (name vyconfd)
  (public_name vyconfd)
