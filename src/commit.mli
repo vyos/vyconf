@@ -1,3 +1,5 @@
+type tree_source = DELETE | ADD
+
 type status = {
   success : bool;
   out : string;
@@ -9,8 +11,9 @@ type node_data = {
     tag_value: string option;
     arg_value: string option;
     path: string list;
+    source: tree_source;
     reply: status option;
-} [@@deriving yojson]
+} [@@deriving to_yojson]
 
 type commit_data = {
     session_id: string;
@@ -21,7 +24,7 @@ type commit_data = {
     background: bool;
     init: status option;
     node_list: node_data list;
-} [@@deriving yojson]
+} [@@deriving to_yojson]
 
 val default_node_data : node_data
 
