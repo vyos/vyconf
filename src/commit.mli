@@ -27,4 +27,8 @@ val default_node_data : node_data
 
 val default_commit_data : commit_data
 
+val calculate_priority_lists : Vyos1x.Reference_tree.t -> Vyos1x.Config_tree.t -> Vyos1x.Config_tree.t -> node_data list * node_data list
+
+val commit_store : commit_data -> unit
+
 val show_commit_data : Vyos1x.Config_tree.t -> Vyos1x.Config_tree.t -> string
