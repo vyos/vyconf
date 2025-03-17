@@ -10,7 +10,7 @@ type status = {
 } [@@deriving yojson]
 
 type node_data = {
-    script_name: string option;
+    script_name: string;
     priority: int;
     tag_value: string option;
     arg_value: string option;
@@ -20,7 +20,7 @@ type node_data = {
 
 
 let default_node_data = {
-    script_name = Some "";
+    script_name = "";
     priority = 0;
     tag_value = None;
     arg_value = None;
@@ -70,19 +70,16 @@ module CI = struct
 end
 module CS = Set.Make(CI)
 
-let owner_args_from_data p s =
-    match s with
-    | None -> None, None
-    | Some o ->
+let owner_args_from_data p o =
     let oa = Pcre.split o in
     let owner = FilePath.basename (List.nth oa 0) in
-    if List.length oa < 2 then Some owner, None
+    if List.length oa < 2 then owner, None
     else
     let var = List.nth oa 1 in
     let res = Pcre.extract_all ~pat:"\\.\\./" var in
     let var_pos = Array.length res in
     let arg_value = Vyos1x.Util.get_last_n p var_pos
-    in Some owner, arg_value
+    in owner, arg_value
 
 let add_tag_instance cd cs tv =
     CS.add { cd with tag_value = Some tv; } cs
@@ -107,9 +104,10 @@ let get_node_data rt ct (path, cs') t =
         | Some s -> int_of_string s
     in
     let owner = RT.get_owner rt rt_path in
-    if  owner = None then (path, cs')
-    else
-    let (own, arg) = owner_args_from_data rpath owner in
+    match owner with
+    | None -> (path, cs')
+    | Some owner_str ->
+    let (own, arg) = owner_args_from_data rpath owner_str in
     let c_data = { default_node_data with
                    script_name = own;
                    priority = priority;

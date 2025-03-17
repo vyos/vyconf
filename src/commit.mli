@@ -4,7 +4,7 @@ type status = {
 }
 
 type node_data = {
-    script_name: string option;
+    script_name: string;
     priority: int;
     tag_value: string option;
     arg_value: string option;
