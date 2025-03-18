@@ -22,6 +22,19 @@
             yojson ppx_deriving.show ppx_deriving_yojson)
  (preprocess (pps lwt_ppx ppx_deriving.show ppx_deriving_yojson)))
 
+(library
+ (name vycall_message)
+ (public_name vyconf.vycall-message)
+ (modules vycall_pbt)
+ (libraries ocaml-protoc))
+
+(library
+ (name commitd_client)
+ (public_name vyconf.vycall-client)
+ (modules vycall_client)
+ (libraries vyos1x-config vyconfd_config vycall_message lwt lwt.unix lwt_log lwt_ppx ocplib-endian)
+ (preprocess (pps lwt_ppx)))
+
 (executable
  (name vyconfd)
  (public_name vyconfd)
@@ -50,7 +63,6 @@
  (preprocess (pps lwt_ppx)))
 
 (rule
- (alias protoc)
  (mode promote)
  (targets vyconf_pbt.ml vyconf_pbt.mli)
  (action
@@ -60,6 +72,17 @@
     (run ocaml-protoc --ml_out src data/vyconf.proto)
     (run mv src/vyconf.ml src/vyconf_pbt.ml)
     (run mv src/vyconf.mli src/vyconf_pbt.mli)))))
+
+(rule
+ (mode promote)
+ (targets vycall_pbt.ml vycall_pbt.mli)
+ (action
+  (chdir
+   %{project_root}
+   (progn
+    (run ocaml-protoc --ml_out src data/vycall.proto)
+    (run mv src/vycall.ml src/vycall_pbt.ml)
+    (run mv src/vycall.mli src/vycall_pbt.mli)))))
 
 (library
  (name vyos1x_adapter)

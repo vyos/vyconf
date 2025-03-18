@@ -6,9 +6,12 @@ type t = {
     program_dir: string;
     config_dir: string;
     reftree_dir: string;
+    session_dir: string;
     primary_config: string;
     fallback_config: string;
     reference_tree: string;
+    running_cache: string;
+    session_cache: string;
     socket: string;
     pid_file: string;
     log_file: string option;
@@ -24,9 +27,12 @@ let empty_config = {
     program_dir = "";
     config_dir = "";
     reftree_dir = "";
+    session_dir = "";
     primary_config = "";
     fallback_config = "";
     reference_tree = "";
+    running_cache = "";
+    session_cache = "";
     socket = "";
     pid_file = "";
     log_file = None;
@@ -63,10 +69,13 @@ let load filename =
             let conf = {conf with data_dir = mandatory_field conf_toml "appliance" "data_dir"} in
             let conf = {conf with config_dir = mandatory_field conf_toml "appliance" "config_dir"} in
             let conf = {conf with reftree_dir = mandatory_field conf_toml "appliance" "reftree_dir"} in
+            let conf = {conf with session_dir = mandatory_field conf_toml "appliance" "session_dir"} in
             let conf = {conf with program_dir = mandatory_field conf_toml "appliance" "program_dir"} in
             let conf = {conf with primary_config = mandatory_field conf_toml "appliance" "primary_config"} in
             let conf = {conf with fallback_config = mandatory_field conf_toml "appliance" "fallback_config"} in
             let conf = {conf with reference_tree = mandatory_field conf_toml "appliance" "reference_tree"} in
+            let conf = {conf with running_cache = mandatory_field conf_toml "appliance" "running_cache"} in
+            let conf = {conf with session_cache = mandatory_field conf_toml "appliance" "session_cache"} in
             (* Optional fields *)
             let conf = {conf with pid_file = optional_field defaults.pid_file conf_toml "vyconf" "pid_file"} in
             let conf = {conf with socket = optional_field defaults.socket conf_toml "vyconf" "socket"} in
