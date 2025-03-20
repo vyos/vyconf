@@ -44,7 +44,7 @@ let delete_path_reversed handle path _len =
     let path = List.rev path in
     cstore_delete_path handle path
 
-module VC = Client.Vyconf_client_session
+module VC = Vyconfd_client.Vyconf_client_session
 
 let get_sockname =
     "/var/run/vyconfd.sock"

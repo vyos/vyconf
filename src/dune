@@ -4,23 +4,22 @@
  (name vyconf_connect)
  (public_name vyconf.vyconf-connect)
  (modules vyconf_pbt message)
- (libraries lwt lwt.unix lwt_log lwt_ppx ocaml-protoc fileutils ppx_deriving_yojson)
- (preprocess (pps lwt_ppx ppx_deriving_yojson)))
+ (libraries lwt lwt.unix lwt_log lwt_ppx ocaml-protoc ocplib-endian)
+ (preprocess (pps lwt_ppx)))
 
 (library
  (name vyconfd_config)
  (public_name vyconf.vyconfd-config)
  (modules vyconf_config startup session directories defaults commit)
- (libraries vyos1x-config vyconf_connect toml sha ppx_deriving.show)
+ (libraries vyos1x-config vyconf_connect toml sha ppx_deriving.show yojson ppx_deriving_yojson)
  (preprocess (pps lwt_ppx ppx_deriving.show ppx_deriving_yojson)))
 
 (library
- (name client)
+ (name vyconfd_client)
  (public_name vyconf.vyconf-client)
  (modules vyconf_client vyconf_client_session)
- (libraries vyos1x-config vyconf_connect lwt lwt.unix lwt_log lwt_ppx ocaml-protoc toml sha
-            yojson ppx_deriving.show ppx_deriving_yojson)
- (preprocess (pps lwt_ppx ppx_deriving.show ppx_deriving_yojson)))
+ (libraries vyos1x-config vyconf_connect lwt lwt.unix lwt_log lwt_ppx)
+ (preprocess (pps lwt_ppx)))
 
 (library
  (name vycall_message)
@@ -46,14 +45,14 @@
  (name vycli)
  (public_name vycli)
  (modules vycli)
- (libraries client)
+ (libraries vyconfd_client)
  (preprocess (pps lwt_ppx)))
 
 (executable
  (name validate)
  (public_name validate)
  (modules validate)
- (libraries client))
+ (libraries vyconfd_client))
 
 (executable
  (name test_commit_data)
