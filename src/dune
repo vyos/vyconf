@@ -8,20 +8,6 @@
  (preprocess (pps lwt_ppx)))
 
 (library
- (name vyconfd_config)
- (public_name vyconf.vyconfd-config)
- (modules vyconf_config startup session directories defaults commit)
- (libraries vyos1x-config vyconf_connect toml sha ppx_deriving.show yojson ppx_deriving_yojson)
- (preprocess (pps lwt_ppx ppx_deriving.show ppx_deriving_yojson)))
-
-(library
- (name vyconfd_client)
- (public_name vyconf.vyconf-client)
- (modules vyconf_client vyconf_client_session)
- (libraries vyos1x-config vyconf_connect lwt lwt.unix lwt_log lwt_ppx)
- (preprocess (pps lwt_ppx)))
-
-(library
  (name vycall_message)
  (public_name vyconf.vycall-message)
  (modules vycall_pbt)
@@ -30,8 +16,22 @@
 (library
  (name commitd_client)
  (public_name vyconf.vycall-client)
- (modules vycall_client)
- (libraries vyos1x-config vyconfd_config vycall_message lwt lwt.unix lwt_log lwt_ppx ocplib-endian)
+ (modules vycall_client commit)
+ (libraries vyos1x-config vycall_message lwt lwt.unix lwt_log lwt_ppx ocplib-endian)
+ (preprocess (pps lwt_ppx)))
+
+(library
+ (name vyconfd_config)
+ (public_name vyconf.vyconfd-config)
+ (modules vyconf_config startup session directories defaults)
+ (libraries vyos1x-config vyconf_connect commitd_client toml sha ppx_deriving.show yojson ppx_deriving_yojson)
+ (preprocess (pps lwt_ppx ppx_deriving.show ppx_deriving_yojson)))
+
+(library
+ (name vyconfd_client)
+ (public_name vyconf.vyconf-client)
+ (modules vyconf_client vyconf_client_session)
+ (libraries vyos1x-config vyconf_connect lwt lwt.unix lwt_log lwt_ppx)
  (preprocess (pps lwt_ppx)))
 
 (executable
@@ -53,13 +53,6 @@
  (public_name validate)
  (modules validate)
  (libraries vyconfd_client))
-
-(executable
- (name test_commit_data)
- (public_name test-commit-data)
- (modules test_commit_data)
- (libraries vyos1x-config vyconfd_config)
- (preprocess (pps lwt_ppx)))
 
 (rule
  (mode promote)

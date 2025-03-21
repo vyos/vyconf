@@ -1,12 +1,10 @@
 (* send commit data to Python commit daemon *)
 
 open Vycall_message.Vycall_pbt
-open Vyconfd_config.Commit
+open Commit
 
 module CT = Vyos1x.Config_tree
 module IC = Vyos1x.Internal.Make(CT)
-module ST = Vyconfd_config.Startup
-module DF = Vyconfd_config.Defaults
 module FP = FilePath
 
 type t = {
@@ -100,25 +98,3 @@ let do_commit session_data =
         let%lwt () = Lwt_io.close client.oc in
         update (commit_proto_to_commit_data resp session_data)
     in Lwt_main.run @@ run ()
-
-(* test function *)
-let test_commit at wt =
-    let vc =
-        ST.load_daemon_config DF.defaults.config_file in
-    let () =
-        IC.write_internal at (FP.concat vc.session_dir vc.running_cache) in
-    let () =
-        IC.write_internal wt (FP.concat vc.session_dir vc.session_cache) in
-    let rt_opt =
-        ST.read_reference_tree (FP.concat vc.reftree_dir vc.reference_tree)
-    in
-    match rt_opt with
-    | Error msg -> print_endline msg
-    | Ok rt ->
-        let del_list, add_list =
-            calculate_priority_lists rt at wt
-        in
-        let commit_session =
-            { default_commit_data with node_list = del_list @ add_list }
-        in
-        do_commit commit_session
