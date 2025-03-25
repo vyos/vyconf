@@ -78,12 +78,20 @@ let create_server accept_connection sock =
         Lwt_unix.accept sock >>= accept_connection >>= serve
     in serve
 
+(* strip commponent version string *)
+let strip_version s =
+    let rex = Pcre.regexp ~flags:[`MULTILINE;`DOTALL] "(^//.*)" in
+    let res = Pcre.split ~max:0 ~rex s in
+    match res with
+    | h :: _ -> h
+    | [] -> panic "Failure applying regex to config string"
+
 (** Load the appliance configuration file *)
 let load_config file =
     try
         let chan = open_in file in
         let s = really_input_string chan (in_channel_length chan) in
-        let config = Vyos1x.Parser.from_string s in
+        let config = strip_version s |> Vyos1x.Parser.from_string in
         Ok config
     with
         | Sys_error msg -> Error msg
