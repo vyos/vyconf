@@ -33,7 +33,6 @@ type request_validate = {
 
 type request_set = {
   path : string list;
-  ephemeral : bool option;
 }
 
 type request_delete = {
@@ -206,7 +205,6 @@ val default_request_validate :
 
 val default_request_set : 
   ?path:string list ->
-  ?ephemeral:bool option ->
   unit ->
   request_set
 (** [default_request_set ()] is the default value for type [request_set] *)

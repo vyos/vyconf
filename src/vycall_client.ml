@@ -31,8 +31,6 @@ let call_to_node_data ((c: call), (nd: node_data)) =
 
 let commit_data_to_commit_proto cd =
     { session_id = cd.session_id;
-      named_active = cd.named_active;
-      named_proposed = cd.named_proposed;
       dry_run = cd.dry_run;
       atomic = cd.atomic;
       background = cd.background;
@@ -86,15 +84,12 @@ let create sockfile =
     let oc = Lwt_io.of_fd ~mode:Lwt_io.Output sock in
     Lwt.return { ic=ic; oc=oc; }
 
-let update session_data =
-    Lwt.return (commit_store session_data)
-
-let do_commit session_data =
-    let session = commit_data_to_commit_proto session_data in
+let do_commit commit_data =
+    let session = commit_data_to_commit_proto commit_data in
     let run () =
         let sockfile = "/run/vyos-commitd.sock" in
         let%lwt client = create sockfile in
         let%lwt resp = do_call client session in
         let%lwt () = Lwt_io.close client.oc in
-        update (commit_proto_to_commit_data resp session_data)
+        Lwt.return (commit_proto_to_commit_data resp commit_data)
     in Lwt_main.run @@ run ()

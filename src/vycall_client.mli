@@ -1,1 +1,1 @@
-val do_commit : Commit.commit_data -> unit
+val do_commit : Commit.commit_data -> Commit.commit_data

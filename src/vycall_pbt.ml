@@ -14,8 +14,6 @@ type call = {
 
 type commit = {
   session_id : string;
-  named_active : string option;
-  named_proposed : string option;
   dry_run : bool;
   atomic : bool;
   background : bool;
@@ -45,8 +43,6 @@ let rec default_call
 
 let rec default_commit 
   ?session_id:((session_id:string) = "")
-  ?named_active:((named_active:string option) = None)
-  ?named_proposed:((named_proposed:string option) = None)
   ?dry_run:((dry_run:bool) = false)
   ?atomic:((atomic:bool) = false)
   ?background:((background:bool) = false)
@@ -54,8 +50,6 @@ let rec default_commit
   ?calls:((calls:call list) = [])
   () : commit  = {
   session_id;
-  named_active;
-  named_proposed;
   dry_run;
   atomic;
   background;
@@ -89,8 +83,6 @@ let default_call_mutable () : call_mutable = {
 
 type commit_mutable = {
   mutable session_id : string;
-  mutable named_active : string option;
-  mutable named_proposed : string option;
   mutable dry_run : bool;
   mutable atomic : bool;
   mutable background : bool;
@@ -100,8 +92,6 @@ type commit_mutable = {
 
 let default_commit_mutable () : commit_mutable = {
   session_id = "";
-  named_active = None;
-  named_proposed = None;
   dry_run = false;
   atomic = false;
   background = false;
@@ -132,8 +122,6 @@ let rec pp_call fmt (v:call) =
 let rec pp_commit fmt (v:commit) = 
   let pp_i fmt () =
     Pbrt.Pp.pp_record_field ~first:true "session_id" Pbrt.Pp.pp_string fmt v.session_id;
-    Pbrt.Pp.pp_record_field ~first:false "named_active" (Pbrt.Pp.pp_option Pbrt.Pp.pp_string) fmt v.named_active;
-    Pbrt.Pp.pp_record_field ~first:false "named_proposed" (Pbrt.Pp.pp_option Pbrt.Pp.pp_string) fmt v.named_proposed;
     Pbrt.Pp.pp_record_field ~first:false "dry_run" Pbrt.Pp.pp_bool fmt v.dry_run;
     Pbrt.Pp.pp_record_field ~first:false "atomic" Pbrt.Pp.pp_bool fmt v.atomic;
     Pbrt.Pp.pp_record_field ~first:false "background" Pbrt.Pp.pp_bool fmt v.background;
@@ -179,18 +167,6 @@ let rec encode_pb_call (v:call) encoder =
 let rec encode_pb_commit (v:commit) encoder = 
   Pbrt.Encoder.string v.session_id encoder;
   Pbrt.Encoder.key 1 Pbrt.Bytes encoder; 
-  begin match v.named_active with
-  | Some x -> 
-    Pbrt.Encoder.string x encoder;
-    Pbrt.Encoder.key 2 Pbrt.Bytes encoder; 
-  | None -> ();
-  end;
-  begin match v.named_proposed with
-  | Some x -> 
-    Pbrt.Encoder.string x encoder;
-    Pbrt.Encoder.key 3 Pbrt.Bytes encoder; 
-  | None -> ();
-  end;
   Pbrt.Encoder.bool v.dry_run encoder;
   Pbrt.Encoder.key 4 Pbrt.Varint encoder; 
   Pbrt.Encoder.bool v.atomic encoder;
@@ -296,16 +272,6 @@ let rec decode_pb_commit d =
     end
     | Some (1, pk) -> 
       Pbrt.Decoder.unexpected_payload "Message(commit), field(1)" pk
-    | Some (2, Pbrt.Bytes) -> begin
-      v.named_active <- Some (Pbrt.Decoder.string d);
-    end
-    | Some (2, pk) -> 
-      Pbrt.Decoder.unexpected_payload "Message(commit), field(2)" pk
-    | Some (3, Pbrt.Bytes) -> begin
-      v.named_proposed <- Some (Pbrt.Decoder.string d);
-    end
-    | Some (3, pk) -> 
-      Pbrt.Decoder.unexpected_payload "Message(commit), field(3)" pk
     | Some (4, Pbrt.Varint) -> begin
       v.dry_run <- Pbrt.Decoder.bool d; dry_run_is_set := true;
     end
@@ -339,8 +305,6 @@ let rec decode_pb_commit d =
   begin if not !session_id_is_set then Pbrt.Decoder.missing_field "session_id" end;
   ({
     session_id = v.session_id;
-    named_active = v.named_active;
-    named_proposed = v.named_proposed;
     dry_run = v.dry_run;
     atomic = v.atomic;
     background = v.background;
