@@ -118,6 +118,30 @@ let validate client path =
     | Fail -> Error (Option.value resp.error ~default:"") |> Lwt.return
     | _ -> Error (Option.value resp.error ~default:"") |> Lwt.return
 
+let set client path =
+    let req = Set {path=path;} in
+    let%lwt resp = do_request client req in
+    match resp.status with
+    | Success -> Lwt.return (Ok "")
+    | Fail -> Error (Option.value resp.error ~default:"") |> Lwt.return
+    | _ -> Error (Option.value resp.error ~default:"") |> Lwt.return
+
+let delete client path =
+    let req = Delete {path=path;} in
+    let%lwt resp = do_request client req in
+    match resp.status with
+    | Success -> Lwt.return (Ok "")
+    | Fail -> Error (Option.value resp.error ~default:"") |> Lwt.return
+    | _ -> Error (Option.value resp.error ~default:"") |> Lwt.return
+
+let commit client =
+    let req = Commit {confirm=None; confirm_timeout=None; comment=None;} in
+    let%lwt resp = do_request client req in
+    match resp.status with
+    | Success -> Ok (Option.value resp.output ~default:"") |> Lwt.return
+    | Fail -> Error (Option.value resp.error ~default:"") |> Lwt.return
+    | _ -> Error (Option.value resp.error ~default:"") |> Lwt.return
+
 let reload_reftree ?(on_behalf_of=None) client =
     let id = on_behalf_of |> (function None -> None | Some x -> (Some (Int32.of_int x))) in
     let req = Reload_reftree {on_behalf_of=id} in

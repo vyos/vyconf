@@ -144,6 +144,31 @@ let validate world token (req: request_validate) =
         response_tmpl
     with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
 
+let set world token (req: request_set) =
+    try
+        let () = (Lwt_log.debug @@ Printf.sprintf "[%s]\n" (Vyos1x.Util.string_of_list req.path)) |> Lwt.ignore_result in
+        let session = Session.set world (find_session token) req.path in
+        Hashtbl.replace sessions token session;
+        response_tmpl
+    with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
+
+let delete world token (req: request_delete) =
+    try
+        let () = (Lwt_log.debug @@ Printf.sprintf "[%s]\n" (Vyos1x.Util.string_of_list req.path)) |> Lwt.ignore_result in
+        let session = Session.delete world (find_session token) req.path in
+        Hashtbl.replace sessions token session;
+        response_tmpl
+    with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
+
+let commit world token (_req: request_commit) =
+    try
+        let success, msg_str = Session.commit world (find_session token) token in
+        match success with
+        | true -> {response_tmpl with status=Success; output=(Some msg_str)}
+        | false -> {response_tmpl with status=Fail; output=(Some msg_str)}
+    with Session.Session_error msg ->
+        {response_tmpl with status=Internal_error; error=(Some msg)}
+
 let reload_reftree world (_req: request_reload_reftree) =
     let config = world.Session.vyconf_config in
     let reftree =
@@ -190,6 +215,9 @@ let rec handle_connection world ic oc () =
                     | Some t, List_children r -> list_children world t r
                     | Some t, Show_config r -> show_config world t r
                     | Some t, Validate r -> validate world t r
+                    | Some t, Set r -> set world t r
+                    | Some t, Delete r -> delete world t r
+                    | Some t, Commit r -> commit world t r
                     | _ -> failwith "Unimplemented"
                 end) |> Lwt.return
         in

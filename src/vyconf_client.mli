@@ -43,4 +43,11 @@ val show_config : t -> string list -> (string, string) result Lwt.t
 
 val validate : t -> string list -> (string, string) result Lwt.t
 
+val set : t -> string list -> (string, string) result Lwt.t
+
+val delete : t -> string list -> (string, string) result Lwt.t
+
+val commit : t -> (string, string) result Lwt.t
+
+
 val reload_reftree : ?on_behalf_of:(int option) -> t -> (string, string) result Lwt.t
