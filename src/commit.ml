@@ -61,6 +61,9 @@ let default_commit_data = {
     result = { success = true; out = ""; };
 }
 
+let fail_status msg =
+    { success=false; out=msg }
+
 let lex_order c1 c2 =
     let c = Vyos1x.Util.lex_order c1.path c2.path in
     match c with
@@ -222,11 +225,17 @@ let config_result_update c_data n_data =
 
 let commit_update c_data =
     match c_data.init with
-    | None -> raise (Commit_error "commitd failure: no init status provided")
+    | None ->
+        { default_commit_data with
+          init=Some (fail_status  "commitd failure: no init status provided")
+        }
     | Some _ ->
         let func acc_data nd =
             match nd.reply with
-            | None -> raise (Commit_error "commitd failure: no reply status provided")
+            | None ->
+                { default_commit_data with
+                  init=Some (fail_status"commitd failure: no reply status provided")
+                }
             | Some _ -> config_result_update acc_data nd
     in List.fold_left func c_data c_data.node_list
 

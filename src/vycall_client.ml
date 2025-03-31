@@ -86,10 +86,8 @@ let create sockfile =
 
 let do_commit commit_data =
     let session = commit_data_to_commit_proto commit_data in
-    let run () =
-        let sockfile = "/run/vyos-commitd.sock" in
-        let%lwt client = create sockfile in
-        let%lwt resp = do_call client session in
-        let%lwt () = Lwt_io.close client.oc in
-        Lwt.return (commit_proto_to_commit_data resp commit_data)
-    in Lwt_main.run @@ run ()
+    let sockfile = "/run/vyos-commitd.sock" in
+    let%lwt client = create sockfile in
+    let%lwt resp = do_call client session in
+    let%lwt () = Lwt_io.close client.oc in
+    Lwt.return(commit_proto_to_commit_data resp commit_data)

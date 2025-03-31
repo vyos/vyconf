@@ -1,8 +1,6 @@
 module CT = Vyos1x.Config_tree
 module VT = Vyos1x.Vytree
 module RT = Vyos1x.Reference_tree
-module CC = Commitd_client.Commit
-module VC = Commitd_client.Vycall_client
 module D = Directories
 
 exception Session_error of string
@@ -89,21 +87,6 @@ let delete w s path =
     let op = CfgDelete (path, value) in
     let config = apply_cfg_op op s.proposed_config in
     {s with proposed_config=config; changeset=(op :: s.changeset)}
-
-let commit w s t =
-    let at = w.running_config in
-    let wt = s.proposed_config in
-    let rt = w.reference_tree in
-    let commit_data = CC.make_commit_data rt at wt t in
-    let received_commit_data = VC.do_commit commit_data in
-    let result_commit_data =
-        try
-            CC.commit_update received_commit_data
-        with CC.Commit_error e ->
-            raise (Session_error (Printf.sprintf "Commit internal error: %s" e))
-    in
-    w.running_config <- result_commit_data.config_result;
-    result_commit_data.result.success, result_commit_data.result.out
 
 let get_value w s path =
     if not (VT.exists s.proposed_config path) then
