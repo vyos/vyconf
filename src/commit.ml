@@ -2,7 +2,8 @@ module VT = Vyos1x.Vytree
 module CT = Vyos1x.Config_tree
 module CD = Vyos1x.Config_diff
 module RT = Vyos1x.Reference_tree
-module FP = FilePath
+
+exception Commit_error of string
 
 type tree_source = DELETE | ADD
 
@@ -33,30 +34,35 @@ let default_node_data = {
     arg_value = None;
     path = [];
     source = ADD;
-    reply = Some { success = false; out = ""; };
+    reply = None;
 }
 
 type commit_data = {
     session_id: string;
-    named_active : string option;
-    named_proposed : string option;
     dry_run: bool;
     atomic: bool;
     background: bool;
     init: status option;
     node_list: node_data list;
+    config_diff: CT.t;
+    config_result: CT.t;
+    result : status;
 } [@@deriving to_yojson]
 
 let default_commit_data = {
     session_id = "";
-    named_active = None;
-    named_proposed = None;
     dry_run = false;
     atomic = false;
     background = false;
-    init = Some { success = false; out = ""; };
+    init = None;
     node_list = [];
+    config_diff = CT.default;
+    config_result = CT.default;
+    result = { success = true; out = ""; };
 }
+
+let fail_status msg =
+    { success=false; out=msg }
 
 let lex_order c1 c2 =
     let c = Vyos1x.Util.lex_order c1.path c2.path in
@@ -155,8 +161,7 @@ let legacy_order del_t a b =
     in
     CS.fold shift a (a, b)
 
-let calculate_priority_lists rt at wt =
-    let diff = CD.diff_tree [] at wt in
+let calculate_priority_lists rt diff =
     let del_tree = CD.get_tagged_delete_tree diff in
     let add_tree = CT.get_subtree diff ["add"] in
     let cs_del' = get_commit_set rt del_tree DELETE in
@@ -176,21 +181,69 @@ let commit_store c_data =
         in List.fold_left func "" c_data.node_list
     in print_endline out
 
-let show_commit_data at wt =
-    let vc =
-        Startup.load_daemon_config Defaults.defaults.config_file in
-    let rt_opt =
-        Startup.read_reference_tree (FP.concat vc.reftree_dir vc.reference_tree)
-    in
-    match rt_opt with
-    | Error msg -> msg
-    | Ok rt ->
-        let del_list, add_list =
-            calculate_priority_lists rt at wt
+(* The base config_result is the intersection of running and proposed
+   configs:
+       on success, added paths are added; deleted paths are ignored
+       on failure, deleted paths are added back in, added paths ignored
+ *)
+let config_result_update c_data n_data =
+    match n_data.reply with
+    | None -> c_data (* already exluded in calling function *)
+    | Some r ->
+    match r.success, n_data.source with
+    | true, ADD ->
+        let add = CT.get_subtree c_data.config_diff ["add"] in
+        let add_tree = CD.clone add (CT.default) n_data.path in
+        let config = CD.tree_union add_tree c_data.config_result in
+        let result =
+            { success = c_data.result.success && true;
+              out = c_data.result.out ^ r.out; }
         in
-        let sprint_node_data acc s =
-            acc ^ "\n" ^ (node_data_to_yojson s |> Yojson.Safe.to_string)
+        { c_data with config_result = config; result = result; }
+    | false, DELETE ->
+        let del = CT.get_subtree c_data.config_diff ["del"] in
+        let add_tree = CD.clone del (CT.default) n_data.path in
+        let config = CD.tree_union add_tree c_data.config_result in
+        let result =
+            { success = c_data.result.success && false;
+              out = c_data.result.out ^ r.out; }
         in
-        let del_out = List.fold_left sprint_node_data "" del_list in
-        let add_out = List.fold_left sprint_node_data "" add_list in
-        del_out ^ "\n" ^ add_out
+        { c_data with config_result = config; result = result; }
+    | true, DELETE ->
+        let result =
+            { success = c_data.result.success && true;
+              out = c_data.result.out ^ r.out; }
+        in
+        { c_data with result = result; }
+    | false, ADD ->
+        let result =
+            { success = c_data.result.success && false;
+              out = c_data.result.out ^ r.out; }
+        in
+        { c_data with result = result; }
+
+
+let commit_update c_data =
+    match c_data.init with
+    | None ->
+        { default_commit_data with
+          init=Some (fail_status  "commitd failure: no init status provided")
+        }
+    | Some _ ->
+        let func acc_data nd =
+            match nd.reply with
+            | None ->
+                { default_commit_data with
+                  init=Some (fail_status"commitd failure: no reply status provided")
+                }
+            | Some _ -> config_result_update acc_data nd
+    in List.fold_left func c_data c_data.node_list
+
+let make_commit_data rt at wt id =
+    let diff = CD.diff_tree [] at wt in
+    let del_list, add_list = calculate_priority_lists rt diff in
+    { default_commit_data with
+      session_id = id;
+      config_diff = diff;
+      config_result = CT.get_subtree diff ["inter"];
+      node_list = del_list @ add_list; }

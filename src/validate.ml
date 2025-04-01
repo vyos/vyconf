@@ -1,4 +1,4 @@
-open Client.Vyconf_client_session
+open Vyconfd_client.Vyconf_client_session
 
 let path_opt = ref ""
 

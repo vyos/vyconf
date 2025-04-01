@@ -26,7 +26,6 @@ type request_validate = {
 
 type request_set = {
   path : string list;
-  ephemeral : bool option;
 }
 
 type request_delete = {
@@ -195,10 +194,8 @@ let rec default_request_validate
 
 let rec default_request_set 
   ?path:((path:string list) = [])
-  ?ephemeral:((ephemeral:bool option) = None)
   () : request_set  = {
   path;
-  ephemeral;
 }
 
 let rec default_request_delete 
@@ -393,12 +390,10 @@ let default_request_validate_mutable () : request_validate_mutable = {
 
 type request_set_mutable = {
   mutable path : string list;
-  mutable ephemeral : bool option;
 }
 
 let default_request_set_mutable () : request_set_mutable = {
   path = [];
-  ephemeral = None;
 }
 
 type request_delete_mutable = {
@@ -636,7 +631,6 @@ let rec pp_request_validate fmt (v:request_validate) =
 let rec pp_request_set fmt (v:request_set) = 
   let pp_i fmt () =
     Pbrt.Pp.pp_record_field ~first:true "path" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.path;
-    Pbrt.Pp.pp_record_field ~first:false "ephemeral" (Pbrt.Pp.pp_option Pbrt.Pp.pp_bool) fmt v.ephemeral;
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
 
@@ -883,12 +877,6 @@ let rec encode_pb_request_set (v:request_set) encoder =
     Pbrt.Encoder.string x encoder;
     Pbrt.Encoder.key 1 Pbrt.Bytes encoder; 
   ) v.path encoder;
-  begin match v.ephemeral with
-  | Some x -> 
-    Pbrt.Encoder.bool x encoder;
-    Pbrt.Encoder.key 3 Pbrt.Varint encoder; 
-  | None -> ();
-  end;
   ()
 
 let rec encode_pb_request_delete (v:request_delete) encoder = 
@@ -1303,16 +1291,10 @@ let rec decode_pb_request_set d =
     end
     | Some (1, pk) -> 
       Pbrt.Decoder.unexpected_payload "Message(request_set), field(1)" pk
-    | Some (3, Pbrt.Varint) -> begin
-      v.ephemeral <- Some (Pbrt.Decoder.bool d);
-    end
-    | Some (3, pk) -> 
-      Pbrt.Decoder.unexpected_payload "Message(request_set), field(3)" pk
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
   done;
   ({
     path = v.path;
-    ephemeral = v.ephemeral;
   } : request_set)
 
 let rec decode_pb_request_delete d =

@@ -12,12 +12,6 @@ message Call {
 
 message Commit {
     required string session_id = 1;
-    // optional explicit load;
-    // otherwise, session configs are loaded from cached internal
-    // representation, specified by session id value
-    optional string named_active = 2;
-    optional string named_proposed = 3;
-    //
     required bool dry_run = 4;
     required bool atomic = 5;
     required bool background = 6;

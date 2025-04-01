@@ -28,7 +28,6 @@ message Request {
 
   message Set {
     repeated string Path = 1;
-    optional bool Ephemeral = 3; 
   }
 
   message Delete {

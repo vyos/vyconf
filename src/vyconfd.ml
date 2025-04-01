@@ -4,8 +4,11 @@ open Vyconf_connect.Vyconf_pbt
 open Vyconfd_config.Defaults
 open Vyconfd_config.Vyconf_config
 
-module FP = FilePath
 module CT = Vyos1x.Config_tree
+module IC = Vyos1x.Internal.Make(CT)
+module CC = Commitd_client.Commit
+module VC = Commitd_client.Vycall_client
+module FP = FilePath
 module Gen = Vyos1x.Generate
 module Session = Vyconfd_config.Session
 module Directories = Vyconfd_config.Directories
@@ -144,6 +147,56 @@ let validate world token (req: request_validate) =
         response_tmpl
     with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
 
+let set world token (req: request_set) =
+    try
+        let () = (Lwt_log.debug @@ Printf.sprintf "[%s]\n" (Vyos1x.Util.string_of_list req.path)) |> Lwt.ignore_result in
+        let session = Session.set world (find_session token) req.path in
+        Hashtbl.replace sessions token session;
+        response_tmpl
+    with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
+
+let delete world token (req: request_delete) =
+    try
+        let () = (Lwt_log.debug @@ Printf.sprintf "[%s]\n" (Vyos1x.Util.string_of_list req.path)) |> Lwt.ignore_result in
+        let session = Session.delete world (find_session token) req.path in
+        Hashtbl.replace sessions token session;
+        response_tmpl
+    with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
+
+let commit world token (_req: request_commit) =
+    let s = find_session token in
+    let at = world.Session.running_config in
+    let wt = s.proposed_config in
+    let rt = world.reference_tree in
+    let vc = world.vyconf_config in
+    let () = IC.write_internal at (FP.concat vc.session_dir vc.running_cache) in
+    let () = IC.write_internal wt (FP.concat vc.session_dir vc.session_cache) in
+
+    let commit_data = CC.make_commit_data rt at wt token in
+    let%lwt received_commit_data = VC.do_commit commit_data in
+    let%lwt result_commit_data =
+        Lwt.return (CC.commit_update received_commit_data)
+    in
+    match result_commit_data.init with
+    | None ->
+        let out = "Empty init" in
+        Lwt.return {response_tmpl with status=Internal_error; error=(Some out)}
+    | Some init_data ->
+        let res, out =
+            init_data.success, init_data.out
+        in
+        match res with
+        | false ->
+            Lwt.return {response_tmpl with status=Internal_error; error=(Some out)}
+        | true ->
+            world.Session.running_config <- result_commit_data.config_result;
+            let success, msg_str =
+                result_commit_data.result.success, result_commit_data.result.out
+            in
+            match success with
+            | true -> Lwt.return {response_tmpl with status=Success; output=(Some msg_str)}
+            | false -> Lwt.return {response_tmpl with status=Fail; output=(Some msg_str)}
+
 let reload_reftree world (_req: request_reload_reftree) =
     let config = world.Session.vyconf_config in
     let reftree =
@@ -172,11 +225,14 @@ let rec handle_connection world ic oc () =
             with Pbrt.Decoder.Failure e -> Lwt.return (Error (Pbrt.Decoder.error_to_string e))
         in
         let%lwt resp =
-            (match req with
-            | Error msg -> {response_tmpl with status=Fail; error=(Some (Printf.sprintf "Decoding error: %s" msg))}
+            match req with
+            | Error msg -> Lwt.return {response_tmpl with status=Fail; error=(Some (Printf.sprintf "Decoding error: %s" msg))}
             | Ok req ->
+               match req with
+               | Some t, Commit r -> commit world t r
+               | _ as req ->
                begin
-                    match req with
+                    (match req with
                     | _, Status -> response_tmpl
                     | _, Setup_session r -> setup_session world r
                     | _, Reload_reftree r -> reload_reftree world r
@@ -190,8 +246,11 @@ let rec handle_connection world ic oc () =
                     | Some t, List_children r -> list_children world t r
                     | Some t, Show_config r -> show_config world t r
                     | Some t, Validate r -> validate world t r
+                    | Some t, Set r -> set world t r
+                    | Some t, Delete r -> delete world t r
                     | _ -> failwith "Unimplemented"
-                end) |> Lwt.return
+                    ) |> Lwt.return
+               end
         in
         let%lwt () = send_response oc resp in
         handle_connection world ic oc ()

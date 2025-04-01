@@ -1,4 +1,4 @@
-open Client.Vyconf_client
+open Vyconfd_client.Vyconf_client
 open Vyconf_connect.Vyconf_pbt
 
 type op_t =
@@ -53,7 +53,7 @@ let output_format_of_string s =
     | _	-> failwith (Printf.sprintf "Unknown output format %s, should be plain or json" s)
 
 let main socket op path out_format config_format =
-    let%lwt client = Client.Vyconf_client.create ~token:!token socket out_format config_format in
+    let%lwt client = create ~token:!token socket out_format config_format in
     let%lwt result = match op with
     | None -> Error "Operation required" |> Lwt.return
     | Some o ->
