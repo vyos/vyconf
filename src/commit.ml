@@ -169,18 +169,6 @@ let calculate_priority_lists rt diff =
     let cs_del, cs_add = legacy_order del_tree cs_del' cs_add' in
     List.rev (CS.elements cs_del), CS.elements cs_add
 
-let commit_store c_data =
-    let out =
-        let func acc nd =
-            match nd.reply with
-            | None -> acc ^ "\n"
-            | Some r ->
-                match r.success with
-                | true -> acc ^ "\n"
-                | false -> acc ^ "\n" ^ r.out
-        in List.fold_left func "" c_data.node_list
-    in print_endline out
-
 (* The base config_result is the intersection of running and proposed
    configs:
        on success, added paths are added; deleted paths are ignored
