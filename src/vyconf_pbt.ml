@@ -53,6 +53,7 @@ type request_commit = {
   confirm : bool option;
   confirm_timeout : int32 option;
   comment : string option;
+  dry_run : bool option;
 }
 
 type request_rollback = {
@@ -236,10 +237,12 @@ let rec default_request_commit
   ?confirm:((confirm:bool option) = None)
   ?confirm_timeout:((confirm_timeout:int32 option) = None)
   ?comment:((comment:string option) = None)
+  ?dry_run:((dry_run:bool option) = None)
   () : request_commit  = {
   confirm;
   confirm_timeout;
   comment;
+  dry_run;
 }
 
 let rec default_request_rollback 
@@ -442,12 +445,14 @@ type request_commit_mutable = {
   mutable confirm : bool option;
   mutable confirm_timeout : int32 option;
   mutable comment : string option;
+  mutable dry_run : bool option;
 }
 
 let default_request_commit_mutable () : request_commit_mutable = {
   confirm = None;
   confirm_timeout = None;
   comment = None;
+  dry_run = None;
 }
 
 type request_rollback_mutable = {
@@ -668,6 +673,7 @@ let rec pp_request_commit fmt (v:request_commit) =
     Pbrt.Pp.pp_record_field ~first:true "confirm" (Pbrt.Pp.pp_option Pbrt.Pp.pp_bool) fmt v.confirm;
     Pbrt.Pp.pp_record_field ~first:false "confirm_timeout" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.confirm_timeout;
     Pbrt.Pp.pp_record_field ~first:false "comment" (Pbrt.Pp.pp_option Pbrt.Pp.pp_string) fmt v.comment;
+    Pbrt.Pp.pp_record_field ~first:false "dry_run" (Pbrt.Pp.pp_option Pbrt.Pp.pp_bool) fmt v.dry_run;
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
 
@@ -934,6 +940,12 @@ let rec encode_pb_request_commit (v:request_commit) encoder =
   | Some x -> 
     Pbrt.Encoder.string x encoder;
     Pbrt.Encoder.key 3 Pbrt.Bytes encoder; 
+  | None -> ();
+  end;
+  begin match v.dry_run with
+  | Some x -> 
+    Pbrt.Encoder.bool x encoder;
+    Pbrt.Encoder.key 4 Pbrt.Varint encoder; 
   | None -> ();
   end;
   ()
@@ -1435,12 +1447,18 @@ let rec decode_pb_request_commit d =
     end
     | Some (3, pk) -> 
       Pbrt.Decoder.unexpected_payload "Message(request_commit), field(3)" pk
+    | Some (4, Pbrt.Varint) -> begin
+      v.dry_run <- Some (Pbrt.Decoder.bool d);
+    end
+    | Some (4, pk) -> 
+      Pbrt.Decoder.unexpected_payload "Message(request_commit), field(4)" pk
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
   done;
   ({
     confirm = v.confirm;
     confirm_timeout = v.confirm_timeout;
     comment = v.comment;
+    dry_run = v.dry_run;
   } : request_commit)
 
 let rec decode_pb_request_rollback d =

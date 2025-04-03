@@ -227,11 +227,12 @@ let commit_update c_data =
             | Some _ -> config_result_update acc_data nd
     in List.fold_left func c_data c_data.node_list
 
-let make_commit_data rt at wt id =
+let make_commit_data ?(dry_run=false) rt at wt id =
     let diff = CD.diff_tree [] at wt in
     let del_list, add_list = calculate_priority_lists rt diff in
     { default_commit_data with
       session_id = id;
+      dry_run = dry_run;
       config_diff = diff;
       config_result = CT.get_subtree diff ["inter"];
       node_list = del_list @ add_list; }
