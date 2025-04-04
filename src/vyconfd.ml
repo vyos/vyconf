@@ -163,7 +163,7 @@ let delete world token (req: request_delete) =
         response_tmpl
     with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
 
-let commit world token (_req: request_commit) =
+let commit world token (req: request_commit) =
     let s = find_session token in
     let at = world.Session.running_config in
     let wt = s.proposed_config in
@@ -172,7 +172,8 @@ let commit world token (_req: request_commit) =
     let () = IC.write_internal at (FP.concat vc.session_dir vc.running_cache) in
     let () = IC.write_internal wt (FP.concat vc.session_dir vc.session_cache) in
 
-    let commit_data = CC.make_commit_data rt at wt token in
+    let req_dry_run = Option.value req.dry_run ~default:false in
+    let commit_data = CC.make_commit_data ~dry_run:req_dry_run rt at wt token in
     let%lwt received_commit_data = VC.do_commit commit_data in
     let%lwt result_commit_data =
         Lwt.return (CC.commit_update received_commit_data)
@@ -189,7 +190,9 @@ let commit world token (_req: request_commit) =
         | false ->
             Lwt.return {response_tmpl with status=Internal_error; error=(Some out)}
         | true ->
-            world.Session.running_config <- result_commit_data.config_result;
+            (* partial commit *)
+            if not req_dry_run then
+                world.Session.running_config <- result_commit_data.config_result;
             let success, msg_str =
                 result_commit_data.result.success, result_commit_data.result.out
             in

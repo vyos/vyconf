@@ -55,6 +55,7 @@ message Request {
     optional bool Confirm = 1;
     optional int32 ConfirmTimeout = 2;
     optional string Comment = 3;
+    optional bool DryRun = 4;
   }
 
   message Rollback {
