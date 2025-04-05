@@ -148,6 +148,7 @@ message Request {
     Validate validate = 21;
     Teardown teardown = 22;
     ReloadReftree reload_reftree = 23;
+    Load load = 24;
   }
 }
 

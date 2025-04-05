@@ -148,6 +148,7 @@ type request =
   | Validate of request_validate
   | Teardown of request_teardown
   | Reload_reftree of request_reload_reftree
+  | Load of request_load
 
 type request_envelope = {
   token : string option;

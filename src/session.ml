@@ -107,6 +107,13 @@ let delete w s path =
     let config = apply_cfg_op op s.proposed_config in
     {s with proposed_config=config; changeset=(op :: s.changeset)}
 
+let load w s file =
+    let ct = Vyos1x.Config_file.load_config file in
+    match ct with
+    | Error e -> raise (Session_error (Printf.sprintf "Error loading config: %s" e))
+    | Ok config ->
+        validate_tree w config; {s with proposed_config=config;}
+
 let get_value w s path =
     if not (VT.exists s.proposed_config path) then
         raise (Session_error ("Config path does not exist"))

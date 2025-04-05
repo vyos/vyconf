@@ -141,6 +141,7 @@ type request =
   | Validate of request_validate
   | Teardown of request_teardown
   | Reload_reftree of request_reload_reftree
+  | Load of request_load
 
 type request_envelope = {
   token : string option;
@@ -795,6 +796,7 @@ let rec pp_request fmt (v:request) =
   | Validate x -> Format.fprintf fmt "@[<hv2>Validate(@,%a)@]" pp_request_validate x
   | Teardown x -> Format.fprintf fmt "@[<hv2>Teardown(@,%a)@]" pp_request_teardown x
   | Reload_reftree x -> Format.fprintf fmt "@[<hv2>Reload_reftree(@,%a)@]" pp_request_reload_reftree x
+  | Load x -> Format.fprintf fmt "@[<hv2>Load(@,%a)@]" pp_request_load x
 
 let rec pp_request_envelope fmt (v:request_envelope) = 
   let pp_i fmt () =
@@ -1153,6 +1155,9 @@ let rec encode_pb_request (v:request) encoder =
   | Reload_reftree x ->
     Pbrt.Encoder.nested encode_pb_request_reload_reftree x encoder;
     Pbrt.Encoder.key 23 Pbrt.Bytes encoder; 
+  | Load x ->
+    Pbrt.Encoder.nested encode_pb_request_load x encoder;
+    Pbrt.Encoder.key 24 Pbrt.Bytes encoder; 
   end
 
 let rec encode_pb_request_envelope (v:request_envelope) encoder = 
@@ -1797,6 +1802,7 @@ let rec decode_pb_request d =
       | Some (21, _) -> (Validate (decode_pb_request_validate (Pbrt.Decoder.nested d)) : request) 
       | Some (22, _) -> (Teardown (decode_pb_request_teardown (Pbrt.Decoder.nested d)) : request) 
       | Some (23, _) -> (Reload_reftree (decode_pb_request_reload_reftree (Pbrt.Decoder.nested d)) : request) 
+      | Some (24, _) -> (Load (decode_pb_request_load (Pbrt.Decoder.nested d)) : request) 
       | Some (n, payload_kind) -> (
         Pbrt.Decoder.skip d payload_kind; 
         loop () 
