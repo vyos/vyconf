@@ -34,6 +34,8 @@ val delete : world -> session_data -> string list -> session_data
 
 val load : world -> session_data -> string -> session_data
 
+val save : world -> session_data -> string -> session_data
+
 val get_value : world -> session_data -> string list -> string
 
 val get_values : world -> session_data -> string list -> string list

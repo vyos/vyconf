@@ -171,6 +171,13 @@ let load world token (req: request_load) =
         response_tmpl
     with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
 
+let save world token (req: request_save) =
+    try
+        let _ = Session.save world (find_session token) req.location
+        in
+        response_tmpl
+    with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
+
 let commit world token (req: request_commit) =
     let s = find_session token in
     let at = world.Session.running_config in
@@ -260,6 +267,7 @@ let rec handle_connection world ic oc () =
                     | Some t, Set r -> set world t r
                     | Some t, Delete r -> delete world t r
                     | Some t, Load r -> load world t r
+                    | Some t, Save r -> save world t r
                     | _ -> failwith "Unimplemented"
                     ) |> Lwt.return
                end
