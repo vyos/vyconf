@@ -107,6 +107,9 @@ let delete w s path =
     let config = apply_cfg_op op s.proposed_config in
     {s with proposed_config=config; changeset=(op :: s.changeset)}
 
+let discard w s =
+    {s with proposed_config=w.running_config}
+
 let load w s file =
     let ct = Vyos1x.Config_file.load_config file in
     match ct with

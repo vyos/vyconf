@@ -32,6 +32,10 @@ type request_delete = {
   path : string list;
 }
 
+type request_discard = {
+  dummy : int32 option;
+}
+
 type request_rename = {
   edit_level : string list;
   from : string;
@@ -142,6 +146,7 @@ type request =
   | Teardown of request_teardown
   | Reload_reftree of request_reload_reftree
   | Load of request_load
+  | Discard of request_discard
 
 type request_envelope = {
   token : string option;
@@ -204,6 +209,12 @@ let rec default_request_delete
   ?path:((path:string list) = [])
   () : request_delete  = {
   path;
+}
+
+let rec default_request_discard 
+  ?dummy:((dummy:int32 option) = None)
+  () : request_discard  = {
+  dummy;
 }
 
 let rec default_request_rename 
@@ -406,6 +417,14 @@ type request_delete_mutable = {
 
 let default_request_delete_mutable () : request_delete_mutable = {
   path = [];
+}
+
+type request_discard_mutable = {
+  mutable dummy : int32 option;
+}
+
+let default_request_discard_mutable () : request_discard_mutable = {
+  dummy = None;
 }
 
 type request_rename_mutable = {
@@ -646,6 +665,12 @@ let rec pp_request_delete fmt (v:request_delete) =
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
 
+let rec pp_request_discard fmt (v:request_discard) = 
+  let pp_i fmt () =
+    Pbrt.Pp.pp_record_field ~first:true "dummy" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.dummy;
+  in
+  Pbrt.Pp.pp_brk pp_i fmt ()
+
 let rec pp_request_rename fmt (v:request_rename) = 
   let pp_i fmt () =
     Pbrt.Pp.pp_record_field ~first:true "edit_level" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.edit_level;
@@ -797,6 +822,7 @@ let rec pp_request fmt (v:request) =
   | Teardown x -> Format.fprintf fmt "@[<hv2>Teardown(@,%a)@]" pp_request_teardown x
   | Reload_reftree x -> Format.fprintf fmt "@[<hv2>Reload_reftree(@,%a)@]" pp_request_reload_reftree x
   | Load x -> Format.fprintf fmt "@[<hv2>Load(@,%a)@]" pp_request_load x
+  | Discard x -> Format.fprintf fmt "@[<hv2>Discard(@,%a)@]" pp_request_discard x
 
 let rec pp_request_envelope fmt (v:request_envelope) = 
   let pp_i fmt () =
@@ -892,6 +918,15 @@ let rec encode_pb_request_delete (v:request_delete) encoder =
     Pbrt.Encoder.string x encoder;
     Pbrt.Encoder.key 1 Pbrt.Bytes encoder; 
   ) v.path encoder;
+  ()
+
+let rec encode_pb_request_discard (v:request_discard) encoder = 
+  begin match v.dummy with
+  | Some x -> 
+    Pbrt.Encoder.int32_as_varint x encoder;
+    Pbrt.Encoder.key 1 Pbrt.Varint encoder; 
+  | None -> ();
+  end;
   ()
 
 let rec encode_pb_request_rename (v:request_rename) encoder = 
@@ -1158,6 +1193,9 @@ let rec encode_pb_request (v:request) encoder =
   | Load x ->
     Pbrt.Encoder.nested encode_pb_request_load x encoder;
     Pbrt.Encoder.key 24 Pbrt.Bytes encoder; 
+  | Discard x ->
+    Pbrt.Encoder.nested encode_pb_request_discard x encoder;
+    Pbrt.Encoder.key 25 Pbrt.Bytes encoder; 
   end
 
 let rec encode_pb_request_envelope (v:request_envelope) encoder = 
@@ -1332,6 +1370,24 @@ let rec decode_pb_request_delete d =
   ({
     path = v.path;
   } : request_delete)
+
+let rec decode_pb_request_discard d =
+  let v = default_request_discard_mutable () in
+  let continue__= ref true in
+  while !continue__ do
+    match Pbrt.Decoder.key d with
+    | None -> (
+    ); continue__ := false
+    | Some (1, Pbrt.Varint) -> begin
+      v.dummy <- Some (Pbrt.Decoder.int32_as_varint d);
+    end
+    | Some (1, pk) -> 
+      Pbrt.Decoder.unexpected_payload "Message(request_discard), field(1)" pk
+    | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
+  done;
+  ({
+    dummy = v.dummy;
+  } : request_discard)
 
 let rec decode_pb_request_rename d =
   let v = default_request_rename_mutable () in
@@ -1803,6 +1859,7 @@ let rec decode_pb_request d =
       | Some (22, _) -> (Teardown (decode_pb_request_teardown (Pbrt.Decoder.nested d)) : request) 
       | Some (23, _) -> (Reload_reftree (decode_pb_request_reload_reftree (Pbrt.Decoder.nested d)) : request) 
       | Some (24, _) -> (Load (decode_pb_request_load (Pbrt.Decoder.nested d)) : request) 
+      | Some (25, _) -> (Discard (decode_pb_request_discard (Pbrt.Decoder.nested d)) : request) 
       | Some (n, payload_kind) -> (
         Pbrt.Decoder.skip d payload_kind; 
         loop () 

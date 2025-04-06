@@ -163,6 +163,14 @@ let delete world token (req: request_delete) =
         response_tmpl
     with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
 
+let discard world token (_req: request_discard) =
+    try
+        let session = Session.discard world (find_session token)
+        in
+        Hashtbl.replace sessions token session;
+        response_tmpl
+    with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
+
 let load world token (req: request_load) =
     try
         let session = Session.load world (find_session token) req.location
@@ -266,6 +274,7 @@ let rec handle_connection world ic oc () =
                     | Some t, Validate r -> validate world t r
                     | Some t, Set r -> set world t r
                     | Some t, Delete r -> delete world t r
+                    | Some t, Discard r -> discard world t r
                     | Some t, Load r -> load world t r
                     | Some t, Save r -> save world t r
                     | _ -> failwith "Unimplemented"

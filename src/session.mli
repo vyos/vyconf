@@ -32,6 +32,8 @@ val set : world -> session_data -> string list -> session_data
 
 val delete : world -> session_data -> string list -> session_data
 
+val discard : world -> session_data -> session_data
+
 val load : world -> session_data -> string -> session_data
 
 val save : world -> session_data -> string -> session_data

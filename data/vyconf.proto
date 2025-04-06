@@ -34,6 +34,10 @@ message Request {
     repeated string Path = 1;
   }
 
+  message Discard {
+    optional int32 dummy = 1;
+  }
+
   message Rename {
     repeated string EditLevel = 1;
     required string From = 2;
@@ -149,6 +153,7 @@ message Request {
     Teardown teardown = 22;
     ReloadReftree reload_reftree = 23;
     Load load = 24;
+    Discard discard = 25;
   }
 }
 
