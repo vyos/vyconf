@@ -43,6 +43,10 @@ type request_discard = {
   dummy : int32 option;
 }
 
+type request_session_changed = {
+  dummy : int32 option;
+}
+
 type request_rename = {
   edit_level : string list;
   from : string;
@@ -154,6 +158,7 @@ type request =
   | Reload_reftree of request_reload_reftree
   | Load of request_load
   | Discard of request_discard
+  | Session_changed of request_session_changed
 
 type request_envelope = {
   token : string option;
@@ -227,6 +232,12 @@ val default_request_discard :
   unit ->
   request_discard
 (** [default_request_discard ()] is the default value for type [request_discard] *)
+
+val default_request_session_changed : 
+  ?dummy:int32 option ->
+  unit ->
+  request_session_changed
+(** [default_request_session_changed ()] is the default value for type [request_session_changed] *)
 
 val default_request_rename : 
   ?edit_level:string list ->
@@ -399,6 +410,9 @@ val pp_request_delete : Format.formatter -> request_delete -> unit
 val pp_request_discard : Format.formatter -> request_discard -> unit 
 (** [pp_request_discard v] formats v *)
 
+val pp_request_session_changed : Format.formatter -> request_session_changed -> unit 
+(** [pp_request_session_changed v] formats v *)
+
 val pp_request_rename : Format.formatter -> request_rename -> unit 
 (** [pp_request_rename v] formats v *)
 
@@ -495,6 +509,9 @@ val encode_pb_request_delete : request_delete -> Pbrt.Encoder.t -> unit
 val encode_pb_request_discard : request_discard -> Pbrt.Encoder.t -> unit
 (** [encode_pb_request_discard v encoder] encodes [v] with the given [encoder] *)
 
+val encode_pb_request_session_changed : request_session_changed -> Pbrt.Encoder.t -> unit
+(** [encode_pb_request_session_changed v encoder] encodes [v] with the given [encoder] *)
+
 val encode_pb_request_rename : request_rename -> Pbrt.Encoder.t -> unit
 (** [encode_pb_request_rename v encoder] encodes [v] with the given [encoder] *)
 
@@ -590,6 +607,9 @@ val decode_pb_request_delete : Pbrt.Decoder.t -> request_delete
 
 val decode_pb_request_discard : Pbrt.Decoder.t -> request_discard
 (** [decode_pb_request_discard decoder] decodes a [request_discard] binary value from [decoder] *)
+
+val decode_pb_request_session_changed : Pbrt.Decoder.t -> request_session_changed
+(** [decode_pb_request_session_changed decoder] decodes a [request_session_changed] binary value from [decoder] *)
 
 val decode_pb_request_rename : Pbrt.Decoder.t -> request_rename
 (** [decode_pb_request_rename decoder] decodes a [request_rename] binary value from [decoder] *)

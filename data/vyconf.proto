@@ -38,6 +38,10 @@ message Request {
     optional int32 dummy = 1;
   }
 
+  message SessionChanged {
+    optional int32 dummy = 1;
+  }
+
   message Rename {
     repeated string EditLevel = 1;
     required string From = 2;
@@ -154,6 +158,7 @@ message Request {
     ReloadReftree reload_reftree = 23;
     Load load = 24;
     Discard discard = 25;
+    SessionChanged session_changed = 26;
   }
 }
 

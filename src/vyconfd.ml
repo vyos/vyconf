@@ -95,6 +95,10 @@ let teardown token =
     with Not_found ->
         {response_tmpl with status=Fail; error=(Some "Session not found")}
 
+let session_changed world token (_req: request_session_changed) =
+    if Session.session_changed world (find_session token) then response_tmpl
+    else {response_tmpl with status=Fail}
+
 let exists world token (req: request_exists) =
     if Session.exists world (find_session token) req.path then response_tmpl
     else {response_tmpl with status=Fail}
@@ -275,6 +279,7 @@ let rec handle_connection world ic oc () =
                     | Some t, Set r -> set world t r
                     | Some t, Delete r -> delete world t r
                     | Some t, Discard r -> discard world t r
+                    | Some t, Session_changed r -> session_changed world t r
                     | Some t, Load r -> load world t r
                     | Some t, Save r -> save world t r
                     | _ -> failwith "Unimplemented"

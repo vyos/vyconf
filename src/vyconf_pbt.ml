@@ -36,6 +36,10 @@ type request_discard = {
   dummy : int32 option;
 }
 
+type request_session_changed = {
+  dummy : int32 option;
+}
+
 type request_rename = {
   edit_level : string list;
   from : string;
@@ -147,6 +151,7 @@ type request =
   | Reload_reftree of request_reload_reftree
   | Load of request_load
   | Discard of request_discard
+  | Session_changed of request_session_changed
 
 type request_envelope = {
   token : string option;
@@ -214,6 +219,12 @@ let rec default_request_delete
 let rec default_request_discard 
   ?dummy:((dummy:int32 option) = None)
   () : request_discard  = {
+  dummy;
+}
+
+let rec default_request_session_changed 
+  ?dummy:((dummy:int32 option) = None)
+  () : request_session_changed  = {
   dummy;
 }
 
@@ -424,6 +435,14 @@ type request_discard_mutable = {
 }
 
 let default_request_discard_mutable () : request_discard_mutable = {
+  dummy = None;
+}
+
+type request_session_changed_mutable = {
+  mutable dummy : int32 option;
+}
+
+let default_request_session_changed_mutable () : request_session_changed_mutable = {
   dummy = None;
 }
 
@@ -671,6 +690,12 @@ let rec pp_request_discard fmt (v:request_discard) =
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
 
+let rec pp_request_session_changed fmt (v:request_session_changed) = 
+  let pp_i fmt () =
+    Pbrt.Pp.pp_record_field ~first:true "dummy" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.dummy;
+  in
+  Pbrt.Pp.pp_brk pp_i fmt ()
+
 let rec pp_request_rename fmt (v:request_rename) = 
   let pp_i fmt () =
     Pbrt.Pp.pp_record_field ~first:true "edit_level" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.edit_level;
@@ -823,6 +848,7 @@ let rec pp_request fmt (v:request) =
   | Reload_reftree x -> Format.fprintf fmt "@[<hv2>Reload_reftree(@,%a)@]" pp_request_reload_reftree x
   | Load x -> Format.fprintf fmt "@[<hv2>Load(@,%a)@]" pp_request_load x
   | Discard x -> Format.fprintf fmt "@[<hv2>Discard(@,%a)@]" pp_request_discard x
+  | Session_changed x -> Format.fprintf fmt "@[<hv2>Session_changed(@,%a)@]" pp_request_session_changed x
 
 let rec pp_request_envelope fmt (v:request_envelope) = 
   let pp_i fmt () =
@@ -921,6 +947,15 @@ let rec encode_pb_request_delete (v:request_delete) encoder =
   ()
 
 let rec encode_pb_request_discard (v:request_discard) encoder = 
+  begin match v.dummy with
+  | Some x -> 
+    Pbrt.Encoder.int32_as_varint x encoder;
+    Pbrt.Encoder.key 1 Pbrt.Varint encoder; 
+  | None -> ();
+  end;
+  ()
+
+let rec encode_pb_request_session_changed (v:request_session_changed) encoder = 
   begin match v.dummy with
   | Some x -> 
     Pbrt.Encoder.int32_as_varint x encoder;
@@ -1196,6 +1231,9 @@ let rec encode_pb_request (v:request) encoder =
   | Discard x ->
     Pbrt.Encoder.nested encode_pb_request_discard x encoder;
     Pbrt.Encoder.key 25 Pbrt.Bytes encoder; 
+  | Session_changed x ->
+    Pbrt.Encoder.nested encode_pb_request_session_changed x encoder;
+    Pbrt.Encoder.key 26 Pbrt.Bytes encoder; 
   end
 
 let rec encode_pb_request_envelope (v:request_envelope) encoder = 
@@ -1388,6 +1426,24 @@ let rec decode_pb_request_discard d =
   ({
     dummy = v.dummy;
   } : request_discard)
+
+let rec decode_pb_request_session_changed d =
+  let v = default_request_session_changed_mutable () in
+  let continue__= ref true in
+  while !continue__ do
+    match Pbrt.Decoder.key d with
+    | None -> (
+    ); continue__ := false
+    | Some (1, Pbrt.Varint) -> begin
+      v.dummy <- Some (Pbrt.Decoder.int32_as_varint d);
+    end
+    | Some (1, pk) -> 
+      Pbrt.Decoder.unexpected_payload "Message(request_session_changed), field(1)" pk
+    | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
+  done;
+  ({
+    dummy = v.dummy;
+  } : request_session_changed)
 
 let rec decode_pb_request_rename d =
   let v = default_request_rename_mutable () in
@@ -1860,6 +1916,7 @@ let rec decode_pb_request d =
       | Some (23, _) -> (Reload_reftree (decode_pb_request_reload_reftree (Pbrt.Decoder.nested d)) : request) 
       | Some (24, _) -> (Load (decode_pb_request_load (Pbrt.Decoder.nested d)) : request) 
       | Some (25, _) -> (Discard (decode_pb_request_discard (Pbrt.Decoder.nested d)) : request) 
+      | Some (26, _) -> (Session_changed (decode_pb_request_session_changed (Pbrt.Decoder.nested d)) : request) 
       | Some (n, payload_kind) -> (
         Pbrt.Decoder.skip d payload_kind; 
         loop () 

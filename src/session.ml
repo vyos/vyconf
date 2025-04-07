@@ -1,4 +1,5 @@
 module CT = Vyos1x.Config_tree
+module CD = Vyos1x.Config_diff
 module VT = Vyos1x.Vytree
 module RT = Vyos1x.Reference_tree
 module D = Directories
@@ -109,6 +110,15 @@ let delete w s path =
 
 let discard w s =
     {s with proposed_config=w.running_config}
+
+let session_changed w s =
+    (* structural equality test requires consistent ordering, which is
+     * practised, but may be unreliable; test actual difference
+     *)
+    let diff = CD.diff_tree [] w.running_config s.proposed_config in
+    let add_tree = CT.get_subtree diff ["add"] in
+    let del_tree = CT.get_subtree diff ["del"] in
+    (del_tree <> CT.default) || (add_tree <> CT.default)
 
 let load w s file =
     let ct = Vyos1x.Config_file.load_config file in
