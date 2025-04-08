@@ -60,6 +60,7 @@ type request_commit = {
   confirm : bool option;
   confirm_timeout : int32 option;
   comment : string option;
+  dry_run : bool option;
 }
 
 type request_rollback = {
@@ -242,6 +243,7 @@ val default_request_commit :
   ?confirm:bool option ->
   ?confirm_timeout:int32 option ->
   ?comment:string option ->
+  ?dry_run:bool option ->
   unit ->
   request_commit
 (** [default_request_commit ()] is the default value for type [request_commit] *)

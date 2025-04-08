@@ -135,7 +135,9 @@ let delete client path =
     | _ -> Error (Option.value resp.error ~default:"") |> Lwt.return
 
 let commit client =
-    let req = Commit {confirm=None; confirm_timeout=None; comment=None;} in
+    let req =
+        Commit {confirm=None; confirm_timeout=None; comment=None; dry_run=None}
+    in
     let%lwt resp = do_request client req in
     match resp.status with
     | Success -> Ok (Option.value resp.output ~default:"") |> Lwt.return
