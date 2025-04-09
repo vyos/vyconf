@@ -236,7 +236,7 @@ let rec handle_connection world ic oc () =
                | _ as req ->
                begin
                     (match req with
-                    | _, Status -> response_tmpl
+                    | _, Prompt -> response_tmpl
                     | _, Setup_session r -> setup_session world r
                     | _, Reload_reftree r -> reload_reftree world r
                     | None, _ -> {response_tmpl with status=Fail; output=(Some "Operation requires session token")}
