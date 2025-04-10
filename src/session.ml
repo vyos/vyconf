@@ -102,7 +102,6 @@ let set w s path =
     {s with proposed_config=config; changeset=(op :: s.changeset)}
 
 let delete w s path =
-    let _ = validate w s path in
     let path, value = split_path w s path in
     let op = CfgDelete (path, value) in
     let config = apply_cfg_op op s.proposed_config in
