@@ -1,4 +1,5 @@
 module CT = Vyos1x.Config_tree
+module CD = Vyos1x.Config_diff
 module VT = Vyos1x.Vytree
 module RT = Vyos1x.Reference_tree
 module D = Directories
@@ -69,6 +70,21 @@ let validate w _s path =
         RT.validate_path D.(w.dirs.validators) w.reference_tree path
     with RT.Validation_error x -> raise (Session_error x)
 
+let validate_tree w' t =
+    let validate_path w out path =
+        let res =
+            try
+                RT.validate_path D.(w.dirs.validators) w.reference_tree path;
+                out
+            with RT.Validation_error x -> out ^ x
+        in res
+    in
+    let paths = CT.value_paths_of_tree t in
+    let out = List.fold_left (validate_path w') "" paths in
+    match out with
+    | "" -> ()
+    | _ -> raise (Session_error out)
+
 let split_path w _s path =
     RT.split_path w.reference_tree path
 
@@ -79,18 +95,46 @@ let set w s path =
     let value_behaviour = if RT.is_multi w.reference_tree refpath then CT.AddValue else CT.ReplaceValue in
     let op = CfgSet (path, value, value_behaviour) in
     let config =
-        apply_cfg_op op s.proposed_config |>
-        (fun c -> RT.set_tag_data w.reference_tree c path) |>
-        (fun c -> RT.set_leaf_data w.reference_tree c path)
+        try
+            apply_cfg_op op s.proposed_config |>
+            (fun c -> RT.set_tag_data w.reference_tree c path) |>
+            (fun c -> RT.set_leaf_data w.reference_tree c path)
+        with CT.Useless_set ->
+            raise (Session_error (Printf.sprintf "Useless set, path: %s" (string_of_op op)))
     in
     {s with proposed_config=config; changeset=(op :: s.changeset)}
 
 let delete w s path =
-    let _ = validate w s path in
     let path, value = split_path w s path in
     let op = CfgDelete (path, value) in
     let config = apply_cfg_op op s.proposed_config in
     {s with proposed_config=config; changeset=(op :: s.changeset)}
+
+let discard w s =
+    {s with proposed_config=w.running_config}
+
+let session_changed w s =
+    (* structural equality test requires consistent ordering, which is
+     * practised, but may be unreliable; test actual difference
+     *)
+    let diff = CD.diff_tree [] w.running_config s.proposed_config in
+    let add_tree = CT.get_subtree diff ["add"] in
+    let del_tree = CT.get_subtree diff ["del"] in
+    (del_tree <> CT.default) || (add_tree <> CT.default)
+
+let load w s file =
+    let ct = Vyos1x.Config_file.load_config file in
+    match ct with
+    | Error e -> raise (Session_error (Printf.sprintf "Error loading config: %s" e))
+    | Ok config ->
+        validate_tree w config; {s with proposed_config=config;}
+
+let save w s file =
+    let ct = w.running_config in
+    let res = Vyos1x.Config_file.save_config ct file in
+    match res with
+    | Error e -> raise (Session_error (Printf.sprintf "Error saving config: %s" e))
+    | Ok () -> s
 
 let get_value w s path =
     if not (VT.exists s.proposed_config path) then

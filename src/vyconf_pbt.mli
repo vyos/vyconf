@@ -15,7 +15,7 @@ type request_output_format =
   | Out_plain 
   | Out_json 
 
-type request_status = unit
+type request_prompt = unit
 
 type request_setup_session = {
   client_application : string option;
@@ -37,6 +37,14 @@ type request_set = {
 
 type request_delete = {
   path : string list;
+}
+
+type request_discard = {
+  dummy : int32 option;
+}
+
+type request_session_changed = {
+  dummy : int32 option;
 }
 
 type request_rename = {
@@ -125,7 +133,7 @@ type request_reload_reftree = {
 }
 
 type request =
-  | Status
+  | Prompt
   | Setup_session of request_setup_session
   | Set of request_set
   | Delete of request_delete
@@ -148,13 +156,16 @@ type request =
   | Validate of request_validate
   | Teardown of request_teardown
   | Reload_reftree of request_reload_reftree
+  | Load of request_load
+  | Discard of request_discard
+  | Session_changed of request_session_changed
 
 type request_envelope = {
   token : string option;
   request : request;
 }
 
-type status =
+type errnum =
   | Success 
   | Fail 
   | Invalid_path 
@@ -166,7 +177,7 @@ type status =
   | Path_already_exists 
 
 type response = {
-  status : status;
+  status : errnum;
   output : string option;
   error : string option;
   warning : string option;
@@ -181,8 +192,8 @@ val default_request_config_format : unit -> request_config_format
 val default_request_output_format : unit -> request_output_format
 (** [default_request_output_format ()] is the default value for type [request_output_format] *)
 
-val default_request_status : unit
-(** [default_request_status ()] is the default value for type [request_status] *)
+val default_request_prompt : unit
+(** [default_request_prompt ()] is the default value for type [request_prompt] *)
 
 val default_request_setup_session : 
   ?client_application:string option ->
@@ -215,6 +226,18 @@ val default_request_delete :
   unit ->
   request_delete
 (** [default_request_delete ()] is the default value for type [request_delete] *)
+
+val default_request_discard : 
+  ?dummy:int32 option ->
+  unit ->
+  request_discard
+(** [default_request_discard ()] is the default value for type [request_discard] *)
+
+val default_request_session_changed : 
+  ?dummy:int32 option ->
+  unit ->
+  request_session_changed
+(** [default_request_session_changed ()] is the default value for type [request_session_changed] *)
 
 val default_request_rename : 
   ?edit_level:string list ->
@@ -345,11 +368,11 @@ val default_request_envelope :
   request_envelope
 (** [default_request_envelope ()] is the default value for type [request_envelope] *)
 
-val default_status : unit -> status
-(** [default_status ()] is the default value for type [status] *)
+val default_errnum : unit -> errnum
+(** [default_errnum ()] is the default value for type [errnum] *)
 
 val default_response : 
-  ?status:status ->
+  ?status:errnum ->
   ?output:string option ->
   ?error:string option ->
   ?warning:string option ->
@@ -366,8 +389,8 @@ val pp_request_config_format : Format.formatter -> request_config_format -> unit
 val pp_request_output_format : Format.formatter -> request_output_format -> unit 
 (** [pp_request_output_format v] formats v *)
 
-val pp_request_status : Format.formatter -> request_status -> unit 
-(** [pp_request_status v] formats v *)
+val pp_request_prompt : Format.formatter -> request_prompt -> unit 
+(** [pp_request_prompt v] formats v *)
 
 val pp_request_setup_session : Format.formatter -> request_setup_session -> unit 
 (** [pp_request_setup_session v] formats v *)
@@ -383,6 +406,12 @@ val pp_request_set : Format.formatter -> request_set -> unit
 
 val pp_request_delete : Format.formatter -> request_delete -> unit 
 (** [pp_request_delete v] formats v *)
+
+val pp_request_discard : Format.formatter -> request_discard -> unit 
+(** [pp_request_discard v] formats v *)
+
+val pp_request_session_changed : Format.formatter -> request_session_changed -> unit 
+(** [pp_request_session_changed v] formats v *)
 
 val pp_request_rename : Format.formatter -> request_rename -> unit 
 (** [pp_request_rename v] formats v *)
@@ -444,8 +473,8 @@ val pp_request : Format.formatter -> request -> unit
 val pp_request_envelope : Format.formatter -> request_envelope -> unit 
 (** [pp_request_envelope v] formats v *)
 
-val pp_status : Format.formatter -> status -> unit 
-(** [pp_status v] formats v *)
+val pp_errnum : Format.formatter -> errnum -> unit 
+(** [pp_errnum v] formats v *)
 
 val pp_response : Format.formatter -> response -> unit 
 (** [pp_response v] formats v *)
@@ -459,8 +488,8 @@ val encode_pb_request_config_format : request_config_format -> Pbrt.Encoder.t ->
 val encode_pb_request_output_format : request_output_format -> Pbrt.Encoder.t -> unit
 (** [encode_pb_request_output_format v encoder] encodes [v] with the given [encoder] *)
 
-val encode_pb_request_status : request_status -> Pbrt.Encoder.t -> unit
-(** [encode_pb_request_status v encoder] encodes [v] with the given [encoder] *)
+val encode_pb_request_prompt : request_prompt -> Pbrt.Encoder.t -> unit
+(** [encode_pb_request_prompt v encoder] encodes [v] with the given [encoder] *)
 
 val encode_pb_request_setup_session : request_setup_session -> Pbrt.Encoder.t -> unit
 (** [encode_pb_request_setup_session v encoder] encodes [v] with the given [encoder] *)
@@ -476,6 +505,12 @@ val encode_pb_request_set : request_set -> Pbrt.Encoder.t -> unit
 
 val encode_pb_request_delete : request_delete -> Pbrt.Encoder.t -> unit
 (** [encode_pb_request_delete v encoder] encodes [v] with the given [encoder] *)
+
+val encode_pb_request_discard : request_discard -> Pbrt.Encoder.t -> unit
+(** [encode_pb_request_discard v encoder] encodes [v] with the given [encoder] *)
+
+val encode_pb_request_session_changed : request_session_changed -> Pbrt.Encoder.t -> unit
+(** [encode_pb_request_session_changed v encoder] encodes [v] with the given [encoder] *)
 
 val encode_pb_request_rename : request_rename -> Pbrt.Encoder.t -> unit
 (** [encode_pb_request_rename v encoder] encodes [v] with the given [encoder] *)
@@ -537,8 +572,8 @@ val encode_pb_request : request -> Pbrt.Encoder.t -> unit
 val encode_pb_request_envelope : request_envelope -> Pbrt.Encoder.t -> unit
 (** [encode_pb_request_envelope v encoder] encodes [v] with the given [encoder] *)
 
-val encode_pb_status : status -> Pbrt.Encoder.t -> unit
-(** [encode_pb_status v encoder] encodes [v] with the given [encoder] *)
+val encode_pb_errnum : errnum -> Pbrt.Encoder.t -> unit
+(** [encode_pb_errnum v encoder] encodes [v] with the given [encoder] *)
 
 val encode_pb_response : response -> Pbrt.Encoder.t -> unit
 (** [encode_pb_response v encoder] encodes [v] with the given [encoder] *)
@@ -552,8 +587,8 @@ val decode_pb_request_config_format : Pbrt.Decoder.t -> request_config_format
 val decode_pb_request_output_format : Pbrt.Decoder.t -> request_output_format
 (** [decode_pb_request_output_format decoder] decodes a [request_output_format] binary value from [decoder] *)
 
-val decode_pb_request_status : Pbrt.Decoder.t -> request_status
-(** [decode_pb_request_status decoder] decodes a [request_status] binary value from [decoder] *)
+val decode_pb_request_prompt : Pbrt.Decoder.t -> request_prompt
+(** [decode_pb_request_prompt decoder] decodes a [request_prompt] binary value from [decoder] *)
 
 val decode_pb_request_setup_session : Pbrt.Decoder.t -> request_setup_session
 (** [decode_pb_request_setup_session decoder] decodes a [request_setup_session] binary value from [decoder] *)
@@ -569,6 +604,12 @@ val decode_pb_request_set : Pbrt.Decoder.t -> request_set
 
 val decode_pb_request_delete : Pbrt.Decoder.t -> request_delete
 (** [decode_pb_request_delete decoder] decodes a [request_delete] binary value from [decoder] *)
+
+val decode_pb_request_discard : Pbrt.Decoder.t -> request_discard
+(** [decode_pb_request_discard decoder] decodes a [request_discard] binary value from [decoder] *)
+
+val decode_pb_request_session_changed : Pbrt.Decoder.t -> request_session_changed
+(** [decode_pb_request_session_changed decoder] decodes a [request_session_changed] binary value from [decoder] *)
 
 val decode_pb_request_rename : Pbrt.Decoder.t -> request_rename
 (** [decode_pb_request_rename decoder] decodes a [request_rename] binary value from [decoder] *)
@@ -630,8 +671,8 @@ val decode_pb_request : Pbrt.Decoder.t -> request
 val decode_pb_request_envelope : Pbrt.Decoder.t -> request_envelope
 (** [decode_pb_request_envelope decoder] decodes a [request_envelope] binary value from [decoder] *)
 
-val decode_pb_status : Pbrt.Decoder.t -> status
-(** [decode_pb_status decoder] decodes a [status] binary value from [decoder] *)
+val decode_pb_errnum : Pbrt.Decoder.t -> errnum
+(** [decode_pb_errnum decoder] decodes a [errnum] binary value from [decoder] *)
 
 val decode_pb_response : Pbrt.Decoder.t -> response
 (** [decode_pb_response decoder] decodes a [response] binary value from [decoder] *)

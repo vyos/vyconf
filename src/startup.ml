@@ -78,44 +78,16 @@ let create_server accept_connection sock =
         Lwt_unix.accept sock >>= accept_connection >>= serve
     in serve
 
-(* strip commponent version string *)
-let strip_version s =
-    let rex = Pcre.regexp ~flags:[`MULTILINE;`DOTALL] "(^//.*)" in
-    let res = Pcre.split ~max:0 ~rex s in
-    match res with
-    | h :: _ -> h
-    | [] -> panic "Failure applying regex to config string"
-
-(** Load the appliance configuration file *)
-let load_config file =
-    try
-        let chan = open_in file in
-        let s = really_input_string chan (in_channel_length chan) in
-        let config = strip_version s |> Vyos1x.Parser.from_string in
-        Ok config
-    with
-        | Sys_error msg -> Error msg
-        | Vyos1x.Util.Syntax_error (opt, msg) ->
-            begin
-                match opt with
-                | None ->
-                    let out = Printf.sprintf "Parse error: %s\n" msg
-                    in Error out
-                | Some (line, pos) ->
-                    let out = Printf.sprintf "Parse error: %s line %d pos %d\n" msg line pos
-                    in Error out
-            end
-
 (** Load the appliance configuration file or the fallback config *)
 let load_config_failsafe main fallback =
-    let res = load_config main in
+    let res = Vyos1x.Config_file.load_config main in
     match res with
     | Ok config -> config
     | Error msg -> 
         Lwt_log.error
           (Printf.sprintf "Failed to load config file %s: %s. Attempting to load fallback config %s" main msg fallback) |>
           Lwt.ignore_result;
-        let res = load_config fallback in
+        let res = Vyos1x.Config_file.load_config fallback in
         begin
             match res with
             | Ok config -> config

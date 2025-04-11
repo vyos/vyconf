@@ -14,8 +14,6 @@ val create_server :
     (Lwt_unix.file_descr * Lwt_unix.sockaddr -> unit Lwt.t) ->
     Lwt_unix.file_descr -> unit -> 'a Lwt.t
 
-val load_config : string -> (Vyos1x.Config_tree.t, string) result
-
 val load_config_failsafe : string -> string -> Vyos1x.Config_tree.t
 
 val load_interface_definitions : string -> (Vyos1x.Reference_tree.t, string) result

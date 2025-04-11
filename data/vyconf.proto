@@ -9,7 +9,7 @@ message Request {
     OutJSON = 1;
   }
 
-  message Status {
+  message Prompt {
   }
 
   message SetupSession {
@@ -32,6 +32,14 @@ message Request {
 
   message Delete {
     repeated string Path = 1;
+  }
+
+  message Discard {
+    optional int32 dummy = 1;
+  }
+
+  message SessionChanged {
+    optional int32 dummy = 1;
   }
 
   message Rename {
@@ -125,7 +133,7 @@ message Request {
 
 
   oneof msg {
-    Status status = 1;
+    Prompt prompt = 1;
     SetupSession setup_session = 2;
     Set set = 3;
     Delete delete = 4;
@@ -148,6 +156,9 @@ message Request {
     Validate validate = 21;
     Teardown teardown = 22;
     ReloadReftree reload_reftree = 23;
+    Load load = 24;
+    Discard discard = 25;
+    SessionChanged session_changed = 26;
   }
 }
 
@@ -156,7 +167,7 @@ message RequestEnvelope {
     required Request request = 2;
 }
 
-enum Status {
+enum Errnum {
   SUCCESS = 0;
   FAIL = 1;
   INVALID_PATH = 2;
@@ -169,7 +180,7 @@ enum Status {
 }
 
 message Response {
-  required Status status = 1;
+  required Errnum status = 1;
   optional string output = 2;
   optional string error = 3;
   optional string warning = 4;
