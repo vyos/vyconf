@@ -48,8 +48,8 @@ let do_request client req =
     let%lwt resp = Vyconf_connect.Message.read client.ic in
     decode_pb_response (Pbrt.Decoder.of_bytes resp) |> Lwt.return
 
-let get_status client =
-    let req = Status in
+let prompt client =
+    let req = Prompt in
     let%lwt resp = do_request client req in
     Lwt.return resp
 

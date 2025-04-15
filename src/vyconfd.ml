@@ -95,6 +95,10 @@ let teardown token =
     with Not_found ->
         {response_tmpl with status=Fail; error=(Some "Session not found")}
 
+let session_changed world token (_req: request_session_changed) =
+    if Session.session_changed world (find_session token) then response_tmpl
+    else {response_tmpl with status=Fail}
+
 let exists world token (req: request_exists) =
     if Session.exists world (find_session token) req.path then response_tmpl
     else {response_tmpl with status=Fail}
@@ -160,6 +164,29 @@ let delete world token (req: request_delete) =
         let () = (Lwt_log.debug @@ Printf.sprintf "[%s]\n" (Vyos1x.Util.string_of_list req.path)) |> Lwt.ignore_result in
         let session = Session.delete world (find_session token) req.path in
         Hashtbl.replace sessions token session;
+        response_tmpl
+    with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
+
+let discard world token (_req: request_discard) =
+    try
+        let session = Session.discard world (find_session token)
+        in
+        Hashtbl.replace sessions token session;
+        response_tmpl
+    with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
+
+let load world token (req: request_load) =
+    try
+        let session = Session.load world (find_session token) req.location
+        in
+        Hashtbl.replace sessions token session;
+        response_tmpl
+    with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
+
+let save world token (req: request_save) =
+    try
+        let _ = Session.save world (find_session token) req.location
+        in
         response_tmpl
     with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
 
@@ -236,7 +263,7 @@ let rec handle_connection world ic oc () =
                | _ as req ->
                begin
                     (match req with
-                    | _, Status -> response_tmpl
+                    | _, Prompt -> response_tmpl
                     | _, Setup_session r -> setup_session world r
                     | _, Reload_reftree r -> reload_reftree world r
                     | None, _ -> {response_tmpl with status=Fail; output=(Some "Operation requires session token")}
@@ -251,6 +278,10 @@ let rec handle_connection world ic oc () =
                     | Some t, Validate r -> validate world t r
                     | Some t, Set r -> set world t r
                     | Some t, Delete r -> delete world t r
+                    | Some t, Discard r -> discard world t r
+                    | Some t, Session_changed r -> session_changed world t r
+                    | Some t, Load r -> load world t r
+                    | Some t, Save r -> save world t r
                     | _ -> failwith "Unimplemented"
                     ) |> Lwt.return
                end

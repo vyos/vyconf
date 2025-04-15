@@ -8,7 +8,7 @@ type request_output_format =
   | Out_plain 
   | Out_json 
 
-type request_status = unit
+type request_prompt = unit
 
 type request_setup_session = {
   client_application : string option;
@@ -30,6 +30,14 @@ type request_set = {
 
 type request_delete = {
   path : string list;
+}
+
+type request_discard = {
+  dummy : int32 option;
+}
+
+type request_session_changed = {
+  dummy : int32 option;
 }
 
 type request_rename = {
@@ -118,7 +126,7 @@ type request_reload_reftree = {
 }
 
 type request =
-  | Status
+  | Prompt
   | Setup_session of request_setup_session
   | Set of request_set
   | Delete of request_delete
@@ -141,13 +149,16 @@ type request =
   | Validate of request_validate
   | Teardown of request_teardown
   | Reload_reftree of request_reload_reftree
+  | Load of request_load
+  | Discard of request_discard
+  | Session_changed of request_session_changed
 
 type request_envelope = {
   token : string option;
   request : request;
 }
 
-type status =
+type errnum =
   | Success 
   | Fail 
   | Invalid_path 
@@ -159,7 +170,7 @@ type status =
   | Path_already_exists 
 
 type response = {
-  status : status;
+  status : errnum;
   output : string option;
   error : string option;
   warning : string option;
@@ -169,7 +180,7 @@ let rec default_request_config_format () = (Curly:request_config_format)
 
 let rec default_request_output_format () = (Out_plain:request_output_format)
 
-let rec default_request_status = ()
+let rec default_request_prompt = ()
 
 let rec default_request_setup_session 
   ?client_application:((client_application:string option) = None)
@@ -203,6 +214,18 @@ let rec default_request_delete
   ?path:((path:string list) = [])
   () : request_delete  = {
   path;
+}
+
+let rec default_request_discard 
+  ?dummy:((dummy:int32 option) = None)
+  () : request_discard  = {
+  dummy;
+}
+
+let rec default_request_session_changed 
+  ?dummy:((dummy:int32 option) = None)
+  () : request_session_changed  = {
+  dummy;
 }
 
 let rec default_request_rename 
@@ -339,7 +362,7 @@ let rec default_request_reload_reftree
   on_behalf_of;
 }
 
-let rec default_request (): request = Status
+let rec default_request (): request = Prompt
 
 let rec default_request_envelope 
   ?token:((token:string option) = None)
@@ -349,10 +372,10 @@ let rec default_request_envelope
   request;
 }
 
-let rec default_status () = (Success:status)
+let rec default_errnum () = (Success:errnum)
 
 let rec default_response 
-  ?status:((status:status) = default_status ())
+  ?status:((status:errnum) = default_errnum ())
   ?output:((output:string option) = None)
   ?error:((error:string option) = None)
   ?warning:((warning:string option) = None)
@@ -405,6 +428,22 @@ type request_delete_mutable = {
 
 let default_request_delete_mutable () : request_delete_mutable = {
   path = [];
+}
+
+type request_discard_mutable = {
+  mutable dummy : int32 option;
+}
+
+let default_request_discard_mutable () : request_discard_mutable = {
+  dummy = None;
+}
+
+type request_session_changed_mutable = {
+  mutable dummy : int32 option;
+}
+
+let default_request_session_changed_mutable () : request_session_changed_mutable = {
+  dummy = None;
 }
 
 type request_rename_mutable = {
@@ -580,14 +619,14 @@ let default_request_envelope_mutable () : request_envelope_mutable = {
 }
 
 type response_mutable = {
-  mutable status : status;
+  mutable status : errnum;
   mutable output : string option;
   mutable error : string option;
   mutable warning : string option;
 }
 
 let default_response_mutable () : response_mutable = {
-  status = default_status ();
+  status = default_errnum ();
   output = None;
   error = None;
   warning = None;
@@ -607,7 +646,7 @@ let rec pp_request_output_format fmt (v:request_output_format) =
   | Out_plain -> Format.fprintf fmt "Out_plain"
   | Out_json -> Format.fprintf fmt "Out_json"
 
-let rec pp_request_status fmt (v:request_status) = 
+let rec pp_request_prompt fmt (v:request_prompt) = 
   let pp_i fmt () =
     Pbrt.Pp.pp_unit fmt ()
   in
@@ -642,6 +681,18 @@ let rec pp_request_set fmt (v:request_set) =
 let rec pp_request_delete fmt (v:request_delete) = 
   let pp_i fmt () =
     Pbrt.Pp.pp_record_field ~first:true "path" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.path;
+  in
+  Pbrt.Pp.pp_brk pp_i fmt ()
+
+let rec pp_request_discard fmt (v:request_discard) = 
+  let pp_i fmt () =
+    Pbrt.Pp.pp_record_field ~first:true "dummy" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.dummy;
+  in
+  Pbrt.Pp.pp_brk pp_i fmt ()
+
+let rec pp_request_session_changed fmt (v:request_session_changed) = 
+  let pp_i fmt () =
+    Pbrt.Pp.pp_record_field ~first:true "dummy" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.dummy;
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
 
@@ -772,7 +823,7 @@ let rec pp_request_reload_reftree fmt (v:request_reload_reftree) =
 
 let rec pp_request fmt (v:request) =
   match v with
-  | Status  -> Format.fprintf fmt "Status"
+  | Prompt  -> Format.fprintf fmt "Prompt"
   | Setup_session x -> Format.fprintf fmt "@[<hv2>Setup_session(@,%a)@]" pp_request_setup_session x
   | Set x -> Format.fprintf fmt "@[<hv2>Set(@,%a)@]" pp_request_set x
   | Delete x -> Format.fprintf fmt "@[<hv2>Delete(@,%a)@]" pp_request_delete x
@@ -795,6 +846,9 @@ let rec pp_request fmt (v:request) =
   | Validate x -> Format.fprintf fmt "@[<hv2>Validate(@,%a)@]" pp_request_validate x
   | Teardown x -> Format.fprintf fmt "@[<hv2>Teardown(@,%a)@]" pp_request_teardown x
   | Reload_reftree x -> Format.fprintf fmt "@[<hv2>Reload_reftree(@,%a)@]" pp_request_reload_reftree x
+  | Load x -> Format.fprintf fmt "@[<hv2>Load(@,%a)@]" pp_request_load x
+  | Discard x -> Format.fprintf fmt "@[<hv2>Discard(@,%a)@]" pp_request_discard x
+  | Session_changed x -> Format.fprintf fmt "@[<hv2>Session_changed(@,%a)@]" pp_request_session_changed x
 
 let rec pp_request_envelope fmt (v:request_envelope) = 
   let pp_i fmt () =
@@ -803,7 +857,7 @@ let rec pp_request_envelope fmt (v:request_envelope) =
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
 
-let rec pp_status fmt (v:status) =
+let rec pp_errnum fmt (v:errnum) =
   match v with
   | Success -> Format.fprintf fmt "Success"
   | Fail -> Format.fprintf fmt "Fail"
@@ -817,7 +871,7 @@ let rec pp_status fmt (v:status) =
 
 let rec pp_response fmt (v:response) = 
   let pp_i fmt () =
-    Pbrt.Pp.pp_record_field ~first:true "status" pp_status fmt v.status;
+    Pbrt.Pp.pp_record_field ~first:true "status" pp_errnum fmt v.status;
     Pbrt.Pp.pp_record_field ~first:false "output" (Pbrt.Pp.pp_option Pbrt.Pp.pp_string) fmt v.output;
     Pbrt.Pp.pp_record_field ~first:false "error" (Pbrt.Pp.pp_option Pbrt.Pp.pp_string) fmt v.error;
     Pbrt.Pp.pp_record_field ~first:false "warning" (Pbrt.Pp.pp_option Pbrt.Pp.pp_string) fmt v.warning;
@@ -838,7 +892,7 @@ let rec encode_pb_request_output_format (v:request_output_format) encoder =
   | Out_plain -> Pbrt.Encoder.int_as_varint (0) encoder
   | Out_json -> Pbrt.Encoder.int_as_varint 1 encoder
 
-let rec encode_pb_request_status (v:request_status) encoder = 
+let rec encode_pb_request_prompt (v:request_prompt) encoder = 
 ()
 
 let rec encode_pb_request_setup_session (v:request_setup_session) encoder = 
@@ -890,6 +944,24 @@ let rec encode_pb_request_delete (v:request_delete) encoder =
     Pbrt.Encoder.string x encoder;
     Pbrt.Encoder.key 1 Pbrt.Bytes encoder; 
   ) v.path encoder;
+  ()
+
+let rec encode_pb_request_discard (v:request_discard) encoder = 
+  begin match v.dummy with
+  | Some x -> 
+    Pbrt.Encoder.int32_as_varint x encoder;
+    Pbrt.Encoder.key 1 Pbrt.Varint encoder; 
+  | None -> ();
+  end;
+  ()
+
+let rec encode_pb_request_session_changed (v:request_session_changed) encoder = 
+  begin match v.dummy with
+  | Some x -> 
+    Pbrt.Encoder.int32_as_varint x encoder;
+    Pbrt.Encoder.key 1 Pbrt.Varint encoder; 
+  | None -> ();
+  end;
   ()
 
 let rec encode_pb_request_rename (v:request_rename) encoder = 
@@ -1084,7 +1156,7 @@ let rec encode_pb_request_reload_reftree (v:request_reload_reftree) encoder =
 
 let rec encode_pb_request (v:request) encoder = 
   begin match v with
-  | Status ->
+  | Prompt ->
     Pbrt.Encoder.key 1 Pbrt.Bytes encoder; 
     Pbrt.Encoder.empty_nested encoder
   | Setup_session x ->
@@ -1153,6 +1225,15 @@ let rec encode_pb_request (v:request) encoder =
   | Reload_reftree x ->
     Pbrt.Encoder.nested encode_pb_request_reload_reftree x encoder;
     Pbrt.Encoder.key 23 Pbrt.Bytes encoder; 
+  | Load x ->
+    Pbrt.Encoder.nested encode_pb_request_load x encoder;
+    Pbrt.Encoder.key 24 Pbrt.Bytes encoder; 
+  | Discard x ->
+    Pbrt.Encoder.nested encode_pb_request_discard x encoder;
+    Pbrt.Encoder.key 25 Pbrt.Bytes encoder; 
+  | Session_changed x ->
+    Pbrt.Encoder.nested encode_pb_request_session_changed x encoder;
+    Pbrt.Encoder.key 26 Pbrt.Bytes encoder; 
   end
 
 let rec encode_pb_request_envelope (v:request_envelope) encoder = 
@@ -1166,7 +1247,7 @@ let rec encode_pb_request_envelope (v:request_envelope) encoder =
   Pbrt.Encoder.key 2 Pbrt.Bytes encoder; 
   ()
 
-let rec encode_pb_status (v:status) encoder =
+let rec encode_pb_errnum (v:errnum) encoder =
   match v with
   | Success -> Pbrt.Encoder.int_as_varint (0) encoder
   | Fail -> Pbrt.Encoder.int_as_varint 1 encoder
@@ -1179,7 +1260,7 @@ let rec encode_pb_status (v:status) encoder =
   | Path_already_exists -> Pbrt.Encoder.int_as_varint 8 encoder
 
 let rec encode_pb_response (v:response) encoder = 
-  encode_pb_status v.status encoder;
+  encode_pb_errnum v.status encoder;
   Pbrt.Encoder.key 1 Pbrt.Varint encoder; 
   begin match v.output with
   | Some x -> 
@@ -1217,11 +1298,11 @@ let rec decode_pb_request_output_format d =
   | 1 -> (Out_json:request_output_format)
   | _ -> Pbrt.Decoder.malformed_variant "request_output_format"
 
-let rec decode_pb_request_status d =
+let rec decode_pb_request_prompt d =
   match Pbrt.Decoder.key d with
   | None -> ();
   | Some (_, pk) -> 
-    Pbrt.Decoder.unexpected_payload "Unexpected fields in empty message(request_status)" pk
+    Pbrt.Decoder.unexpected_payload "Unexpected fields in empty message(request_prompt)" pk
 
 let rec decode_pb_request_setup_session d =
   let v = default_request_setup_session_mutable () in
@@ -1327,6 +1408,42 @@ let rec decode_pb_request_delete d =
   ({
     path = v.path;
   } : request_delete)
+
+let rec decode_pb_request_discard d =
+  let v = default_request_discard_mutable () in
+  let continue__= ref true in
+  while !continue__ do
+    match Pbrt.Decoder.key d with
+    | None -> (
+    ); continue__ := false
+    | Some (1, Pbrt.Varint) -> begin
+      v.dummy <- Some (Pbrt.Decoder.int32_as_varint d);
+    end
+    | Some (1, pk) -> 
+      Pbrt.Decoder.unexpected_payload "Message(request_discard), field(1)" pk
+    | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
+  done;
+  ({
+    dummy = v.dummy;
+  } : request_discard)
+
+let rec decode_pb_request_session_changed d =
+  let v = default_request_session_changed_mutable () in
+  let continue__= ref true in
+  while !continue__ do
+    match Pbrt.Decoder.key d with
+    | None -> (
+    ); continue__ := false
+    | Some (1, Pbrt.Varint) -> begin
+      v.dummy <- Some (Pbrt.Decoder.int32_as_varint d);
+    end
+    | Some (1, pk) -> 
+      Pbrt.Decoder.unexpected_payload "Message(request_session_changed), field(1)" pk
+    | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
+  done;
+  ({
+    dummy = v.dummy;
+  } : request_session_changed)
 
 let rec decode_pb_request_rename d =
   let v = default_request_rename_mutable () in
@@ -1767,7 +1884,7 @@ let rec decode_pb_request d =
       | None -> Pbrt.Decoder.malformed_variant "request"
       | Some (1, _) -> begin 
         Pbrt.Decoder.empty_nested d ;
-        (Status : request)
+        (Prompt : request)
       end
       | Some (2, _) -> (Setup_session (decode_pb_request_setup_session (Pbrt.Decoder.nested d)) : request) 
       | Some (3, _) -> (Set (decode_pb_request_set (Pbrt.Decoder.nested d)) : request) 
@@ -1797,6 +1914,9 @@ let rec decode_pb_request d =
       | Some (21, _) -> (Validate (decode_pb_request_validate (Pbrt.Decoder.nested d)) : request) 
       | Some (22, _) -> (Teardown (decode_pb_request_teardown (Pbrt.Decoder.nested d)) : request) 
       | Some (23, _) -> (Reload_reftree (decode_pb_request_reload_reftree (Pbrt.Decoder.nested d)) : request) 
+      | Some (24, _) -> (Load (decode_pb_request_load (Pbrt.Decoder.nested d)) : request) 
+      | Some (25, _) -> (Discard (decode_pb_request_discard (Pbrt.Decoder.nested d)) : request) 
+      | Some (26, _) -> (Session_changed (decode_pb_request_session_changed (Pbrt.Decoder.nested d)) : request) 
       | Some (n, payload_kind) -> (
         Pbrt.Decoder.skip d payload_kind; 
         loop () 
@@ -1832,18 +1952,18 @@ let rec decode_pb_request_envelope d =
     request = v.request;
   } : request_envelope)
 
-let rec decode_pb_status d = 
+let rec decode_pb_errnum d = 
   match Pbrt.Decoder.int_as_varint d with
-  | 0 -> (Success:status)
-  | 1 -> (Fail:status)
-  | 2 -> (Invalid_path:status)
-  | 3 -> (Invalid_value:status)
-  | 4 -> (Commit_in_progress:status)
-  | 5 -> (Configuration_locked:status)
-  | 6 -> (Internal_error:status)
-  | 7 -> (Permission_denied:status)
-  | 8 -> (Path_already_exists:status)
-  | _ -> Pbrt.Decoder.malformed_variant "status"
+  | 0 -> (Success:errnum)
+  | 1 -> (Fail:errnum)
+  | 2 -> (Invalid_path:errnum)
+  | 3 -> (Invalid_value:errnum)
+  | 4 -> (Commit_in_progress:errnum)
+  | 5 -> (Configuration_locked:errnum)
+  | 6 -> (Internal_error:errnum)
+  | 7 -> (Permission_denied:errnum)
+  | 8 -> (Path_already_exists:errnum)
+  | _ -> Pbrt.Decoder.malformed_variant "errnum"
 
 let rec decode_pb_response d =
   let v = default_response_mutable () in
@@ -1854,7 +1974,7 @@ let rec decode_pb_response d =
     | None -> (
     ); continue__ := false
     | Some (1, Pbrt.Varint) -> begin
-      v.status <- decode_pb_status d; status_is_set := true;
+      v.status <- decode_pb_errnum d; status_is_set := true;
     end
     | Some (1, pk) -> 
       Pbrt.Decoder.unexpected_payload "Message(response), field(1)" pk

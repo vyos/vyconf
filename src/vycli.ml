@@ -2,7 +2,7 @@ open Vyconfd_client.Vyconf_client
 open Vyconf_connect.Vyconf_pbt
 
 type op_t =
-    | OpStatus
+    | OpPrompt
     | OpSetupSession
     | OpTeardownSession
     | OpShowConfig
@@ -35,7 +35,7 @@ let args = [
     ("--exists", Arg.Unit (fun () -> op := Some OpExists), "Check if specified path exists");
     ("--list-children", Arg.Unit (fun () -> op := Some OpListChildren), "List children of the node at the specified path");
     ("--show-config", Arg.Unit (fun () -> op := Some OpShowConfig), "Show the configuration at the specified path");
-    ("--status", Arg.Unit (fun () -> op := Some OpStatus), "Send a status/keepalive message");
+    ("--prompt", Arg.Unit (fun () -> op := Some OpPrompt), "Send a status/keepalive message");
     ("--validate", Arg.Unit (fun () -> op := Some OpValidate), "Validate path");
     ("--reload-reftree", Arg.Unit (fun () -> op := Some OpReloadReftree), "Reload reference tree");
    ]
@@ -59,8 +59,8 @@ let main socket op path out_format config_format =
     | Some o ->
         begin
             match o with
-            | OpStatus ->
-                let%lwt resp = get_status client in
+            | OpPrompt ->
+                let%lwt resp = prompt client in
                 begin
                     match resp.status with
                     | Success -> Ok "" |> Lwt.return
