@@ -147,7 +147,7 @@ let get_node_data rt ct src (path, cs') t =
     in (path, cs)
 
 let get_commit_set rt ct src =
-    snd (VT.fold_tree_with_path (get_node_data rt ct src) ([], CS.empty) ct)
+    VT.fold_tree_with_path (get_node_data rt ct src) ([], CS.empty) ct
 
 (* for initial consistency with the legacy ordering of delete and add
    queues, enforce the following subtlety: if a path in the delete tree is
