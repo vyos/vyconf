@@ -405,8 +405,9 @@ let get_completion_env ?(legacy_format=false) w s path =
         | h :: tl -> (h, tl)
     in
     let config = get_proposed_config w s in
+    let path_total = s.edit_level @ path in
     let res =
-        Vyos1x.Completion.get_completion_env_str ~legacy_format w.reference_tree config op path
+        Vyos1x.Completion.get_completion_env_str ~legacy_format w.reference_tree config op path_total
     in
     match res with
     | Ok env -> env
