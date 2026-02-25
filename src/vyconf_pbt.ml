@@ -67,16 +67,14 @@ type request_session_changed = {
   dummy : int32 option;
 }
 
-type request_rename = {
-  edit_level : string list;
-  source : string;
-  destination : string;
+type request_copy = {
+  source : string list;
+  destination : string list;
 }
 
-type request_copy = {
-  edit_level : string list;
-  source : string;
-  destination : string;
+type request_rename = {
+  source : string list;
+  destination : string list;
 }
 
 type request_comment = {
@@ -360,22 +358,18 @@ let rec default_request_session_changed
   dummy;
 }
 
-let rec default_request_rename 
-  ?edit_level:((edit_level:string list) = [])
-  ?source:((source:string) = "")
-  ?destination:((destination:string) = "")
-  () : request_rename  = {
-  edit_level;
+let rec default_request_copy 
+  ?source:((source:string list) = [])
+  ?destination:((destination:string list) = [])
+  () : request_copy  = {
   source;
   destination;
 }
 
-let rec default_request_copy 
-  ?edit_level:((edit_level:string list) = [])
-  ?source:((source:string) = "")
-  ?destination:((destination:string) = "")
-  () : request_copy  = {
-  edit_level;
+let rec default_request_rename 
+  ?source:((source:string list) = [])
+  ?destination:((destination:string list) = [])
+  () : request_rename  = {
   source;
   destination;
 }
@@ -702,28 +696,24 @@ let default_request_session_changed_mutable () : request_session_changed_mutable
   dummy = None;
 }
 
-type request_rename_mutable = {
-  mutable edit_level : string list;
-  mutable source : string;
-  mutable destination : string;
-}
-
-let default_request_rename_mutable () : request_rename_mutable = {
-  edit_level = [];
-  source = "";
-  destination = "";
-}
-
 type request_copy_mutable = {
-  mutable edit_level : string list;
-  mutable source : string;
-  mutable destination : string;
+  mutable source : string list;
+  mutable destination : string list;
 }
 
 let default_request_copy_mutable () : request_copy_mutable = {
-  edit_level = [];
-  source = "";
-  destination = "";
+  source = [];
+  destination = [];
+}
+
+type request_rename_mutable = {
+  mutable source : string list;
+  mutable destination : string list;
+}
+
+let default_request_rename_mutable () : request_rename_mutable = {
+  source = [];
+  destination = [];
 }
 
 type request_comment_mutable = {
@@ -1079,19 +1069,17 @@ let rec pp_request_session_changed fmt (v:request_session_changed) =
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
 
-let rec pp_request_rename fmt (v:request_rename) = 
+let rec pp_request_copy fmt (v:request_copy) = 
   let pp_i fmt () =
-    Pbrt.Pp.pp_record_field ~first:true "edit_level" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.edit_level;
-    Pbrt.Pp.pp_record_field ~first:false "source" Pbrt.Pp.pp_string fmt v.source;
-    Pbrt.Pp.pp_record_field ~first:false "destination" Pbrt.Pp.pp_string fmt v.destination;
+    Pbrt.Pp.pp_record_field ~first:true "source" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.source;
+    Pbrt.Pp.pp_record_field ~first:false "destination" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.destination;
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
 
-let rec pp_request_copy fmt (v:request_copy) = 
+let rec pp_request_rename fmt (v:request_rename) = 
   let pp_i fmt () =
-    Pbrt.Pp.pp_record_field ~first:true "edit_level" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.edit_level;
-    Pbrt.Pp.pp_record_field ~first:false "source" Pbrt.Pp.pp_string fmt v.source;
-    Pbrt.Pp.pp_record_field ~first:false "destination" Pbrt.Pp.pp_string fmt v.destination;
+    Pbrt.Pp.pp_record_field ~first:true "source" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.source;
+    Pbrt.Pp.pp_record_field ~first:false "destination" (Pbrt.Pp.pp_list Pbrt.Pp.pp_string) fmt v.destination;
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
 
@@ -1495,26 +1483,26 @@ let rec encode_pb_request_session_changed (v:request_session_changed) encoder =
   end;
   ()
 
-let rec encode_pb_request_rename (v:request_rename) encoder = 
-  Pbrt.List_util.rev_iter_with (fun x encoder -> 
-    Pbrt.Encoder.string x encoder;
-    Pbrt.Encoder.key 1 Pbrt.Bytes encoder; 
-  ) v.edit_level encoder;
-  Pbrt.Encoder.string v.source encoder;
-  Pbrt.Encoder.key 2 Pbrt.Bytes encoder; 
-  Pbrt.Encoder.string v.destination encoder;
-  Pbrt.Encoder.key 3 Pbrt.Bytes encoder; 
-  ()
-
 let rec encode_pb_request_copy (v:request_copy) encoder = 
   Pbrt.List_util.rev_iter_with (fun x encoder -> 
     Pbrt.Encoder.string x encoder;
     Pbrt.Encoder.key 1 Pbrt.Bytes encoder; 
-  ) v.edit_level encoder;
-  Pbrt.Encoder.string v.source encoder;
-  Pbrt.Encoder.key 2 Pbrt.Bytes encoder; 
-  Pbrt.Encoder.string v.destination encoder;
-  Pbrt.Encoder.key 3 Pbrt.Bytes encoder; 
+  ) v.source encoder;
+  Pbrt.List_util.rev_iter_with (fun x encoder -> 
+    Pbrt.Encoder.string x encoder;
+    Pbrt.Encoder.key 2 Pbrt.Bytes encoder; 
+  ) v.destination encoder;
+  ()
+
+let rec encode_pb_request_rename (v:request_rename) encoder = 
+  Pbrt.List_util.rev_iter_with (fun x encoder -> 
+    Pbrt.Encoder.string x encoder;
+    Pbrt.Encoder.key 1 Pbrt.Bytes encoder; 
+  ) v.source encoder;
+  Pbrt.List_util.rev_iter_with (fun x encoder -> 
+    Pbrt.Encoder.string x encoder;
+    Pbrt.Encoder.key 2 Pbrt.Bytes encoder; 
+  ) v.destination encoder;
   ()
 
 let rec encode_pb_request_comment (v:request_comment) encoder = 
@@ -2252,75 +2240,57 @@ let rec decode_pb_request_session_changed d =
     dummy = v.dummy;
   } : request_session_changed)
 
-let rec decode_pb_request_rename d =
-  let v = default_request_rename_mutable () in
-  let continue__= ref true in
-  let destination_is_set = ref false in
-  let source_is_set = ref false in
-  while !continue__ do
-    match Pbrt.Decoder.key d with
-    | None -> (
-      v.edit_level <- List.rev v.edit_level;
-    ); continue__ := false
-    | Some (1, Pbrt.Bytes) -> begin
-      v.edit_level <- (Pbrt.Decoder.string d) :: v.edit_level;
-    end
-    | Some (1, pk) -> 
-      Pbrt.Decoder.unexpected_payload "Message(request_rename), field(1)" pk
-    | Some (2, Pbrt.Bytes) -> begin
-      v.source <- Pbrt.Decoder.string d; source_is_set := true;
-    end
-    | Some (2, pk) -> 
-      Pbrt.Decoder.unexpected_payload "Message(request_rename), field(2)" pk
-    | Some (3, Pbrt.Bytes) -> begin
-      v.destination <- Pbrt.Decoder.string d; destination_is_set := true;
-    end
-    | Some (3, pk) -> 
-      Pbrt.Decoder.unexpected_payload "Message(request_rename), field(3)" pk
-    | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
-  done;
-  begin if not !destination_is_set then Pbrt.Decoder.missing_field "destination" end;
-  begin if not !source_is_set then Pbrt.Decoder.missing_field "source" end;
-  ({
-    edit_level = v.edit_level;
-    source = v.source;
-    destination = v.destination;
-  } : request_rename)
-
 let rec decode_pb_request_copy d =
   let v = default_request_copy_mutable () in
   let continue__= ref true in
-  let destination_is_set = ref false in
-  let source_is_set = ref false in
   while !continue__ do
     match Pbrt.Decoder.key d with
     | None -> (
-      v.edit_level <- List.rev v.edit_level;
+      v.destination <- List.rev v.destination;
+      v.source <- List.rev v.source;
     ); continue__ := false
     | Some (1, Pbrt.Bytes) -> begin
-      v.edit_level <- (Pbrt.Decoder.string d) :: v.edit_level;
+      v.source <- (Pbrt.Decoder.string d) :: v.source;
     end
     | Some (1, pk) -> 
       Pbrt.Decoder.unexpected_payload "Message(request_copy), field(1)" pk
     | Some (2, Pbrt.Bytes) -> begin
-      v.source <- Pbrt.Decoder.string d; source_is_set := true;
+      v.destination <- (Pbrt.Decoder.string d) :: v.destination;
     end
     | Some (2, pk) -> 
       Pbrt.Decoder.unexpected_payload "Message(request_copy), field(2)" pk
-    | Some (3, Pbrt.Bytes) -> begin
-      v.destination <- Pbrt.Decoder.string d; destination_is_set := true;
-    end
-    | Some (3, pk) -> 
-      Pbrt.Decoder.unexpected_payload "Message(request_copy), field(3)" pk
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
   done;
-  begin if not !destination_is_set then Pbrt.Decoder.missing_field "destination" end;
-  begin if not !source_is_set then Pbrt.Decoder.missing_field "source" end;
   ({
-    edit_level = v.edit_level;
     source = v.source;
     destination = v.destination;
   } : request_copy)
+
+let rec decode_pb_request_rename d =
+  let v = default_request_rename_mutable () in
+  let continue__= ref true in
+  while !continue__ do
+    match Pbrt.Decoder.key d with
+    | None -> (
+      v.destination <- List.rev v.destination;
+      v.source <- List.rev v.source;
+    ); continue__ := false
+    | Some (1, Pbrt.Bytes) -> begin
+      v.source <- (Pbrt.Decoder.string d) :: v.source;
+    end
+    | Some (1, pk) -> 
+      Pbrt.Decoder.unexpected_payload "Message(request_rename), field(1)" pk
+    | Some (2, Pbrt.Bytes) -> begin
+      v.destination <- (Pbrt.Decoder.string d) :: v.destination;
+    end
+    | Some (2, pk) -> 
+      Pbrt.Decoder.unexpected_payload "Message(request_rename), field(2)" pk
+    | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind
+  done;
+  ({
+    source = v.source;
+    destination = v.destination;
+  } : request_rename)
 
 let rec decode_pb_request_comment d =
   let v = default_request_comment_mutable () in
