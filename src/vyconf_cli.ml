@@ -5,12 +5,16 @@ type op_t =
     | OpSet
     | OpDelete
     | OpDiscard
+    | OpCopy
+    | OpRename
 
 let op_of_string s =
     match s with
     | "vy_set" -> OpSet
     | "vy_delete" -> OpDelete
     | "vy_discard" -> OpDiscard
+    | "vy_copy" -> OpCopy
+    | "vy_rename" -> OpRename
     | _ -> failwith (Printf.sprintf "Unknown operation %s" s)
 
 let config_format_of_string s =
@@ -76,6 +80,8 @@ let main op path =
         | OpSet -> set c path
         | OpDelete -> delete c path
         | OpDiscard -> discard c
+        | OpCopy -> copy c path
+        | OpRename -> rename c path
         end
     | Error e -> Error e |> Lwt.return
     in
@@ -109,5 +115,7 @@ let () =
     match op, path_list with
     | OpSet, [] | OpDelete, [] ->
         let () = print_endline "Must specify config path" in exit 1
+    | OpCopy, [] | OpRename, [] ->
+        let () = print_endline "Copy and rename operations require configuration paths" in exit 1
     | _, _ ->
         let result = Lwt_main.run (main op path_list) in exit result
