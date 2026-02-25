@@ -263,6 +263,22 @@ let discard world token (_req: request_discard) =
         response_tmpl
     with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
 
+let copy world token (req: request_copy) =
+    try
+        let session = Session.copy world (find_session token) req.source req.destination
+        in
+        Hashtbl.replace sessions token session;
+        response_tmpl
+    with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
+
+let rename world token (req: request_rename) =
+    try
+        let session = Session.rename world (find_session token) req.source req.destination
+        in
+        Hashtbl.replace sessions token session;
+        response_tmpl
+    with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
+
 let load world token (req: request_load) =
     try
         let session = Session.load world (find_session token) req.location req.cached
@@ -505,6 +521,8 @@ let rec handle_connection world ic oc () =
                     | Some t, Reference_path_exists r -> reference_path_exists world t r
                     | Some t, Get_path_type r -> get_path_type world t r
                     | Some t, Get_completion_env r -> get_completion_env world t r
+                    | Some t, Copy r -> copy world t r
+                    | Some t, Rename r -> rename world t r
                     | _ -> failwith "Unimplemented"
                     ) |> Lwt.return
                end
