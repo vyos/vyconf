@@ -267,6 +267,53 @@ let aux_delete w s path name tagval =
 let discard _w s =
     { s with changeset = []; }
 
+let copy w s p1 p2 =
+    if Vyos1x.Util.is_empty p1
+    then raise (Session_error "Cannot copy an empty path")
+    else
+    if Vyos1x.Util.is_empty p2
+    then raise (Session_error "Cannot copy to an empty path")
+    else
+    let p1_total = s.edit_level @ p1 in
+    let p2_total = s.edit_level @ p2 in
+    let ct = get_proposed_config w s in
+    if not ((VT.exists[@alert "-exn"]) ct p1_total)
+    then
+    let p1_str = Vyos1x.Util.string_of_list p1_total in
+    let out = Printf.sprintf "Configuration path \"%s\" does not exist" p1_str in
+    raise (Session_error out)
+    else
+    let _ = validate w s p2_total in
+    let ct' = (VT.copy[@alert "-exn"]) ct p1_total p2_total in
+    let changeset' = get_changeset w s ct ct' in
+    { s with changeset = changeset' @ s.changeset }
+
+let rename w s p1 p2 =
+    if Vyos1x.Util.is_empty p1
+    then raise (Session_error "Cannot rename an empty path")
+    else
+    let p2_last =
+      match Vyos1x.Util.get_last p2 with
+      | None -> raise (Session_error "Cannot rename to an empty value")
+      | Some v -> v
+    in
+    if (Vyos1x.Util.drop_last p1) <> (Vyos1x.Util.drop_last p2)
+    then raise (Session_error "Cannot rename a node: paths are inconsistent")
+    else
+    let p1_total = s.edit_level @ p1 in
+    let p2_total = s.edit_level @ p2 in
+    let ct = get_proposed_config w s in
+    if not ((VT.exists[@alert "-exn"]) ct p1_total)
+    then
+    let p1_str = Vyos1x.Util.string_of_list p1_total in
+    let out = Printf.sprintf "Configuration path \"%s\" does not exist" p1_str in
+    raise (Session_error out)
+    else
+    let _ = validate w s p2_total in
+    let ct' = (VT.rename[@alert "-exn"]) ct p1_total p2_last in
+    let changeset' = get_changeset w s ct ct' in
+    { s with changeset = changeset' @ s.changeset }
+
 let edit_env_str s =
     (* To maintain consistency with classic CLI, we return env variable for
        PS1 on changes to edit level.
@@ -405,8 +452,9 @@ let get_completion_env ?(legacy_format=false) w s path =
         | h :: tl -> (h, tl)
     in
     let config = get_proposed_config w s in
+    let path_total = s.edit_level @ path in
     let res =
-        Vyos1x.Completion.get_completion_env_str ~legacy_format w.reference_tree config op path
+        Vyos1x.Completion.get_completion_env_str ~legacy_format w.reference_tree config op path_total
     in
     match res with
     | Ok env -> env

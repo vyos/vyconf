@@ -69,16 +69,14 @@ message Request {
     optional int32 dummy = 1;
   }
 
-  message Rename {
-    repeated string edit_level = 1;
-    required string source = 2;
-    required string destination = 3;
+  message Copy {
+    repeated string source = 1;
+    repeated string destination = 2;
   }
 
-  message Copy {
-    repeated string edit_level = 1;
-    required string source = 2;
-    required string destination = 3;
+  message Rename {
+    repeated string source = 1;
+    repeated string destination = 2;
   }
 
   message Comment {

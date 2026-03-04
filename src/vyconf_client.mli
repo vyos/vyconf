@@ -55,3 +55,7 @@ val reference_path_exists : t -> string list -> (string, string) result Lwt.t
 val get_path_type : t -> string list -> (string, string) result Lwt.t
 
 val get_completion_env : t -> string list -> (string, string) result Lwt.t
+
+val copy : t -> string list -> (string, string) result Lwt.t
+
+val rename : t -> string list -> (string, string) result Lwt.t

@@ -100,3 +100,7 @@ val reference_path_exists : world -> session_data -> string list -> bool
 val get_path_type : ?legacy_format:bool -> world -> session_data -> string list -> string
 
 val get_completion_env : ?legacy_format:bool -> world -> session_data -> string list -> string
+
+val copy : world -> session_data -> string list -> string list -> session_data
+
+val rename : world -> session_data -> string list -> string list -> session_data

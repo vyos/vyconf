@@ -74,16 +74,14 @@ type request_session_changed = {
   dummy : int32 option;
 }
 
-type request_rename = {
-  edit_level : string list;
-  source : string;
-  destination : string;
+type request_copy = {
+  source : string list;
+  destination : string list;
 }
 
-type request_copy = {
-  edit_level : string list;
-  source : string;
-  destination : string;
+type request_rename = {
+  source : string list;
+  destination : string list;
 }
 
 type request_comment = {
@@ -364,21 +362,19 @@ val default_request_session_changed :
   request_session_changed
 (** [default_request_session_changed ()] is the default value for type [request_session_changed] *)
 
-val default_request_rename : 
-  ?edit_level:string list ->
-  ?source:string ->
-  ?destination:string ->
-  unit ->
-  request_rename
-(** [default_request_rename ()] is the default value for type [request_rename] *)
-
 val default_request_copy : 
-  ?edit_level:string list ->
-  ?source:string ->
-  ?destination:string ->
+  ?source:string list ->
+  ?destination:string list ->
   unit ->
   request_copy
 (** [default_request_copy ()] is the default value for type [request_copy] *)
+
+val default_request_rename : 
+  ?source:string list ->
+  ?destination:string list ->
+  unit ->
+  request_rename
+(** [default_request_rename ()] is the default value for type [request_rename] *)
 
 val default_request_comment : 
   ?path:string list ->
@@ -618,11 +614,11 @@ val pp_request_discard : Format.formatter -> request_discard -> unit
 val pp_request_session_changed : Format.formatter -> request_session_changed -> unit 
 (** [pp_request_session_changed v] formats v *)
 
-val pp_request_rename : Format.formatter -> request_rename -> unit 
-(** [pp_request_rename v] formats v *)
-
 val pp_request_copy : Format.formatter -> request_copy -> unit 
 (** [pp_request_copy v] formats v *)
+
+val pp_request_rename : Format.formatter -> request_rename -> unit 
+(** [pp_request_rename v] formats v *)
 
 val pp_request_comment : Format.formatter -> request_comment -> unit 
 (** [pp_request_comment v] formats v *)
@@ -762,11 +758,11 @@ val encode_pb_request_discard : request_discard -> Pbrt.Encoder.t -> unit
 val encode_pb_request_session_changed : request_session_changed -> Pbrt.Encoder.t -> unit
 (** [encode_pb_request_session_changed v encoder] encodes [v] with the given [encoder] *)
 
-val encode_pb_request_rename : request_rename -> Pbrt.Encoder.t -> unit
-(** [encode_pb_request_rename v encoder] encodes [v] with the given [encoder] *)
-
 val encode_pb_request_copy : request_copy -> Pbrt.Encoder.t -> unit
 (** [encode_pb_request_copy v encoder] encodes [v] with the given [encoder] *)
+
+val encode_pb_request_rename : request_rename -> Pbrt.Encoder.t -> unit
+(** [encode_pb_request_rename v encoder] encodes [v] with the given [encoder] *)
 
 val encode_pb_request_comment : request_comment -> Pbrt.Encoder.t -> unit
 (** [encode_pb_request_comment v encoder] encodes [v] with the given [encoder] *)
@@ -906,11 +902,11 @@ val decode_pb_request_discard : Pbrt.Decoder.t -> request_discard
 val decode_pb_request_session_changed : Pbrt.Decoder.t -> request_session_changed
 (** [decode_pb_request_session_changed decoder] decodes a [request_session_changed] binary value from [decoder] *)
 
-val decode_pb_request_rename : Pbrt.Decoder.t -> request_rename
-(** [decode_pb_request_rename decoder] decodes a [request_rename] binary value from [decoder] *)
-
 val decode_pb_request_copy : Pbrt.Decoder.t -> request_copy
 (** [decode_pb_request_copy decoder] decodes a [request_copy] binary value from [decoder] *)
+
+val decode_pb_request_rename : Pbrt.Decoder.t -> request_rename
+(** [decode_pb_request_rename decoder] decodes a [request_rename] binary value from [decoder] *)
 
 val decode_pb_request_comment : Pbrt.Decoder.t -> request_comment
 (** [decode_pb_request_comment decoder] decodes a [request_comment] binary value from [decoder] *)

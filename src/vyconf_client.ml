@@ -254,3 +254,25 @@ let get_completion_env client path =
     (* legacy getCompletionEnv is silent on error *)
     | Fail -> Error "" |> Lwt.return
     | _ -> Error (Option.value resp.error ~default:"") |> Lwt.return
+
+let copy client path =
+    let path_arr = Array.of_list path in
+    let path1 = Array.to_list (Array.sub path_arr 0 2) in
+    let path2 = Array.to_list (Array.sub path_arr 3 2) in
+    let req = Copy {source=path1; destination=path2;} in
+    let%lwt resp = do_request client req in
+    match resp.status with
+    | Success -> Lwt.return (Ok "")
+    | Fail -> Error (Option.value resp.error ~default:"") |> Lwt.return
+    | _ -> Error (Option.value resp.error ~default:"") |> Lwt.return
+
+let rename client path =
+    let path_arr = Array.of_list path in
+    let path1 = Array.to_list (Array.sub path_arr 0 2) in
+    let path2 = Array.to_list (Array.sub path_arr 3 2) in
+    let req = Rename {source=path1; destination=path2;} in
+    let%lwt resp = do_request client req in
+    match resp.status with
+    | Success -> Lwt.return (Ok "")
+    | Fail -> Error (Option.value resp.error ~default:"") |> Lwt.return
+    | _ -> Error (Option.value resp.error ~default:"") |> Lwt.return
