@@ -39,7 +39,3 @@ Mirror twin: `VyOS-Networks/vyconf` (mirror status not confirmed live in the gen
 - This is pre-1.0 — APIs and IPC shapes are unstable. Coordinate any cross-repo changes with the `vyos-1x` and `vyos1x-config` maintainers.
 - `dune subst` step (`["dune" "subst"] {pinned}`) only runs from a pinned/published opam install; vendored builds skip it.
 - Architecture doc at `architecture.md` explains the verify/generate/apply phasing — read it before adding new commit semantics.
-
----
-
-This file is mirrored on Confluence: [`vyos/vyconf`](https://internal.confluence.vyos.com/wiki/spaces/VYOS/pages/818184628). The Confluence page also carries the per-repo audit data (settings, workflows, secret counts, hygiene) that complements this CLAUDE.md. Edit either side; resync via the documentation pipeline.
