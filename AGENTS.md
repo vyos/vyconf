@@ -32,9 +32,6 @@ Sibling to `vyos/vyos1x-config` (the OCaml library that owns the actual config-t
 - Mergify backports via `@Mergifyio backport <branch>`.
 - OCaml core repos (this, `vyos1x-config`, `vyos-utils`) follow MIT/LGPL upstream norms.
 
-## Mirror relationship
-Mirror twin: `VyOS-Networks/vyconf` (mirror status not confirmed live in the gen-1 pipeline; treat `vyos/*` as canonical).
-
 ## Notes for future contributors
 - This is pre-1.0 — APIs and IPC shapes are unstable. Coordinate any cross-repo changes with the `vyos-1x` and `vyos1x-config` maintainers.
 - `dune subst` step (`["dune" "subst"] {pinned}`) only runs from a pinned/published opam install; vendored builds skip it.
