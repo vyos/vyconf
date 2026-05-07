@@ -10,7 +10,7 @@ Software appliance configuration framework. Future config-session daemon for VyO
 
 ## Build / test / run
 ```
-opam install. --deps-only
+opam install . --deps-only
 dune build -p vyconf
 dune runtest         # ounit2 test suite under test/
 ```
