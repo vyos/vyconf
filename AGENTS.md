@@ -28,7 +28,7 @@ Sibling to `vyos/vyos1x-config` (the OCaml library that owns the actual config-t
 
 ## Conventions
 - Commit/PR title: `component: T12345: description` (Phorge task ID at https://vyos.dev). Enforced by `vyos/.github` reusable.
-- Default branch: `current`. Release-train branches: `current`, `circinus`, `sagitta`, `equuleus`.
+- Default branch: `rolling`. Release-train branches: `rolling`, `circinus`, `sagitta`, `equuleus`.
 - Mergify backports via `@Mergifyio backport <branch>`.
 - OCaml core repos (this, `vyos1x-config`, `vyos-utils`) follow MIT/LGPL upstream norms.
 
