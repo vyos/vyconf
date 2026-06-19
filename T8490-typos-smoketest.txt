@@ -1,0 +1,1 @@
+T8490 typos ruleset smoke test. Safe to delete. Deliberate misspelling follows: recieve
