@@ -191,7 +191,7 @@ let config_result_update c_data n_data =
         [Tree_alg.Nonexistent_child] non reachable
      *)
     match n_data.reply with
-    | None -> c_data (* already exluded in calling function *)
+    | None -> c_data (* already excluded in calling function *)
     | Some r ->
     match r.success, n_data.source with
     | true, ADD ->
