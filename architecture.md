@@ -36,7 +36,7 @@ under a single interface.
 The other problem, apart from unification, that we are aiming to solve is robustness
 and reliability. Many applications simply take any configuration and fail to start
 if it's incorrect, correctness verification is left up to the users. For an appliance
-it's preferrable when in case of user error the incorrect configuration is not applied
+it's preferable when in case of user error the incorrect configuration is not applied
 at all.
 
 The other problem is that configuration of individual applications may be correct,
@@ -44,7 +44,7 @@ but the overall appliance configuration may not, e.g. if the user set an applica
 to listen on specific address, but did not configure the network interface accordingly.
 
 A possible solution to this is to make configuration stateful and atomic. First a 
-proposed configuration is built, then it's commited, and if any stage fails, it's
+proposed configuration is built, then it's committed, and if any stage fails, it's
 rolled back to its previous state. This also simplifies accounting and allows to keep
 configuration revision history and rollback to previous revisions.
 
