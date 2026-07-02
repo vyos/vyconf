@@ -58,8 +58,13 @@ jobs:
       - name: Install dependencies
         run: opam install . --deps-only --with-test --yes
 
+      # --ignore-promoted-rules uses the committed src/*_pbt.ml instead of
+      # re-running the ocaml-protoc codegen (a (mode promote) rule). This is
+      # how the package is built via opam (`dune build -p` implies the same
+      # flag), so CI matches: the committed 2.x-generated bindings are used and
+      # ocaml-protoc is not invoked for codegen.
       - name: Build
-        run: opam exec -- dune build
+        run: opam exec -- dune build --ignore-promoted-rules
 
       - name: Run tests
-        run: opam exec -- dune runtest
+        run: opam exec -- dune runtest --ignore-promoted-rules
