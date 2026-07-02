@@ -32,6 +32,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Build-only job; do not leave the git token in .git/config for
+          # later steps (e.g. the git-pinned vyos1x-config install).
+          persist-credentials: false
 
       - name: Set up OCaml ${{ matrix.ocaml-compiler }}
         uses: ocaml/setup-ocaml@v3
