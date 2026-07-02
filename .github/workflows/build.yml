@@ -1,0 +1,54 @@
+# Build and test vyconf on every PR and push to rolling.
+#
+# vyos1x-config (the core dependency) is not published to the default opam
+# repository, so it is pinned from git before `opam install --deps-only` runs.
+# setup-ocaml's automatic local-package pinning is disabled (opam-pin: false)
+# so the dependency solve does not run before that git pin is registered.
+name: Build and test
+
+on:
+  push:
+    branches: [rolling]
+  pull_request:
+    branches: [rolling]
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        ocaml-compiler: ["4.14", "5.2"]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up OCaml ${{ matrix.ocaml-compiler }}
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          # Pin vyos1x-config manually below, before the dependency solve.
+          opam-pin: false
+          dune-cache: true
+
+      - name: Pin vyos1x-config from git
+        run: opam pin add --no-action --yes vyos1x-config git+https://github.com/vyos/vyos1x-config.git#rolling
+
+      - name: Install dependencies
+        run: opam install . --deps-only --with-test --yes
+
+      - name: Build
+        run: opam exec -- dune build
+
+      - name: Run tests
+        run: opam exec -- dune runtest
