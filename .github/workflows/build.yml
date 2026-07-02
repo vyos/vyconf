@@ -44,6 +44,13 @@ jobs:
       - name: Pin vyos1x-config from git
         run: opam pin add --no-action --yes vyos1x-config git+https://github.com/vyos/vyos1x-config.git#rolling
 
+      # vyos1x-config's src/dune links `containers`, but its opam file does not
+      # declare it, so the dependency solve for vyos1x-config never pulls it and
+      # `dune build -p vyos1x-config` fails with "Library containers not found".
+      # Install it explicitly until vyos1x-config.opam is fixed upstream.
+      - name: Install vyos1x-config's undeclared build dependency
+        run: opam install --yes containers
+
       - name: Install dependencies
         run: opam install . --deps-only --with-test --yes
 
