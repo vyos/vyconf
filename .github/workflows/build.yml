@@ -1,0 +1,70 @@
+# Build and test vyconf on every PR and push to rolling.
+#
+# vyos1x-config (the core dependency) is not published to the default opam
+# repository, so it is pinned from git before `opam install --deps-only` runs.
+# setup-ocaml's automatic local-package pinning is disabled (opam-pin: false)
+# so the dependency solve does not run before that git pin is registered.
+name: Build and test
+
+on:
+  push:
+    branches: [rolling]
+  pull_request:
+    branches: [rolling]
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        ocaml-compiler: ["4.14", "5.2"]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          # Build-only job; do not leave the git token in .git/config for
+          # later steps (e.g. the git-pinned vyos1x-config install).
+          persist-credentials: false
+
+      - name: Set up OCaml ${{ matrix.ocaml-compiler }}
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          # Pin vyos1x-config manually below, before the dependency solve.
+          opam-pin: false
+          dune-cache: true
+
+      - name: Pin vyos1x-config from git
+        run: opam pin add --no-action --yes vyos1x-config git+https://github.com/vyos/vyos1x-config.git#rolling
+
+      # vyos1x-config's src/dune links `containers`, but its opam file does not
+      # declare it, so the dependency solve for vyos1x-config never pulls it and
+      # `dune build -p vyos1x-config` fails with "Library containers not found".
+      # Install it explicitly until vyos1x-config.opam is fixed upstream.
+      - name: Install vyos1x-config's undeclared build dependency
+        run: opam install --yes containers
+
+      - name: Install dependencies
+        run: opam install . --deps-only --with-test --yes
+
+      # --ignore-promoted-rules uses the committed src/*_pbt.ml instead of
+      # re-running the ocaml-protoc codegen (a (mode promote) rule). This is
+      # how the package is built via opam (`dune build -p` implies the same
+      # flag), so CI matches: the committed 2.x-generated bindings are used and
+      # ocaml-protoc is not invoked for codegen.
+      - name: Build
+        run: opam exec -- dune build --ignore-promoted-rules
+
+      - name: Run tests
+        run: opam exec -- dune runtest --ignore-promoted-rules
