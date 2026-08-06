@@ -1,6 +1,7 @@
 module VT = Vyos1x.Vytree
 module CT = Vyos1x.Config_tree
-module CD = Vyos1x.Config_diff
+module DT = Vyos1x.Diff_tree
+module UN = Vyos1x.Union
 module RT = Vyos1x.Reference_tree
 
 exception Commit_error of string
@@ -171,7 +172,7 @@ let legacy_order del_t a b =
     CS.fold shift a (a, b)
 
 let calculate_priority_lists rt diff =
-    let del_tree = CD.get_tagged_delete_tree diff in
+    let del_tree = DT.get_tagged_delete_tree diff in
     let add_tree = CT.get_subtree diff ["add"] in
     let cs_del' = get_commit_set rt del_tree DELETE in
     let cs_add' = get_commit_set rt add_tree ADD in
@@ -184,9 +185,9 @@ let calculate_priority_lists rt diff =
        on failure, deleted paths are added back in, added paths ignored
  *)
 let config_result_update c_data n_data =
-    (* alert exn CD.clone:
+    (* alert exn CT.clone:
         [Vytree.Nonexistent_path] not possible for node_data.path
-       alert exn CD.tree_union:
+       alert exn UN.tree_union:
         [Tree_alg.Incompatible_union] not possible for base root
         [Tree_alg.Nonexistent_child] non reachable
      *)
@@ -203,9 +204,9 @@ let config_result_update c_data n_data =
             | None -> n_data.path
             | Some v -> n_data.path @ [v]
         in
-        let add_tree = (CD.clone[@alert "-exn"]) add (CT.default) path in
+        let add_tree = (CT.clone[@alert "-exn"]) add (CT.default) path in
         let config =
-            (CD.tree_union[@alert "-exn"]) add_tree c_data.config_result
+            (UN.tree_union[@alert "-exn"]) add_tree c_data.config_result
         in
         let result =
             { success = c_data.result.success && true;
@@ -221,9 +222,9 @@ let config_result_update c_data n_data =
             | None -> n_data.path
             | Some v -> n_data.path @ [v]
         in
-        let add_tree = (CD.clone[@alert "-exn"]) sub (CT.default) path in
+        let add_tree = (CT.clone[@alert "-exn"]) sub (CT.default) path in
         let config =
-            (CD.tree_union[@alert "-exn"]) add_tree c_data.config_result
+            (UN.tree_union[@alert "-exn"]) add_tree c_data.config_result
         in
         let result =
             { success = c_data.result.success && false;
@@ -261,11 +262,11 @@ let commit_update c_data =
     in List.fold_left func c_data c_data.node_list
 
 let make_commit_data ?(dry_run=false) rt at wt id pid sudo_user user =
-    (* alert exn CD.diff_tree:
+    (* alert exn DT.diff_tree:
         [Config_diff.Incommensurable] not possible as base root
         [Config_diff.Empty_comparison] not reachable for path []
      *)
-    let diff = (CD.diff_tree[@alert "-exn"]) [] at wt in
+    let diff = (DT.diff_tree[@alert "-exn"]) [] at wt in
     let del_list, add_list = calculate_priority_lists rt diff in
     { session_id = id;
       session_pid = pid;

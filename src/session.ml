@@ -1,7 +1,9 @@
 module CT = Vyos1x.Config_tree
 module IC = Vyos1x.Internal.Make(CT)
 module CC = Commitd_client.Commit
-module CD = Vyos1x.Config_diff
+module DT = Vyos1x.Diff_tree
+module DS = Vyos1x.Diff_show
+module UN = Vyos1x.Union
 module VT = Vyos1x.Vytree
 module VL = Vyos1x.Vylist
 module RT = Vyos1x.Reference_tree
@@ -179,11 +181,11 @@ let update_delete w s changeset path =
     (op :: changeset)
 
 let get_changeset w s lt rt =
-    (* alert exn CD.diff_tree:
+    (* alert exn DT.diff_tree:
         [Config_diff.Incommensurable] not possible for base root
         [Config_diff.Empty_comparison] not possible for empty path
      *)
-    let diff = (CD.diff_tree[@alert "-exn"]) [] lt rt in
+    let diff = (DT.diff_tree[@alert "-exn"]) [] lt rt in
     let add_tree = CT.get_subtree diff ["add"] in
     let del_tree = CT.get_subtree diff ["del"] in
     let add_changeset =
@@ -375,12 +377,12 @@ let session_changed w s =
     (* structural equality test requires consistent ordering, which is
      * practised, but may be unreliable; test actual difference
      *)
-    (* alert exn CD.diff_tree:
+    (* alert exn DT.diff_tree:
         [Config_diff.Incommensurable] not possible for base root
         [Config_diff.Empty_comparison] not possible for empty path
      *)
     let c = get_proposed_config w s in
-    let diff = (CD.diff_tree[@alert "-exn"]) [] w.running_config c in
+    let diff = (DT.diff_tree[@alert "-exn"]) [] w.running_config c in
     let add_tree = CT.get_subtree diff ["add"] in
     let del_tree = CT.get_subtree diff ["del"] in
     (del_tree <> CT.default) || (add_tree <> CT.default)
@@ -405,7 +407,7 @@ let load w s file cached =
         { s with changeset = get_changeset w s w.running_config config; }
 
 let merge w s file destructive =
-    (* alert exn CD.tree_merge:
+    (* alert exn UN.tree_merge:
         [Tree_alg.Incompatible_union] not possible for base root
         [Tree_alg.Nonexistent_child] not reachable
      *)
@@ -416,7 +418,7 @@ let merge w s file destructive =
         let () = validate_tree w config in
         let proposed = get_proposed_config w s in
         let merged =
-            (CD.tree_merge[@alert "-exn"]) ~destructive:destructive proposed config
+            (UN.tree_merge[@alert "-exn"]) ~destructive:destructive proposed config
         in
         { s with changeset = get_changeset w s w.running_config merged; }
 
@@ -650,7 +652,7 @@ let show_config w s path =
     then raise (Session_error "Path does not exist")
     else
     let res =
-        (CD.diff_show[@alert "-exn"])
+        (DS.diff_show[@alert "-exn"])
         w.reference_tree
         path_show
         w.running_config
