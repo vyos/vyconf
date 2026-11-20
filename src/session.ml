@@ -15,6 +15,7 @@ exception Session_error of string
 type cfg_op =
     | CfgSet of string list * string option * CT.value_behaviour
     | CfgDelete of string list * string	option
+    | CfgComment of string list * string option
     [@@deriving yojson]
 
 type world = {
@@ -67,6 +68,11 @@ let string_of_op op =
         (match value with
          | None -> Printf.sprintf "delete %s" path_str
          | Some v -> Printf.sprintf "delete %s \"%s\"" path_str v)
+    | CfgComment (path, value) ->
+        let path_str = Vyos1x.Util.string_of_list path in
+        (match value with
+         | None -> Printf.sprintf "comment %s \"\"" path_str
+         | Some v -> Printf.sprintf "comment %s \"%s\"" path_str v)
 
 let sprint_changeset ss =
     let ss = List.map (fun x -> aux_op_to_yojson x) ss in
@@ -87,6 +93,9 @@ let apply_cfg_op w op config =
        alert exn CT.delete; CT.prune_delete:
         [Vytree.Empty_path] not possible as checked in delete
         [Vytree.Nonexistent_path] not possible as checked in update_delete
+       alert exn CT.comment:
+        [Vytree.Empty_path] not possible as checked in comment
+        [Vytree.Nonexistent_path] not possible as checked in update_comment
      *)
     let result =
     match op with
@@ -113,6 +122,12 @@ let apply_cfg_op w op config =
             (fun c -> (CT.prune_delete[@alert "-exn"]) c path)
         with
         | VT.Nonexistent_path | CT.No_such_value -> config
+        end
+    | CfgComment (path, value) ->
+        begin
+        try
+            (CT.set_comment[@alert "-exn"]) config path value
+        with VT.Nonexistent_path -> config
         end
     in result
 
@@ -180,12 +195,40 @@ let update_delete w s changeset path =
     let op = CfgDelete (path, value) in
     (op :: changeset)
 
+let update_comment w s changeset path value =
+    (* alert exn VT.exists; CT.value_exists:
+        [Vytree.Empty_path] checked or n/a in callers comment, get_changeset
+     *)
+    let proposed_config = get_proposed_config w s in
+    if not ((VT.exists[@alert "-exn"]) proposed_config path) then
+        (* check if value is being included *)
+        let path' = Vyos1x.Util.drop_last path in
+        if not (Vyos1x.Util.is_empty path') &&
+            ((VT.exists[@alert "-exn"]) proposed_config path') &&
+            ((CT.is_leaf[@alert "-exn"]) proposed_config path') then
+            raise (Session_error "Comment not allowed on config values")
+        else
+            raise (Session_error "The specified config node does not exist")
+    else
+    if ((CT.is_tag[@alert "-exn"]) proposed_config path) then
+        raise (Session_error "Comment not allowed at this level")
+    else
+    let comment =
+        match value with
+        | "" -> None
+        | _ as c -> Some c
+    in
+    let op = CfgComment (path, comment) in
+    (op :: changeset)
+
 let get_changeset w s lt rt =
     (* alert exn DT.diff_tree:
         [Config_diff.Incommensurable] not possible for base root
         [Config_diff.Empty_comparison] not possible for empty path
      *)
-    let diff = (DT.diff_tree[@alert "-exn"]) [] lt rt in
+    let diff, raw_comment_changeset =
+        (DT.diff_tree_data[@alert "-exn"]) ~diff_comments:true [] lt rt
+    in
     let add_tree = CT.get_subtree diff ["add"] in
     let del_tree = CT.get_subtree diff ["del"] in
     let add_changeset =
@@ -194,7 +237,10 @@ let get_changeset w s lt rt =
     let del_changeset =
         List.fold_left (update_delete w s) [] (CT.value_paths_of_tree del_tree)
     in
-    add_changeset @ del_changeset
+    let comment_changeset =
+        List.map (fun (a, b) -> CfgComment (a, b)) raw_comment_changeset
+    in
+    comment_changeset @ add_changeset @ del_changeset
 
 let set w s path =
     if Vyos1x.Util.is_empty path
@@ -211,6 +257,15 @@ let delete w s path =
     else
     let path_total = s.edit_level @ path in
     let changeset' = update_delete w s s.changeset path_total in
+    { s with changeset = changeset' }
+
+let comment w s path value =
+    if Vyos1x.Util.is_empty path
+    then
+        raise (Session_error "Comment not allowed on empty path")
+    else
+    let path_total = s.edit_level @ path in
+    let changeset' = update_comment w s s.changeset path_total value in
     { s with changeset = changeset' }
 
 let aux_set w s path name tagval =
