@@ -717,6 +717,7 @@ let show_config w s path =
     else
     let res =
         (DS.diff_show[@alert "-exn"])
+        ~diff_comments:true
         w.reference_tree
         path_show
         w.running_config
