@@ -313,9 +313,14 @@ let commit world token (req: request_commit) =
     | Error msg ->
         Lwt.return {response_tmpl with status=Internal_error; error=(Some msg)}
     | Ok c_data ->
-    let%lwt received_commit_data = VC.do_commit c_data in
     let%lwt result_commit_data =
-        Lwt.return (CC.commit_update received_commit_data)
+        match c_data.node_list with
+        | [] -> (* commit consists of comments only *)
+            let comm_data = { c_data with init = Some { success = true; out = "" } } in
+            Lwt.return (Session.apply_commit world comm_data)
+        | _ ->
+            let%lwt received_commit_data = VC.do_commit c_data in
+            Lwt.return (Session.apply_commit world received_commit_data)
     in
     match result_commit_data.init with
     | None ->

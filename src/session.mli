@@ -90,6 +90,8 @@ val write_session_cache : world -> Vyos1x.Config_tree.t -> (unit, string) result
 
 val prepare_commit : ?dry_run:bool -> world -> session_data -> Vyos1x.Config_tree.t -> string -> (Commitd_client.Commit.commit_data, string) result
 
+val apply_commit : world -> Commitd_client.Commit.commit_data -> Commitd_client.Commit.commit_data
+
 val post_process_commit : world -> session_data -> Commitd_client.Commit.commit_data * Vyos1x.Config_tree.t -> Vyos1x.Config_tree.t * Vyos1x.Config_tree.t
 
 val get_config : world -> session_data -> string -> string

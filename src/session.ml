@@ -569,6 +569,15 @@ let prepare_commit ?(dry_run=false) w s config id =
     | Ok (), Error msg -> Error msg
     | Error msg1, Error msg2 -> Error (Printf.sprintf "%s\n %s" msg1 msg2)
 
+let apply_commit w (c_data: CC.commit_data) =
+    let cc_data = CC.commit_update c_data in
+    let comment_changeset =
+        List.map (fun (a, b) -> CfgComment (a, b)) cc_data.comment_changeset
+    in
+    let config =
+        apply_changes w comment_changeset cc_data.config_result
+    in { cc_data with config_result = config }
+
 let post_process_commit w s ((c_data: CC.commit_data), proposed_config) =
     let ident n v y =
         if (y.script_name <> n || y.tag_value <> v) then false
