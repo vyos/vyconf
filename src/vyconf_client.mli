@@ -30,6 +30,8 @@ val set : t -> string list -> (string, string) result Lwt.t
 
 val delete : t -> string list -> (string, string) result Lwt.t
 
+val comment : t -> string list -> (string, string) result Lwt.t
+
 val session_changed : t -> (string, string) result Lwt.t
 
 val discard : t -> (string, string) result Lwt.t

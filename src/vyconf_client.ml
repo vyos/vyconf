@@ -147,6 +147,18 @@ let delete client path =
     | Fail -> Error (Option.value resp.error ~default:"") |> Lwt.return
     | _ -> Error (Option.value resp.error ~default:"") |> Lwt.return
 
+let comment client path =
+    let path_arr = Array.of_list path in
+    let last = Array.length path_arr - 1 in
+    let value = path_arr.(last) in
+    let path = Array.to_list (Array.sub path_arr 0 last) in
+    let req = Comment {path=path; comment=value} in
+    let%lwt resp = do_request client req in
+    match resp.status with
+    | Success -> Lwt.return (Ok "")
+    | Fail -> Error (Option.value resp.error ~default:"") |> Lwt.return
+    | _ -> Error (Option.value resp.error ~default:"") |> Lwt.return
+
 let session_changed client =
     let req = Session_changed {dummy=None;} in
     let%lwt resp = do_request client req in
