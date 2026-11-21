@@ -5,7 +5,16 @@ name = "Test Appliance"
 data_dir = "/usr/share/testappliance"
 program_dir = "/usr/libexec/testappliance"
 config_dir = "/etc/testappliance"
+reftree_dir = "/usr/libexec/testappliance/reftree"
+session_dir = "/usr/libexec/testappliance/session"
 
 # paths relative to config_dir
 primary_config = "config.boot"
 fallback_config = "config.failsafe"
+
+# paths relative to reftree_dir
+reference_tree = "reftree.cache"
+
+# paths relative to session_dir
+running_cache = "running_cache"
+session_cache = "session_cache"
