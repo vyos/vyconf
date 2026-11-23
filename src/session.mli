@@ -1,6 +1,7 @@
 type cfg_op =
     | CfgSet of string list * string option * Vyos1x.Config_tree.value_behaviour
     | CfgDelete of string list * string option
+    | CfgComment of string list * string option
 
 type world = {
     mutable running_config: Vyos1x.Config_tree.t;
@@ -42,6 +43,8 @@ val get_changeset : world -> session_data -> Vyos1x.Config_tree.t -> Vyos1x.Conf
 val set : world -> session_data -> string list -> session_data
 
 val delete : world -> session_data -> string list -> session_data
+
+val comment : world -> session_data -> string list -> string -> session_data
 
 val aux_set : world -> session_data -> string list -> string -> string option -> unit
 
@@ -86,6 +89,8 @@ val write_running_cache : world -> (unit, string) result
 val write_session_cache : world -> Vyos1x.Config_tree.t -> (unit, string) result
 
 val prepare_commit : ?dry_run:bool -> world -> session_data -> Vyos1x.Config_tree.t -> string -> (Commitd_client.Commit.commit_data, string) result
+
+val apply_commit : world -> Commitd_client.Commit.commit_data -> Commitd_client.Commit.commit_data
 
 val post_process_commit : world -> session_data -> Commitd_client.Commit.commit_data * Vyos1x.Config_tree.t -> Vyos1x.Config_tree.t * Vyos1x.Config_tree.t
 

@@ -4,6 +4,7 @@ open Vyconf_connect.Vyconf_pbt
 type op_t =
     | OpSet
     | OpDelete
+    | OpComment
     | OpDiscard
     | OpCopy
     | OpRename
@@ -12,6 +13,7 @@ let op_of_string s =
     match s with
     | "vy_set" -> OpSet
     | "vy_delete" -> OpDelete
+    | "vy_comment" -> OpComment
     | "vy_discard" -> OpDiscard
     | "vy_copy" -> OpCopy
     | "vy_rename" -> OpRename
@@ -79,6 +81,7 @@ let main op path =
         match op with
         | OpSet -> set c path
         | OpDelete -> delete c path
+        | OpComment -> comment c path
         | OpDiscard -> discard c
         | OpCopy -> copy c path
         | OpRename -> rename c path
@@ -113,7 +116,7 @@ let () =
     let op_str = FilePath.basename Sys.argv.(0) in
     let op = op_of_string op_str in
     match op, path_list with
-    | OpSet, [] | OpDelete, [] ->
+    | OpSet, [] | OpDelete, [] | OpComment, [] ->
         let () = print_endline "Must specify config path" in exit 1
     | OpCopy, [] | OpRename, [] ->
         let () = print_endline "Copy and rename operations require configuration paths" in exit 1

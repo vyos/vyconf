@@ -26,6 +26,7 @@ type commit_data = {
     init: status option;
     node_list: node_data list;
     config_diff: Vyos1x.Config_tree.t;
+    comment_changeset: (string list * string option) list;
     config_result: Vyos1x.Config_tree.t;
     result: status;
 } [@@deriving to_yojson]

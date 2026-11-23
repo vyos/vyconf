@@ -59,6 +59,7 @@ type commit_data = {
     init: status option;
     node_list: node_data list;
     config_diff: CT.t;
+    comment_changeset: (string list * string option) list;
     config_result: CT.t;
     result : status;
 } [@@deriving to_yojson]
@@ -266,7 +267,7 @@ let make_commit_data ?(dry_run=false) rt at wt id pid sudo_user user =
         [Config_diff.Incommensurable] not possible as base root
         [Config_diff.Empty_comparison] not reachable for path []
      *)
-    let diff = (DT.diff_tree[@alert "-exn"]) [] at wt in
+    let diff, comm_changeset = (DT.diff_tree_data[@alert "-exn"]) ~diff_comments:true [] at wt in
     let del_list, add_list = calculate_priority_lists rt diff in
     { session_id = id;
       session_pid = pid;
@@ -278,5 +279,6 @@ let make_commit_data ?(dry_run=false) rt at wt id pid sudo_user user =
       init = None;
       config_diff = diff;
       config_result = CT.get_subtree diff ["inter"];
+      comment_changeset = comm_changeset;
       node_list = del_list @ add_list;
       result = default_status; }

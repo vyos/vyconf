@@ -227,6 +227,14 @@ let delete world token (req: request_delete) =
         response_tmpl
     with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
 
+let comment world token (req: request_comment) =
+    try
+        let () = (Lwt_log.debug @@ Printf.sprintf "[%s]\n" (Vyos1x.Util.string_of_list req.path)) |> Lwt.ignore_result in
+        let session = Session.comment world (find_session token) req.path req.comment in
+        Hashtbl.replace sessions token session;
+        response_tmpl
+    with Session.Session_error msg -> {response_tmpl with status=Fail; error=(Some msg)}
+
 let aux_set world token (req: request_aux_set) =
     try
         let () = (Lwt_log.debug @@ Printf.sprintf "[%s]\n" (Vyos1x.Util.string_of_list req.path)) |> Lwt.ignore_result in
@@ -313,9 +321,14 @@ let commit world token (req: request_commit) =
     | Error msg ->
         Lwt.return {response_tmpl with status=Internal_error; error=(Some msg)}
     | Ok c_data ->
-    let%lwt received_commit_data = VC.do_commit c_data in
     let%lwt result_commit_data =
-        Lwt.return (CC.commit_update received_commit_data)
+        match c_data.node_list with
+        | [] -> (* commit consists of comments only *)
+            let comm_data = { c_data with init = Some { success = true; out = "" } } in
+            Lwt.return (Session.apply_commit world comm_data)
+        | _ ->
+            let%lwt received_commit_data = VC.do_commit c_data in
+            Lwt.return (Session.apply_commit world received_commit_data)
     in
     match result_commit_data.init with
     | None ->
@@ -523,6 +536,7 @@ let rec handle_connection world ic oc () =
                     | Some t, Get_completion_env r -> get_completion_env world t r
                     | Some t, Copy r -> copy world t r
                     | Some t, Rename r -> rename world t r
+                    | Some t, Comment r -> comment world t r
                     | _ -> failwith "Unimplemented"
                     ) |> Lwt.return
                end
