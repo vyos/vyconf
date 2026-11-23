@@ -31,7 +31,7 @@
       <leafNode name="host-name">
         <properties>
           <constraint>
-            <regex>[a-zA-Z][a-zA-Z0-9\-]</regex>
+            <regex>[a-zA-Z][a-zA-Z0-9\-]+</regex>
           </constraint>
         </properties>
       </leafNode>
